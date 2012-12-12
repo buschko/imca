@@ -54,7 +54,7 @@ HOSTNAME	:=	$(shell uname -n | tr '[:upper:]' '[:lower:]')
 #-----------------------------------------------------------------------------
 # Soplex Libaries
 #-----------------------------------------------------------------------------
-SOPLEXSRC	= /home/dennis/lib/soplex-1.7.0
+SOPLEXSRC	= /Users/guckd/lib/soplex-1.7.0
 SOPLEXLIB	= $(SOPLEXSRC)/lib/libsoplex.a
 SOPLEXINCLUDE	= $(SOPLEXSRC)/src
 SOPLEXLINK	= $(SOPLEXSRC)/lib/libsoplex.a
@@ -84,7 +84,7 @@ AR		=	ar
 AR_o		= #
 ZLIB		=	-lz
 GMPLIB		=	-lgmpxx -lgmp
-TIMELIB		=	-lrt
+# TIMELIB		=	-lrt
 
 
 SRCDIR		=	src

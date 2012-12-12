@@ -754,6 +754,8 @@ SparseMatrix *read_MA_SparseMatrix_file(const char *filename)
 	unsigned long num_ms_states = 0;
 	map<string,unsigned long> states;
 	map<unsigned long,string> states_nr;
+    states.clear();
+    states_nr.clear();
 	
 	if (filename == NULL) {
 		fprintf(stderr, "Called with filename == NULL\n");
@@ -770,7 +772,6 @@ SparseMatrix *read_MA_SparseMatrix_file(const char *filename)
 	}
 	
 	line_no = 1;
-	
 	
 	if(!error)
 		read_states(&line_no, &error, p, filename, &num_states, &states, &states_nr);
@@ -796,7 +797,6 @@ SparseMatrix *read_MA_SparseMatrix_file(const char *filename)
 	if (!error) {
 		model = SparseMatrix_new(num_states, states, states_nr); /* create MA model and reserve state memory */
 	}
-
 	
 	/* second pass: count probabilistic states and store initial and goal states */
 	line_no = 1;
@@ -806,7 +806,6 @@ SparseMatrix *read_MA_SparseMatrix_file(const char *filename)
 	if (!error) {
 		rewind(p);
 	}
-
 	
 	/* third pass on file: than reserve transition memory and store exit rates */
 	line_no = 1;
@@ -821,17 +820,17 @@ SparseMatrix *read_MA_SparseMatrix_file(const char *filename)
 	
 	/* fourth pass on file: save transitions */
 	read_transitions(&line_no, &error, p, filename, model, deadlocks);
-	
+    
 	if (p != NULL) {
 		fclose(p);
 	}
-	
+    
 	if (error) {
 		/* free the halfly-complete MDP structure if an error has occured */
 		SparseMatrix_free(model);
 		model = NULL;
 	}else{
-		print_model(model);
+		//print_model(model);
 		print_model_info(model);
 	}
 	

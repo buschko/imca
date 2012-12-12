@@ -43,8 +43,11 @@ SparseMatrix *SparseMatrix_new(unsigned long num_states, map<string,unsigned lon
 	bool * isPS = (bool *) malloc(num_states * sizeof(bool));
 	SparseMatrix *model = (SparseMatrix*)malloc(sizeof(SparseMatrix));
 	model->n = num_states;
-	model->states = states;
+	cout << "" ;
+    model->states = states;
 	model->states_nr = states_nr;
+    //model->states.insert(states.begin(),states.end());
+    //model->states_nr.insert(states_nr.begin(),states_nr.end());
 	model->initials = initials;
 	model->goals = goals;
 	model->isPS = isPS;

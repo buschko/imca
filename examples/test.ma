@@ -1,8 +1,7 @@
 #INITIALS
 s0
 #GOALS
-s2 
-s6
+s2
 #TRANSITIONS
 s0 a1
 * s1 1
