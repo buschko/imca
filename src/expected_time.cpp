@@ -156,11 +156,11 @@ Real compute_expected_time(SparseMatrix* ma, bool max) {
 	}
 	// printf("LP computation start.\n");
 	
-	for (unsigned int x = 0; x < ma->n; x++) {
+	/*for (unsigned int x = 0; x < ma->n; x++) {
 		if(locks[x]){
 			cout << x << endl;
 		}
-	}
+	}*/
 	
 	/* first step: build the lp model */
 	set_obj_function_ext(lp_model,ma,max,locks);
