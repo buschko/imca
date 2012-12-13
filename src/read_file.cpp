@@ -165,6 +165,7 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 				ret=tmp.insert(pair<string,unsigned long>(state,state_nr));
 				if(ret.second == true){
 					//cout << "Deadlock: " << state << "    State nr = " << state_nr << endl;
+					deadlock=true;
 					tmp_nr.insert(pair<unsigned long,string>(state_nr,state));
 					(*deadlocks).push_back(state_nr);
 					state_nr++;
@@ -179,13 +180,15 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 			}
 		}
 	
+	cout << "hey" << endl;
+	
 	/* TODO: also check lines */
 	while (fgets(s, MAX_LINE_LENGTH, p) != NULL && !*error) {
 		if (s[0] == '*') {
 			sscanf(s, "%s%s", star, state);
 			ret=tmp.insert(pair<string,unsigned long>(state,state_nr));
 			if(ret.second == true){
-				//cout << "Deadlock: " << state << "    State nr = " << state_nr << endl;
+				cout << "Deadlock: " << state << "    State nr = " << state_nr << endl;
 				//cout << "";
 				deadlock=true;
 				tmp_nr.insert(pair<unsigned long,string>(state_nr,state));
@@ -198,8 +201,9 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 			++(*line_no);
 		}
 	}
+	
 	if(deadlock) {
-		(*num_states) = state_nr;	
+		(*num_states) = state_nr;
 		(*states)=tmp;
 		(*states_nr)=tmp_nr;
 	}
