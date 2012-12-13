@@ -630,30 +630,28 @@ bool* compute_locks_strong(SparseMatrix *ma, bool* bad) {
 		check = false;
 		for (unsigned long state_nr = 0; state_nr < ma->n; state_nr++) {
 			if(lock_states[state_nr] == 0  and !ma->goals[state_nr]) {
-				isLock = false;
 				unsigned long state_start = row_starts[state_nr];
 				unsigned long state_end = row_starts[state_nr + 1];
 				dbg_printf("row_starts: %li row_ends: %li\n",state_start,state_end);
+				strong_lock = true;
 				for (unsigned long choice_nr = state_start; choice_nr < state_end; choice_nr++) {
-					/* Add up all outgoing rates of the distribution */
+					// Add up all outgoing rates of the distribution 
 					unsigned long i_start = choice_starts[choice_nr];
 					unsigned long i_end = choice_starts[choice_nr + 1];
 					dbg_printf("choice_starts: %li choice_ends: %li\n",i_start,i_end);
-					strong_lock = false;
 					isLock = true;
 					for (unsigned long i = i_start; i < i_end; i++) {
-						if(lock_states[ma->cols[i]]>0) {
-							strong_lock = true;
+						if(!lock_states[ma->cols[i]]>0) {
+							isLock = false;
 						}
 					}
-					if(!strong_lock)
-						isLock = false;
+					if(!isLock)
+						strong_lock = false;
 				}
-				if(isLock) {
+				if(strong_lock) {
 					//cout << state_nr << endl;
 					lock_states[state_nr] = 1;
 					check = true;
-					isLock = false;
 				}
 			}
 		}
@@ -757,6 +755,8 @@ bool* compute_locks_weak(SparseMatrix *ma, bool* bad) {
 	
 	unsigned long *choice_starts = (unsigned long *) ma->choice_counts;
 	bool check = true;
+	bool isLock = false;
+	bool strong_lock = false;
 	while(check) {
 		//cout << "enter" << endl;
 		check = false;
@@ -764,19 +764,25 @@ bool* compute_locks_weak(SparseMatrix *ma, bool* bad) {
 			if(lock_states[state_nr] == 0 and !ma->goals[state_nr]) {
 				unsigned long state_start = row_starts[state_nr];
 				unsigned long state_end = row_starts[state_nr + 1];
-				//printf("row_starts: %li row_ends: %li\n",state_start,state_end);
+				strong_lock = false;
 				for (unsigned long choice_nr = state_start; choice_nr < state_end; choice_nr++) {
-					/* Add up all outgoing rates of the distribution */
+					// Add up all outgoing rates of the distribution 
 					unsigned long i_start = choice_starts[choice_nr];
 					unsigned long i_end = choice_starts[choice_nr + 1];
-					//printf("choice_starts: %li choice_ends: %li\n",i_start,i_end);
+					dbg_printf("choice_starts: %li choice_ends: %li\n",i_start,i_end);
+					isLock = true;
 					for (unsigned long i = i_start; i < i_end; i++) {
-						if(lock_states[ma->cols[i]] > 0) {
-							//cout << state_nr << endl;
-							lock_states[state_nr] = 1;
-							check = true;
+						if(!lock_states[ma->cols[i]]>0) {
+							isLock = false;
 						}
 					}
+					if(isLock)
+						strong_lock = true;
+				}
+				if(strong_lock) {
+					//cout << state_nr << endl;
+					lock_states[state_nr] = 1;
+					check = true;
 				}
 			}
 		}

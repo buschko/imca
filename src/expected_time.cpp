@@ -167,11 +167,12 @@ Real compute_expected_time(SparseMatrix* ma, bool max) {
 	set_constraints_ext(lp_model,ma,max,locks);
 	
 	lp_model.writeFile("file.lp", NULL, NULL, NULL);
-	// TODO: find out why LP model causes segfault in some cases (temorary BUGFIX: load model from file)
+	// TODO: find out why LP model causes segfault in some cases (temporary BUGFIX: load model from file)
 	//lp_model.readFile("file.lp");
 	
 	/* solve the LP */
 	SPxSolver::Status stat;
+	//lp_model.setDelta(1e-6);
 	stat = lp_model.solve();
 	
 	//print_lp_info(lp_model);	
