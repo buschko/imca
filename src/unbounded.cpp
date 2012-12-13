@@ -92,6 +92,7 @@ static void set_constraints_unb(SoPlex& lp_model, SparseMatrix *ma, bool max, bo
 	Real *exit_rates = ma->exit_rates;
 	unsigned long *cols = ma->cols;
 	Real prob;
+	
 	int m=0; // greater equal 0
 	if(!max)
 		m=2; // less equal 0
@@ -126,7 +127,7 @@ static void set_constraints_unb(SoPlex& lp_model, SparseMatrix *ma, bool max, bo
 					}
 				}
 				if(!loop)
-					row.add(state_nr,-1.0);
+					row.add(state_nr,-1);
 				lp_model.addRow(LPRow(row,LPRow::Type(m), 0));
 				row.~DSVector();
 			}
@@ -164,15 +165,17 @@ Real compute_unbounded_reachability(SparseMatrix* ma, bool max) {
 	set_constraints_unb(lp_model,ma,max,locks);
 	
 	lp_model.writeFile("file.lp", NULL, NULL, NULL);
-	// TODO: find out why LP model causes segfault in some cases (temorary BUGFIX: load model from file)
+	// TODO: (temorary BUGFIX: load model from file)
 	//lp_model.readFile("file.lp");
+	
+	//cout << lp_model.rowVector(0) << endl;
 	
 	/* solve the LP */
 	SPxSolver::Status stat;
 	dbg_printf("solve\n");
 	stat = lp_model.solve();
 	
-	//print_lp_info(lp_model);	
+	//print_lp_info(lp_model);
 	
 	/* find the max or min prob. for an initial state */
 	Real obj;
@@ -192,6 +195,7 @@ Real compute_unbounded_reachability(SparseMatrix* ma, bool max) {
 		bool *initials = ma->initials;
 		unsigned long state_nr;
 		for (state_nr = 0; state_nr < ma->n; state_nr++) {
+			//cout << "s" << state_nr << " " << probs[state_nr] << endl;
 			if(initials[state_nr]){
 				Real tmp = probs[state_nr];
 				dbg_printf("%li: prob %lf\n",state_nr, tmp);

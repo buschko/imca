@@ -335,8 +335,10 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 	char src[MAX_LINE_LENGTH];
 	char dst[MAX_LINE_LENGTH];
 	char act[MAX_LINE_LENGTH];
+	char star[MAX_LINE_LENGTH];
 	Real exit_rate=0;
 	Real max_exit_rate=0;
+	Real prob;
 	unsigned long exit_index = 0;
 	unsigned long num_choice = 0;
 	unsigned long num_non_zeros = 0;
@@ -345,6 +347,8 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 	unsigned long *rate_starts;
 	unsigned long from;
 	unsigned long last_from = 0;
+	unsigned long to;
+	unsigned long last_to = -1;
 	map<string ,unsigned long> states;
 	bool *isPS;
 
@@ -382,6 +386,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 				*error = true;
 			} else {
 				from=states.find(src)->second;
+				last_to = -1;
 				/* test consistency of ma file */
 				if (from < last_from) {
 					fprintf(stderr, "Line %ld: State transitions must be given in continous order for one state.\n", *line_no);
@@ -421,15 +426,19 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 			//++(*line_no);
 		} else {
 			/* probabilistic transitions are choosen before markovian transitions */
-			if((isPS[from] && !is_ms) || (!isPS[from] && is_ms)) {
+			Real rate;
+			sscanf(s, "%s%s%lf", star, dst, &rate);
+			to = states.find(dst)->second;
+			if(((isPS[from] && !is_ms) || (!isPS[from] && is_ms)) && to != last_to) {
 				num_non_zeros++;
 				if(is_ms){
-					Real rate;
-					char star[MAX_LINE_LENGTH];
-					sscanf(s, "%s%s%lf", star, dst, &rate);
+					//Real rate;
+					//char star[MAX_LINE_LENGTH];
+					//sscanf(s, "%s%s%lf", star, dst, &rate);
 					exit_rate += rate;
 				}
 			}
+			last_to = to;
 		}
 		++(*line_no);
 	}
@@ -516,6 +525,10 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 	unsigned long to;
 	char act[MAX_LINE_LENGTH];
 	bool bad=false;
+	unsigned long last_to = -1;
+	
+	Real tmp = 0;
+	unsigned int old_index;
 
 	if (!*error) {
 		Real *non_zeros = ma->non_zeros;
@@ -554,12 +567,19 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 					char star[MAX_LINE_LENGTH];
 					sscanf(s, "%s%s%lf", star, dst, &rate);
 					to=states.find(dst)->second;
-					non_zeros[nz_index] = rate;
-					cols[nz_index] = to;
-					nz_index++;
-					choice_size++;
+					if(to != last_to) {
+						non_zeros[nz_index] = rate;
+						cols[nz_index] = to;
+						old_index = nz_index;
+						nz_index++;
+						choice_size++;
+					}else if(to == last_to) {
+						non_zeros[old_index] += rate;
+					}
+					last_to = to;
 				}
 			} else {
+				last_to = -1;
 				/* just read a line "state act" */
 				sscanf(s, "%s%s", src, act);
 				from=states.find(src)->second;
