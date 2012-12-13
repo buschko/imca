@@ -116,7 +116,8 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 	char star[MAX_LINE_LENGTH];
 	map<string ,unsigned long> tmp=*states;
 	map<unsigned long, string> tmp_nr=*states_nr;
-
+	bool deadlock=false;
+	
 	/* go to Transitions */
 	if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 		{
@@ -141,6 +142,7 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 				ret=tmp.insert(pair<string,unsigned long>(state,state_nr));
 				if(ret.second == true){
 					//cout << "Deadlock: " << state << "    State nr = " << state_nr << endl;
+					deadlock=true;
 					tmp_nr.insert(pair<unsigned long,string>(state_nr,state));
 					(*deadlocks).push_back(state_nr);
 					state_nr++;
@@ -177,7 +179,6 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 			}
 		}
 	
-	
 	/* TODO: also check lines */
 	while (fgets(s, MAX_LINE_LENGTH, p) != NULL && !*error) {
 		if (s[0] == '*') {
@@ -185,19 +186,23 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 			ret=tmp.insert(pair<string,unsigned long>(state,state_nr));
 			if(ret.second == true){
 				//cout << "Deadlock: " << state << "    State nr = " << state_nr << endl;
+				//cout << "";
+				deadlock=true;
 				tmp_nr.insert(pair<unsigned long,string>(state_nr,state));
 				(*deadlocks).push_back(state_nr);
 				state_nr++;
-			} 
+			}
+			//cout << state << endl;
 			++(*line_no);
 		} else {
 			++(*line_no);
 		}
 	}
-	
-	(*num_states) = state_nr;	
-	(*states)=tmp;
-	(*states_nr)=tmp_nr;
+	if(deadlock) {
+		(*num_states) = state_nr;	
+		(*states)=tmp;
+		(*states_nr)=tmp_nr;
+	}
 }
 
 static void init_states(unsigned long *line_no, bool *error, FILE *p, const char *filename, unsigned long *num_ms_states, map<string,unsigned long> states, SparseMatrix *ma, vector<unsigned long> deadlocks) {
@@ -781,7 +786,7 @@ SparseMatrix *read_MA_SparseMatrix_file(const char *filename)
 		fprintf(stderr, "Called with filename == NULL\n");
 		error = true;
 	}
-	
+	//cout << "first pass" << endl;
 	/* first pass on file: create a hash table with state names and get number of states. */
 	if (!error) {
 		p = fopen(filename, "r");
@@ -801,7 +806,7 @@ SparseMatrix *read_MA_SparseMatrix_file(const char *filename)
 	}
 	
 	line_no = 1;
-	
+	//cout << "deadlock pass" << endl;
 	vector<unsigned long> deadlocks;
 	deadlocks.clear();
 	// check for deadlock states and add a selfloop
@@ -817,7 +822,7 @@ SparseMatrix *read_MA_SparseMatrix_file(const char *filename)
 	if (!error) {
 		model = SparseMatrix_new(num_states, states, states_nr); /* create MA model and reserve state memory */
 	}
-	
+	//cout << "second pass" << endl;
 	/* second pass: count probabilistic states and store initial and goal states */
 	line_no = 1;
 	if(!error)
@@ -826,7 +831,7 @@ SparseMatrix *read_MA_SparseMatrix_file(const char *filename)
 	if (!error) {
 		rewind(p);
 	}
-	
+	//cout << "third pass" << endl;
 	/* third pass on file: than reserve transition memory and store exit rates */
 	line_no = 1;
 	
@@ -837,7 +842,7 @@ SparseMatrix *read_MA_SparseMatrix_file(const char *filename)
 	if (!error) {
 		rewind(p);
 	}
-	
+	//cout << "fourth pass" << endl;
 	/* fourth pass on file: save transitions */
 	read_transitions(&line_no, &error, p, filename, model, deadlocks);
     
