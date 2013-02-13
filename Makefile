@@ -91,7 +91,7 @@ SRCDIR		=	src
 BINDIR		=	bin
 LIBDIR		=	lib
 INCLUDEDIR	=	include
-LIBOBJ		=	read_file.o read_file_imc.o  sparse.o unbounded.o expected_time.o sccs.o long_run_average.o debug.o bounded.o
+LIBOBJ		=	read_file.o read_file_imc.o  sparse.o unbounded.o expected_time.o sccs.o sccs2.o long_run_average.o debug.o bounded.o
 BINOBJ		=	main.o
 
 NAME		=	imca

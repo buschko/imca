@@ -34,6 +34,7 @@
 
 #include "soplex.h"
 #include "sccs.h"
+#include "sccs2.h"
 #include "read_file.h"
 #include "debug.h"
 
@@ -542,10 +543,14 @@ Real compute_long_run_average(SparseMatrix *ma, bool max) {
 	
 	SparseMatrixMEC *mecs;
 	if(max) {
-		mecs=compute_maximal_end_components(ma);
+		//mecs=compute_maximal_end_components(ma);
+		//mecs=compute_maximal_end_components2(ma);
+		mecs=mEC_decomposition_previous_algorithm(ma);
 	} else {
 		//mecs=compute_bottom_strongly_connected_components(ma);
-		mecs=compute_maximal_end_components(ma);
+		//mecs=compute_maximal_end_components2(ma);
+		//mecs=compute_maximal_end_components(ma);
+		mecs=mEC_decomposition_previous_algorithm(ma);
 	}
 	
 	// printf("LP computation start.\n");

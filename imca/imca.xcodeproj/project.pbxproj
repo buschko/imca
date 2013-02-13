@@ -32,6 +32,7 @@
 		B96D6AE41664FDEA00B9A9BE /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../Makefile; sourceTree = "<group>"; };
 		B96D6AE51664FDF300B9A9BE /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = README; path = ../README; sourceTree = "<group>"; };
 		B96D6AE61664FDFB00B9A9BE /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
+		B9B5298916CBA3E100E6A0DD /* sccs2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sccs2.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -49,6 +50,7 @@
 		B96D6ACC1664FDDC00B9A9BE /* src */ = {
 			isa = PBXGroup;
 			children = (
+				B9B5298916CBA3E100E6A0DD /* sccs2.cpp */,
 				B96D6ACD1664FDDC00B9A9BE /* .kdev_include_paths */,
 				B96D6ACE1664FDDC00B9A9BE /* bcg2imca.c */,
 				B96D6ACF1664FDDC00B9A9BE /* bounded.cpp */,
@@ -217,6 +219,7 @@
 				B96D6ACB1664FCFB00B9A9BE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

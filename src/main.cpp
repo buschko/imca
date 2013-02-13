@@ -34,6 +34,7 @@
 #include <map>
 #include <string>
 #include "soplex.h"
+#include <popt.h>
 
 #ifndef __APPLE__
 #include <malloc.h>
@@ -44,6 +45,7 @@
 #include "unbounded.h"
 #include "expected_time.h"
 #include "sccs.h"
+#include "sccs2.h"
 #include "long_run_average.h"
 #include "bounded.h"
 
@@ -124,7 +126,7 @@ using namespace std;
 static void print_intro(void) {
 	printf(" ------------------------------------------------------------------- \n");
 	printf("|                  Interactive Markov Chain Analyzer                |\n");
-	printf("|                       IMCA Version 1.4 beta                       |\n");
+	printf("|                     IMCA Version 1.4 no segfault                  |\n");
 	printf("|                                                                   |\n");
 	printf("|                   Copyright (C) RWTH Aachen, 2012                 |\n");
 	printf("|                         Author: Dennis Guck                       |\n");
