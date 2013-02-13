@@ -1,7 +1,7 @@
 /**
- New version of the sccs.cpp for an QMA project: Improving MEC Decomposition
- in the IMCA tool. This class contains a the old, and the two new MEC Decomposition
- algorithms as proposed in a paper by Chatterjee and Henzinger: Faster and Dynamic
+ * New version of the sccs.cpp for an QMA project: Improving MEC Decomposition
+ * in the IMCA tool. This class contains a the old, and the two new MEC Decomposition
+ * algorithms as proposed in a paper by Chatterjee and Henzinger: Faster and Dynamic
  * Algorithms For Maximal End-Component Decomposition And Related Graph Problems In
  * Probabilistic Verfication.
  * 
@@ -404,85 +404,6 @@ void attractor_remove(SparseMatrix *ma, bool* u0_states, bool* bad_states, bool*
     printf("|\n");*/
 }
 
-void attractor_remove_bscc(SparseMatrix *ma, bool* bad_states, bool* new_bad_states,bool* bad_transitions,bool* bscc_states,unsigned long& nr_states_removed){
-
-    
-    //initializing the attractor set:
-    
-    bool *attractor_set=(bool *) malloc(ma->n * sizeof(bool));
-    
-    for(int i = 0; i < ma->n; i++){
-        if(bscc_states[i]){
-            attractor_set[i] = true;
-        }else{
-            attractor_set[i] = false;
-        }
-    }    
-    
-    bool attracted_new_state = true;
-    
-    while(attracted_new_state){ //continue until no new states have been found
-        attracted_new_state = false;
-        
-        for(unsigned long v = 0; v < ma->n && !attractor_set[v]; v++){
-            //lookup the edges going from this vertex:
-            unsigned long *row_starts = (unsigned long *) ma->row_counts;
-            unsigned long *choice_starts = (unsigned long *) ma->choice_counts;
-            unsigned long *cols = ma->cols;
-            unsigned long dst;
-            unsigned long row_start = row_starts[v]; //row_start = row_counts[i]
-            unsigned long row_end = row_starts[v + 1]; //row_end = row_counts[i+1]
-            unsigned long choice_start;
-            unsigned long choice_end;
-
-
-            bool each_transition_choice_to_ui = true;
-            
-            while(row_start < row_end) {
-                if(!bad_transitions[row_start]){
-                    bool choice_to_ui_found = false;
-
-                    choice_start = choice_starts[row_start];
-                    choice_end = choice_starts[row_start + 1];
-                    while(choice_start < choice_end){ 
-                        dst=cols[choice_start];
-                        
-                        if(!bad_states[dst] && attractor_set[dst]){
-                            choice_to_ui_found = true;
-                        }
-                        
-                        choice_start++;
-                    }
-                    
-                    if(!choice_to_ui_found){
-                        each_transition_choice_to_ui = false;
-                    }
-                    
-                }
-                row_start++;
-            }
-            
-            if(each_transition_choice_to_ui){
-                attractor_set[v] = true;
-                attracted_new_state = true;
-            }
-        }
-                
-    }
-    
-    
-    
-    //now throw away all vertices attracted
-    
-    for(unsigned long i = 0; i < ma->n; i++){
-        if(attractor_set[i] && !new_bad_states[i]){
-            new_bad_states[i] = true;
-            nr_states_removed++;
-        }
-    }
-    
-}
-
 /**
  * MEC Decomposition as described by Chatterjee and Henzinger as the ¨Old algorithm¨:
  * 
@@ -883,42 +804,4 @@ SparseMatrixMEC* mEC_decomposition_previous_algorithm_without_attractor(SparseMa
     */
     //printf("sccs2.ccp: mEC_decomposition_old_algorithm Done! Time: detailed: %f.\n",ttime);
     return mec;
-}
-
-void update_set_Ji(SparseMatrix *ma, bool* set_Li, bool* set_Ji, unsigned long& Ji_size, bool* bad_states, bool* bad_transitions){
-    //Let Ji+1 be the set of vertices in the remaining graph with an edge to Li+1, so it may not be a bad vertex.
-    for(unsigned long v = 0; v < ma->n; v++){
-        if(!bad_states[v]){
-            unsigned long *row_starts = (unsigned long *) ma->row_counts;
-            unsigned long *choice_starts = (unsigned long *) ma->choice_counts;
-            unsigned long *cols = ma->cols;
-            unsigned long dst;
-            unsigned long row_start = row_starts[v]; //row_start = row_counts[i]
-            unsigned long row_end = row_starts[v + 1]; //row_end = row_counts[i+1]
-            unsigned long choice_start;
-            unsigned long choice_end;
-            while(row_start < row_end) {
-                //printf("a");
-                //if(!bad_transitions[row_start]){ Questionable if this should be activated or not
-                    choice_start = choice_starts[row_start];
-                    choice_end = choice_starts[row_start + 1]; //-1??????
-                    //printf("b");
-                    while(choice_start < choice_end){ 
-                        //printf("c");
-                        dst=cols[choice_start];
-                        //!bad_states[dst] should not be used here because the states in set_Li already are in the set of bad states.
-
-                        if(set_Li[dst]){
-                            if(!set_Ji[v]){
-                                Ji_size++;
-                            }
-                            set_Ji[v] = true;                            
-                        }
-                        choice_start++;
-                    } 
-                //}
-                row_start++;
-            }
-        }
-    }
 }

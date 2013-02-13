@@ -126,7 +126,8 @@ using namespace std;
 static void print_intro(void) {
 	printf(" ------------------------------------------------------------------- \n");
 	printf("|                  Interactive Markov Chain Analyzer                |\n");
-	printf("|                     IMCA Version 1.4 no segfault                  |\n");
+	printf("|                        IMCA Version 1.5 beta                      |\n");
+	printf("|             Binary build date: %s @ %s             |\n", __DATE__, __TIME__);
 	printf("|                                                                   |\n");
 	printf("|                   Copyright (C) RWTH Aachen, 2012                 |\n");
 	printf("|                         Author: Dennis Guck                       |\n");
