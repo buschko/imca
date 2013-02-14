@@ -474,9 +474,27 @@ Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC 
 	dbg_printf("make constraints\n");
 	set_constraints_ssp(lp_model,ma,mecs,max,mec,locks,lra,ssp_nr,mecNr,lra_mec);
 	
-	lp_model.writeFile("file.lp", NULL, NULL, NULL);
+	
+	char *tmpname = strdup("tmp/tmpfileXXXXXX");
+	mkstemp(tmpname);
+	ofstream fileW(tmpname);
+	
+	lp_model.writeLPF(fileW, NULL, NULL, NULL);
+	
+	fileW.close();
+
+	//lp_model.writeFile("file.lp", NULL, NULL, NULL);
 	// TODO: find out why LP model causes segfault in some cases (temorary BUGFIX: load model from file)
-	lp_model.readFile("file.lp");
+	//lp_model.readFile("file.lp");
+	
+	ifstream fileR(tmpname);
+	
+	lp_model.readLPF(fileR,NULL,NULL,NULL);
+	
+	fileR.close();
+	if( remove( tmpname ) != 0 )
+		perror( "Error deleting file" );
+	
 	
 	/* solve the LP */
 	SPxSolver::Status stat;
@@ -576,12 +594,12 @@ Real compute_long_run_average(SparseMatrix *ma, bool max) {
 		dbg_printf("set const\n");
 		set_constraints_lra(lp_model,ma,max,mec,locks);
 		if(max){
-			lp_model.writeFile("filemax.lp", NULL, NULL, NULL);
+			//lp_model.writeFile("filemax.lp", NULL, NULL, NULL);
 			//lp_model.clear();
 			// TODO: find out why LP model causes segfault in some cases (temorary BUGFIX: load model from file)
 			//lp_model.readFile("filemax.lp");
 		}else {
-			lp_model.writeFile("filemin.lp", NULL, NULL, NULL);
+			//lp_model.writeFile("filemin.lp", NULL, NULL, NULL);
 			//lp_model.clear();
 			// TODO: find out why LP model causes segfault in some cases (temorary BUGFIX: load model from file)
 			//lp_model.readFile("filemin.lp");

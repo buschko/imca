@@ -108,7 +108,7 @@
 		B96D6AC11664FCFB00B9A9BE /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0450;
+				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = "Dennis Guck";
 			};
 			buildConfigurationList = B96D6AC41664FCFB00B9A9BE /* Build configuration list for PBXProject "imca" */;
@@ -182,6 +182,7 @@
 		B96D6ACA1664FCFB00B9A9BE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				DEBUGGING_SYMBOLS = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -194,6 +195,7 @@
 		B96D6ACB1664FCFB00B9A9BE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";

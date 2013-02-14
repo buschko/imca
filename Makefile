@@ -110,6 +110,8 @@ LIBOBJDIR	=	$(OBJDIR)/lib
 BINOBJFILES	=	$(addprefix $(BINOBJDIR)/,$(BINOBJ))
 LIBOBJFILES	=	$(addprefix $(LIBOBJDIR)/,$(LIBOBJ))
 
+TMPDIR		=	tmp
+
 LIBBUILD	=	$(AR)
 LIBBUILD_o	=	$(AR_o)
 LIBBUILDFLAGS	=	$(ARFLAGS)
@@ -136,7 +138,7 @@ ifeq ($(VERBOSE),false)
 .SILENT:	$(LIBLINK) $(LIBSHORTLINK) $(BINLINK) $(BINSHORTLINK) $(BINFILE) $(LIBFILE) $(BINOBJFILES) $(LIBOBJFILES)
 endif
 
-all: $(LIBFILE) $(BINFILE) $(LIBLINK) $(LIBSHORTLINK) $(BINLINK) $(BINSHORTLINK) $(SOPLEXLINK)
+all: $(TMPDIR) $(LIBFILE) $(BINFILE) $(LIBLINK) $(LIBSHORTLINK) $(BINLINK) $(BINSHORTLINK) $(SOPLEXLINK)
 
 #-----------------------------------------------------------------------------
 # SHARED Libaries
@@ -159,7 +161,7 @@ DFLAGS		+=	$(USRDFLAGS)
 #-----------------------------------------------------------------------------
 # Create directories
 #-----------------------------------------------------------------------------
-$(OBJDIR):	
+$(OBJDIR):
 		@-mkdir -p $(OBJDIR)
 
 $(BINOBJDIR):	$(OBJDIR)
@@ -173,6 +175,9 @@ $(BINDIR):
 
 $(LIBDIR):
 		@-mkdir -p $(LIBDIR)
+		
+$(TMPDIR):	
+		@-mkdir -p $(TMPDIR)
 		
 #-----------------------------------------------------------------------------
 # making library

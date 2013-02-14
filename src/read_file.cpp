@@ -180,7 +180,7 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 			}
 		}
 	
-	cout << "hey" << endl;
+	// cout << "hey" << endl;
 	
 	/* TODO: also check lines */
 	while (fgets(s, MAX_LINE_LENGTH, p) != NULL && !*error) {

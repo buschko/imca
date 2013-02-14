@@ -164,7 +164,7 @@ Real compute_unbounded_reachability(SparseMatrix* ma, bool max) {
 	set_obj_function_unb(lp_model,ma,max,locks);
 	set_constraints_unb(lp_model,ma,max,locks);
 	
-	lp_model.writeFile("file.lp", NULL, NULL, NULL);
+	//lp_model.writeFile("file.lp", NULL, NULL, NULL);
 	// TODO: (temorary BUGFIX: load model from file)
 	//lp_model.readFile("file.lp");
 	

@@ -166,7 +166,7 @@ Real compute_expected_time(SparseMatrix* ma, bool max) {
 	set_obj_function_ext(lp_model,ma,max,locks);
 	set_constraints_ext(lp_model,ma,max,locks);
 	
-	lp_model.writeFile("file.lp", NULL, NULL, NULL);
+	//lp_model.writeFile("file.lp", NULL, NULL, NULL);
 	// TODO: find out why LP model causes segfault in some cases (temporary BUGFIX: load model from file)
 	//lp_model.readFile("file.lp");
 	
