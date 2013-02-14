@@ -1,5 +1,5 @@
 ******************************************************************
-     README: Interactive Markov Chain Analyzer 1.4 beta (IMCA)
+     README: Interactive Markov Chain Analyzer 1.5 beta (IMCA)
 ******************************************************************
 
 IMCA 1.4 beta is a command-line tool for analyzing unbounded reachability 
@@ -41,10 +41,11 @@ FILE STRUCTURE:
     -IMCA/obj			            -- the object-file directory
     -IMCA/include 			      -- the header files
     -IMCA/src   			        -- the source code
+    -IMCA/tmp				-- directory for temporary files
      
     -IMCA/examples      	    -- some example files
-    	-MRMC_HOME/examples/WorkstationCluster      -- the Workstation Cluster
-      -MRMC_HOME/examples/GoogleFileSystem        -- the Google file system
+    	-MRMC_HOME/examples/PollingSystem      -- the Polling System with and without confluence reduction
+      -MRMC_HOME/examples/ProcessorGrid        -- a processor grid example with and without confluence reduction
                                
     -IMCA/LICENSE 			      -- the licensing information
     -IMCA/README              -- the file you are reading now
