@@ -129,7 +129,8 @@ static void print_intro(void) {
 	printf("|                        IMCA Version 1.5 beta                      |\n");
 	printf("|             Binary build date: %s @ %s             |\n", __DATE__, __TIME__);
 	printf("|                                                                   |\n");
-	printf("|                   Copyright (C) RWTH Aachen, 2012                 |\n");
+	printf("|                  Copyright (C) RWTH Aachen, 2012.                 |\n");
+	printf("|             Copyright (C) University of Twente, 2013.             |\n");
 	printf("|                         Author: Dennis Guck                       |\n");
 	printf("|           IMCA is distributed under the GPL conditions            |\n");
 	printf("|            (GPL stands for GNU General Public License)            |\n");    
@@ -143,12 +144,14 @@ static void print_intro(void) {
 * Program usage
 */
 static void print_usage(void) {
-	printf("Usage: imca <model file> <min/max> <computation>\n");
+	printf("Usage: imca <model file> <min/max> <computation> <options>\n");
 	printf("	<model file>	- could be one of {.ma, .imc}\n");
 	printf("	<min/max>	- could be '-min' or '-max' or both\n");
 	printf("	<computation>	- could be one or more of {-ub, -et, -lra, -tb}\n");
-	printf("	<options>	- time- and error-bound for tb (default epsilon=1e-6) \n");
-	printf("	<model type>	- define if .ma input is an IMC {-imc} \n");
+	printf("	<options>	- time- and error-bound for tb (default epsilon=1e-6)  \n");
+	printf("                          '-T' for upper bound '-F' for lower bound \n");
+	printf("                          '-e' for error bound '-i' for interval output\n");
+	//printf("	<model type>	- define if .ma input is an IMC {-imc} \n");
 }
 
 /**

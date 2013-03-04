@@ -34,6 +34,8 @@ The tool is distributed under the GNU General Public License (GPL):
 For the use of bcg2imca you need to acquire a CADP Licence (free for academical usage)
 
 	http://cadp.inria.fr/registration/
+	
+Note, that the .imc input format have only legacy support, which can lead to problems. If it is possible, use the .ma input format.
     
 -----------------------------------------------------------------
                     2. Distribution structure
