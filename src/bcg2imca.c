@@ -2,7 +2,7 @@
  * Original Example from http://www.inrialpes.fr/vasy/cadp/man/bcg_read.html, from Hubert Garavel. 
  * Changed version of Silvio De Carolis for his Masterthesis "Zuverlaessigkeitsanalyse auf dynamischen Fehlerbaeumen" at the chair of computer science 2 RWTH-Aachen
  * Original comments in english, Silvio De Carolis comments in german.
- * Extended by Dennis Guck for use in dftcalc -> CADP -> IMCA Tool-chain.auto
+ * Extended by Dennis Guck for use in dftcalc -> CADP -> IMCA Tool-chain
  */
 
 #include "bcg_user.h"

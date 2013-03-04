@@ -49,6 +49,10 @@ void function_strongconnect(SparseMatrix *ma,unsigned long v, vector<unsigned lo
     stack.push_back(v); //S.push(v) //stack.push_back(v);
     stack_precense[v] = true;
     
+    printf("size: %ld\n",stack.size());
+	printf("capacity: %ld\n",stack.capacity());
+	printf("max size: %ld\n",stack.max_size());
+    
     //printf("function_strongconnect for v: %lu.\n",v);
     // Consider successors of v
     //for each (v,w) in E do:
