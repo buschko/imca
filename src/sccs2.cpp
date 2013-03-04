@@ -41,15 +41,19 @@ bool isIn_copy(vector<unsigned long> set, unsigned long element)
     return false;
 }
 
-void function_strongconnect(SparseMatrix *ma,unsigned long v, vector<unsigned long>& scc_states, vector<unsigned long>& stack, bool* stack_precense, bool* bad_states, bool* bad_transitions, unsigned long& i, vector<long>& index, vector<unsigned long>& lowlink,unsigned long& scc_nr){
-    // Set the depth index for v to the smallest unused index
+void function_strongconnect(SparseMatrix *ma,unsigned long v, vector<unsigned long>& scc_states, vector<unsigned long>& stack, bool *stack_precense, bool* bad_states, bool* bad_transitions, unsigned long& i, vector<long>& index, vector<unsigned long>& lowlink,unsigned long& scc_nr){
+	// Set the depth index for v to the smallest unused index
     index[v] = i; //v.index := index
     lowlink[v] = i; //v.lowlink := index
     i++; //index := index + 1
     stack.push_back(v); //S.push(v) //stack.push_back(v);
     stack_precense[v] = true;
+	
+	//printf("size: %ld\n",stack.size());
+	//printf("capacity: %ld\n",stack.capacity());
+	//printf("max size: %ld\n",stack.max_size());
     
-    //printf("function_strongconnect for v: %lu.\n",v);
+    printf("function_strongconnect for v: %lu.\n",v);
     // Consider successors of v
     //for each (v,w) in E do:
     unsigned long *row_starts = (unsigned long *) ma->row_counts;
@@ -64,12 +68,14 @@ void function_strongconnect(SparseMatrix *ma,unsigned long v, vector<unsigned lo
         //printf("a");
         if(!bad_transitions[row_start]){
             choice_start = choice_starts[row_start];
-            choice_end = choice_starts[row_start + 1]; //-1??????
+            choice_end = choice_starts[row_start + 1];
             //printf("b");
             while(choice_start < choice_end){ 
                 //printf("c");
                 dst=cols[choice_start];
                 if(index[(long)dst]< 0 && !bad_states[dst]){
+					if(v==47360)
+						printf("here\n");
                     //printf("d");
                     // Successor w has not yet been visited; recurse on it
                     function_strongconnect(ma,dst,scc_states,stack,stack_precense,bad_states,bad_transitions,i,index,lowlink,scc_nr); //stronglyconnect(w)
@@ -141,7 +147,7 @@ void function_strongconnect(SparseMatrix *ma,unsigned long v, vector<unsigned lo
             
 	if(scc.size() > 0){
             scc_nr++;
-            //printf("SCC found by decomposition!");
+            printf("SCC found by decomposition!");
         }
     }
 }
@@ -157,6 +163,8 @@ void compute_SCC_decomposition_tarjan(SparseMatrix *ma, vector<unsigned long>& s
     vector<long> index(ma->n,-1); //init v.index
     vector<unsigned long> lowlink(ma->n,0); //init v.lowlink
     
+	printf("hi\n");
+	
     unsigned long i=0; //index := 0
     vector<unsigned long> stack; //S := empty
     bool *stack_precense=(bool *) malloc(ma->n * sizeof(bool));
@@ -164,6 +172,7 @@ void compute_SCC_decomposition_tarjan(SparseMatrix *ma, vector<unsigned long>& s
         stack_precense[i]=false;
     }
     unsigned long v = 0;
+	
     while(v < ma->n){ //for each v in V do
         
         if(index[v]<0 && !bad_states[v]){
@@ -171,6 +180,8 @@ void compute_SCC_decomposition_tarjan(SparseMatrix *ma, vector<unsigned long>& s
         }
         v++;
     }
+	
+	free(stack_precense);
     
     /*
     for(int j = 0; j < ma->n;j++){
@@ -460,6 +471,7 @@ SparseMatrixMEC* mEC_decomposition_previous_algorithm(SparseMatrix *ma){
     
     unsigned long mec_nr = 1; //amount of mecs stored
     
+	//printf("lets start\n");
     
     //Start of actual algorithm:
     while(nr_states_removed < ma->n){
@@ -554,6 +566,8 @@ SparseMatrixMEC* mEC_decomposition_previous_algorithm(SparseMatrix *ma){
     /* Store MECs in a new MA,  this is copied from sccs.cpp*/
     /* allocate memory for BSCCs and store them */
     SparseMatrixMEC *mec;
+	
+	//printf("creating MEC");
     
     mec=SparseMatrixMEC_new(mec_states_nr,mec_nr-1);
     unsigned long * cols = mec->cols;
@@ -651,7 +665,6 @@ SparseMatrixMEC* mEC_decomposition_previous_algorithm_without_attractor(SparseMa
     //vector<unsigned long> mec_states(ma->n,0);
     
     unsigned long mec_nr = 1; //amount of mecs stored
-    
     
     //Start of actual algorithm:
     while(nr_states_removed < ma->n){

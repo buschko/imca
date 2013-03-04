@@ -478,11 +478,16 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 		dbg_printf("model discretized\n");
 		//print_model(discrete_ma);
 
-
 		// value iteration
 		unsigned long steps_for_interval = round(tb/tau);
 		cout << "iterations: " << steps_for_interval<< endl;
 		cout << "step duration: " << tau <<endl;
+		Real interval = 0.1;
+		unsigned long interval_step = round(interval/tau);
+		unsigned long counter=0;
+		cout << "interval step: " << interval_step <<endl;
+		
+		
 		for(unsigned long i=0; i <= steps_for_interval; i++){
 			// compute v for Markovian states: from b dwon to a, we make discrete model absorbing
 			compute_markovian_vector(discrete_ma,v,u, true);
@@ -492,6 +497,33 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 				compute_interactive_vector(discrete_ma,v,u,max,locks,reach);
 			}else {
 				compute_probabilistic_vector(discrete_ma,v,u,max, true);
+			}
+			if(counter==interval_step) {
+			
+				Real prob;
+				if(max)
+					prob=0;
+				else
+					prob=1;
+				bool *initials = ma->initials;
+				for (unsigned long state_nr = 0; state_nr < num_states; state_nr++) {
+					//cout << (ma->states_nr.find(state_nr)->second).c_str() << ": " << u[state_nr] << endl;
+					if(initials[state_nr]){
+					if(max){
+						if(prob<u[state_nr])
+							prob=u[state_nr];
+						}else{
+						if(prob>u[state_nr])
+							prob=u[state_nr];
+						}
+					}
+				}
+				
+				printf("tb=%.5g Maximal time-bounded reachability probability: %.10g\n", i*tau,prob);
+			
+				counter=0;
+			} else {
+				counter++;
 			}
 		}
 		SparseMatrix_free(discrete_ma);

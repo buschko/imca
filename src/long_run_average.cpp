@@ -559,6 +559,7 @@ Real compute_long_run_average(SparseMatrix *ma, bool max) {
 		locks=compute_locks_weak(ma);
 	}
 	
+	printf("MEC computation start.\n");
 	SparseMatrixMEC *mecs;
 	if(max) {
 		//mecs=compute_maximal_end_components(ma);
@@ -571,7 +572,7 @@ Real compute_long_run_average(SparseMatrix *ma, bool max) {
 		mecs=mEC_decomposition_previous_algorithm(ma);
 	}
 	
-	// printf("LP computation start.\n");
+	printf("LP computation start.\n");
 	vector<bool> mec(ma->n,false);
 	vector<bool> mec_tmp(ma->n,false);
 	vector<Real> lra_mec(mecs->n);
