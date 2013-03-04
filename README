@@ -2,7 +2,7 @@
      README: Interactive Markov Chain Analyzer 1.5 beta (IMCA)
 ******************************************************************
 
-IMCA 1.4 beta is a command-line tool for analyzing unbounded reachability 
+IMCA 1.5 beta is a command-line tool for analyzing unbounded reachability 
 probabilities, expected-time, and long-run averages. We support analyzing of 
 Interactive Markov Chains and Markov Automata. This version do not provide all 
 functionalities from prior Versions including a GUI, time-bounded reachability 
@@ -20,6 +20,8 @@ unpacking the IMCA-distribution archive.
  1. General information
  2. Distribution structure
  3. Makefile information
+ 4. bcg2imca information
+ 5. Miscellaneous
  
  -----------------------------------------------------------------
                       1. General information
@@ -27,29 +29,35 @@ unpacking the IMCA-distribution archive.
 
 The tool is distributed under the GNU General Public License (GPL):
 
-    IMCA/LICENSE
+	IMCA/LICENSE
+	
+For the use of bcg2imca you need to acquire a CADP Licence (free for academical usage)
+
+	http://cadp.inria.fr/registration/
     
 -----------------------------------------------------------------
                     2. Distribution structure
 -----------------------------------------------------------------
 
 FILE STRUCTURE:
-    -IMCA/bin/imca   	  		  -- the IMCA binary
-                                (might not be present before compilation)
-    -IMCA/lib/imca.a		 	    -- the static library containing the IMCA core
-                                (might not be present before compilation)
-    -IMCA/obj			            -- the object-file directory
-    -IMCA/include 			      -- the header files
-    -IMCA/src   			        -- the source code
-    -IMCA/tmp				-- directory for temporary files
+	-IMCA/bin/imca					-- the IMCA binary
+										(might not be present before compilation)
+	-IMCA/lib/imca.a				-- the static library containing the IMCA core
+										(might not be present before compilation)
+	-IMCA/obj						-- the object-file directory
+	-IMCA/include					-- the header files
+	-IMCA/src						-- the source code
+	-IMCA/tmp						-- directory for temporary files
      
-    -IMCA/examples      	    -- some example files
-    	-MRMC_HOME/examples/PollingSystem      -- the Polling System with and without confluence reduction
-      -MRMC_HOME/examples/ProcessorGrid        -- a processor grid example with and without confluence reduction
+    -IMCA/examples					-- some example files
+	-IMCA/examples/PollingSystem	-- the Polling System with and without confluence reduction
+	-IMCA/examples/ProcessorGrid	-- a processor grid example with and without confluence reduction
                                
-    -IMCA/LICENSE 			      -- the licensing information
-    -IMCA/README              -- the file you are reading now
-    -MRMC_HOME/makefile       -- the main makefile
+	-IMCA/LICENSE					-- the licensing information
+	-IMCA/README					-- the file you are reading now
+	-IMCA/makefile					-- the main makefile
+	-IMCA/compile.sh				-- the bcg2imca compile script
+										environment variable $CADP has to be set
     
 -----------------------------------------------------------------
                     3. Makefile information
@@ -58,9 +66,28 @@ FILE STRUCTURE:
 You have to adjust the path location for the Soplex library.
 
 -----------------------------------------------------------------
-                    4. Miscellaneous information
+                    4. bcg2imca information
+-----------------------------------------------------------------
+
+To compile bcg2imca you can just run the compile script.
+The program is elementary and will give no proper error messages!
+
+The usage of the program is as follows:
+	bcg2imca <input> <output> <goal action>
+		<input>			-	inputFile.bcg (have to exist)
+		<output>		-	outputFile.ma (will be created if not present)
+		<goal action>	-	transition leading to success
+		
+Note, that the condition for extracting goal states currently only support the identification over one action. 
+
+-----------------------------------------------------------------
+                    5. Miscellaneous information
 -----------------------------------------------------------------
 
 If you have trouble with compiling Soplex, try to add the following to the Makefile:
 
 USRCXXFLAGS = -arch x86_64 -arch i386
+
+It can be that you have to add execution rights to compile.sh by
+
+chmod +x compile.sh

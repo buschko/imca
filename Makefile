@@ -84,7 +84,7 @@ AR		=	ar
 AR_o		= #
 ZLIB		=	-lz
 GMPLIB		=	-lgmpxx -lgmp
-# TIMELIB		=	-lrt
+#TIMELIB		=	-lrt
 
 
 SRCDIR		=	src

@@ -52,9 +52,13 @@ void function_strongconnect(SparseMatrix *ma,unsigned long v, vector<unsigned lo
 	//printf("size: %ld\n",stack.size());
 	//printf("capacity: %ld\n",stack.capacity());
 	//printf("max size: %ld\n",stack.max_size());
+	dbg_printf("function_strongconnect for v: %lu.\n",v);
+    dbg_printf("size: %ld\n",stack.size());
+	dbg_printf("capacity: %ld\n",stack.capacity());
+	dbg_printf("max size: %ld\n",stack.max_size());
     
-    printf("function_strongconnect for v: %lu.\n",v);
-    // Consider successors of v
+    //printf("function_strongconnect for v: %lu.\n",v);
+	// Consider successors of v
     //for each (v,w) in E do:
     unsigned long *row_starts = (unsigned long *) ma->row_counts;
     unsigned long *choice_starts = (unsigned long *) ma->choice_counts;
@@ -147,7 +151,7 @@ void function_strongconnect(SparseMatrix *ma,unsigned long v, vector<unsigned lo
             
 	if(scc.size() > 0){
             scc_nr++;
-            printf("SCC found by decomposition!");
+            dbg_printf("SCC found by decomposition!");
         }
     }
 }
@@ -162,8 +166,6 @@ void compute_SCC_decomposition_tarjan(SparseMatrix *ma, vector<unsigned long>& s
     /* Initialize vectors needed for Tarjan SCC Decomposition algorithm */
     vector<long> index(ma->n,-1); //init v.index
     vector<unsigned long> lowlink(ma->n,0); //init v.lowlink
-    
-	printf("hi\n");
 	
     unsigned long i=0; //index := 0
     vector<unsigned long> stack; //S := empty
