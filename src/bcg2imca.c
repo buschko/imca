@@ -68,8 +68,7 @@ dstring_printf(dstring *ds, const char *fmt, ...)
 	size = ds->beyond - ds->s;
 	avail = ds->beyond - ds->p;
 	used = ds->p - ds->s;
-	dstring_status(ds, "printf");
-	//fprintf(stderr, "dstring_printf dstring %p: size: %d, used:%d, avail:%d,  s: %p, p: %p, beyond: %p\n", ds, size, used, avail, ds->s, ds->p, ds->beyond);
+	dstring_status(ds, "printf-start");
 
 	while (1) {
 		/* Try to print in the allocated space. */
@@ -82,7 +81,7 @@ dstring_printf(dstring *ds, const char *fmt, ...)
 			size = ds->beyond - ds->s;
 			avail = ds->beyond - ds->p;
 			used = ds->p - ds->s;
-			fprintf(stderr, "printed dstring %p: size:%d, used:%d, avail:%d, s: %p, p: %p, beyond: %p\n", ds, size, used, avail, ds->s, ds->p, ds->beyond);
+			dstring_status(ds, "printf-done");
 			return  ds->p - n;
 		}
 		/* Else try again with more space. */
@@ -92,7 +91,7 @@ dstring_printf(dstring *ds, const char *fmt, ...)
 			inc = size * 2;  /* twice the old size */
 		newsize = size + inc;
 		fprintf(stderr, "resize dstring %p: size: %d, newsize: %d\n", ds, size, newsize);
-		if ((ds->s = realloc (ds->s, newsize)) == NULL) {
+		if ((ds->s = realloc (ds->s, newsize)) == 0) {
 			fatal("out of memory");
 		} else {
 			ds->p = ds->s + used;
@@ -100,10 +99,10 @@ dstring_printf(dstring *ds, const char *fmt, ...)
 			size = ds->beyond - ds->s;
 			avail = ds->beyond - ds->p;
 			used = ds->p - ds->s;
-			fprintf(stderr, "resized dstring %p: size:%d, used:%d, avail:%d, s: %p, p: %p, beyond: %p\n", ds, size, used, avail, ds->s, ds->p, ds->beyond);
+			dstring_status(ds, "printf-resized");
 		}
 	}
-	return NULL;
+	return 0;
 }
 
 
@@ -149,10 +148,6 @@ dstring *nonmarkovian;
 	bcg_label_string = BCG_OT_LABEL_STRING (bcg_graph, bcg_label_number);
 	printf ("\t\tlabel string = %s\n", bcg_label_string);
 
-	//if(strcmp(bcg_label_string, "rate 0.2")==0)
-	//	bcg_label_string = "act3";
-	//printf ("\t\tlabel string now = %s\n", bcg_label_string);
-	
 	//ignore selfloops (due to DFT condition)
 	if(bcg_state_1!=bcg_state_2) {
 		// add edge
