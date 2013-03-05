@@ -88,7 +88,7 @@ dstring_printf(dstring *ds, const char *fmt, ...)
 		if (n > -1)    /* glibc 2.1 */
 			inc = n+1; /* precisely what is needed */
 		else           /* glibc 2.0 */
-			inc = size * 2;  /* twice the old size */
+			inc = size;  /* twice the old size */
 		newsize = size + inc;
 		fprintf(stderr, "resize dstring %p: size: %d, newsize: %d\n", ds, size, newsize);
 		if ((ds->s = realloc (ds->s, newsize)) == 0) {
