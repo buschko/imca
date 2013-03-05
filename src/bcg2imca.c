@@ -14,6 +14,8 @@
 #include <string.h>
 #include "bcg2imca.h"
 
+/* ugly, but only enabled in string.h if we set some special macro */
+extern char* strdup(const char*);
 
 typedef struct dstring {
 	char *s;         /* string buffer */
@@ -143,9 +145,11 @@ dstring *nonmarkovian;
 		bcg_gate = BCG_OT_LABEL_HIDDEN_GATE (bcg_graph, bcg_label_number);
 		printf ("\t\thidden label (hidden gate = %s)\n", bcg_gate);
 	}
-	// next line will invalidate value of bcg_gate;
-	// if we want to use it further, we have to make a copy first (e.g. using strdup)
-	bcg_label_string = BCG_OT_LABEL_STRING (bcg_graph, bcg_label_number);
+
+	// to our surprise, next line _does_ need strdup; without it, we get
+	// wrong results (above, "rate 0.2" is printed as value of bcg_gate,
+	// but, without strdup below, we may get "0.2" as value of bcg_label_string
+	bcg_label_string = strdup(BCG_OT_LABEL_STRING (bcg_graph, bcg_label_number));
 	printf ("\t\tlabel string = %s\n", bcg_label_string);
 
 	//ignore selfloops (due to DFT condition)
@@ -159,6 +163,8 @@ dstring *nonmarkovian;
 			dstring_printf(nonmarkovian,"* s%lu 1\n",bcg_state_2);
 		}
 	}
+
+	free(bcg_label_string);
 }
 
 int main(int argc, char* argv[]) {
