@@ -14,9 +14,6 @@
 #include <string.h>
 #include "bcg2imca.h"
 
-/* ugly, but only enabled in string.h if we set some special macro */
-extern char* strdup(const char*);
-
 
 typedef struct dstring {
 	char *s;         /* string buffer */
@@ -135,21 +132,22 @@ dstring *nonmarkovian;
 	BCG_TYPE_BOOLEAN bcg_visible;
 	BCG_TYPE_C_STRING bcg_gate;
 
-	bcg_label_string = strdup(BCG_OT_LABEL_STRING (bcg_graph, bcg_label_number));
-	bcg_label_gate = strdup(BCG_OT_LABEL_GATE (bcg_graph, bcg_label_number));
 	bcg_visible = BCG_OT_LABEL_VISIBLE (bcg_graph, bcg_label_number);
 	
 	// print the edge to output
 	printf ("\ttransition from state %lu to state %lu\n", bcg_state_1, bcg_state_2);
 	printf ("\t\tlabel unique number = %u\n", bcg_label_number);
-	printf ("\t\tlabel string = %s\n", bcg_label_string);
 	if (bcg_visible) {
-		bcg_gate = strdup(BCG_OT_LABEL_GATE (bcg_graph, bcg_label_number));
+		bcg_gate = BCG_OT_LABEL_GATE (bcg_graph, bcg_label_number);
 		printf ("\t\tvisible label (gate = %s)\n", bcg_gate);
 	} else {
-		bcg_gate = strdup(BCG_OT_LABEL_HIDDEN_GATE (bcg_graph, bcg_label_number));
+		bcg_gate = BCG_OT_LABEL_HIDDEN_GATE (bcg_graph, bcg_label_number);
 		printf ("\t\thidden label (hidden gate = %s)\n", bcg_gate);
 	}
+	// next line will invalidate value of bcg_gate;
+	// if we want to use it further, we have to make a copy first (e.g. using strdup)
+	bcg_label_string = BCG_OT_LABEL_STRING (bcg_graph, bcg_label_number);
+	printf ("\t\tlabel string = %s\n", bcg_label_string);
 
 	//if(strcmp(bcg_label_string, "rate 0.2")==0)
 	//	bcg_label_string = "act3";
@@ -166,8 +164,6 @@ dstring *nonmarkovian;
 			dstring_printf(nonmarkovian,"* s%lu 1\n",bcg_state_2);
 		}
 	}
-	free(bcg_label_string);
-	free(bcg_gate);
 }
 
 int main(int argc, char* argv[]) {
