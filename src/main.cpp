@@ -74,6 +74,7 @@ double begin, end;
 #define TO_STR       "--to"
 #define IMC_STR "-imc"
 #define INTERVAL_STR "-i"
+#define TIME_POINTS_STR "-Tp"
 
 // Boolean macros for option checking
 #define IS_LOWER_BOUND(str) (strncmp(str,"--from", 7) == 0 || strncmp(str, "-F", 3 ) == 0)
@@ -154,6 +155,8 @@ static void print_usage(void) {
 	printf("	<options>	- time- and error-bound for tb (default epsilon=1e-6)  \n");
 	printf("                          '-T' for upper bound '-F' for lower bound \n");
 	printf("                          '-e' for error bound '-i' for interval output\n");
+	printf("                          '-i' only available for [0,T]\n");
+	//printf("                          '-Tp {a,b,c}' for several time points (i XOR Tp)\n");
 	//printf("	<model type>	- define if .ma input is an IMC {-imc} \n");
 }
 

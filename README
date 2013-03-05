@@ -1,6 +1,6 @@
-******************************************************************
-     README: Interactive Markov Chain Analyzer 1.5 beta (IMCA)
-******************************************************************
+*******************************************************************************
+          README: Interactive Markov Chain Analyzer 1.5 beta (IMCA)
+*******************************************************************************
 
 IMCA 1.5 beta is a command-line tool for analyzing unbounded reachability 
 probabilities, expected-time, and long-run averages. We support analyzing of 
@@ -14,82 +14,97 @@ distribution.
 NOTE: Below we assume that IMCA is the folder you obtained after
 unpacking the IMCA-distribution archive.
 
------------------------------------------------------------------
+-------------------------------------------------------------------------------
                              Contents
------------------------------------------------------------------
+-------------------------------------------------------------------------------
  1. General information
  2. Distribution structure
  3. Makefile information
  4. bcg2imca information
  5. Miscellaneous
  
- -----------------------------------------------------------------
+-------------------------------------------------------------------------------
                       1. General information
------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 The tool is distributed under the GNU General Public License (GPL):
 
 	IMCA/LICENSE
 	
-For the use of bcg2imca you need to acquire a CADP Licence (free for academical usage)
+For the use of bcg2imca you need to acquire a CADP Licence 
+(free for academical usage):
 
 	http://cadp.inria.fr/registration/
 	
-Note, that the .imc input format have only legacy support, which can lead to problems. If it is possible, use the .ma input format.
+Note, that the .imc input format have only legacy support, which 
+can lead to problems. If it is possible, use the .ma input format.
     
------------------------------------------------------------------
+-------------------------------------------------------------------------------
                     2. Distribution structure
------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 FILE STRUCTURE:
-	-IMCA/bin/imca					-- the IMCA binary
-										(might not be present before compilation)
-	-IMCA/lib/imca.a				-- the static library containing the IMCA core
-										(might not be present before compilation)
-	-IMCA/obj						-- the object-file directory
-	-IMCA/include					-- the header files
-	-IMCA/src						-- the source code
-	-IMCA/tmp						-- directory for temporary files
+    -IMCA/bin/imca               -- the IMCA binary
+                                    (might not be present before compilation)
+    -IMCA/lib/imca.a             -- the static library containing the IMCA core
+                                    (might not be present before compilation)
+    -IMCA/obj                    -- the object-file directory
+    -IMCA/include                -- the header files
+    -IMCA/src                    -- the source code
+    -IMCA/tmp                    -- directory for temporary files
+                                    (might not be present before compilation)
      
-    -IMCA/examples					-- some example files
-	-IMCA/examples/PollingSystem	-- the Polling System with and without confluence reduction
-	-IMCA/examples/ProcessorGrid	-- a processor grid example with and without confluence reduction
+    -IMCA/examples               -- some example files
+    -IMCA/examples/PollingSystem -- the Polling System with and without 
+	                                confluence reduction
+    -IMCA/examples/ProcessorGrid -- a processor grid example with and without 
+	                                confluence reduction
                                
-	-IMCA/LICENSE					-- the licensing information
-	-IMCA/README					-- the file you are reading now
-	-IMCA/makefile					-- the main makefile
-	-IMCA/compile.sh				-- the bcg2imca compile script
-										environment variable $CADP has to be set
+    -IMCA/LICENSE                -- the licensing information
+    -IMCA/README                 -- the file you are reading now
+    -IMCA/makefile               -- the main makefile
+    -IMCA/compile.sh             -- the bcg2imca compile script
+                                    (environment variable $CADP has to be set)
     
------------------------------------------------------------------
+-------------------------------------------------------------------------------
                     3. Makefile information
------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 You have to adjust the path location for the Soplex library.
 
------------------------------------------------------------------
+Line 57: SOPLEXSRC
+
+If you compile on a MAC you have to comment out with #:
+
+Line 87: TIMELIB
+
+-------------------------------------------------------------------------------
                     4. bcg2imca information
------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 To compile bcg2imca you can just run the compile script.
 The program is elementary and will give no proper error messages!
 
 The usage of the program is as follows:
-	bcg2imca <input> <output> <goal action>
-		<input>			-	inputFile.bcg (have to exist)
-		<output>		-	outputFile.ma (will be created if not present)
-		<goal action>	-	transition leading to success
+    bcg2imca <input> <output> <goal action>
+        <input>         - inputFile.bcg (have to exist)
+        <output>        - outputFile.ma (will be created if not present)
+        <goal action>   - transition leading to success
 		
-Note, that the condition for extracting goal states currently only support the identification over one action. 
+Note, that the condition for extracting goal states currently only support the 
+identification over one action. 
 
------------------------------------------------------------------
+-------------------------------------------------------------------------------
                     5. Miscellaneous information
------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
-If you have trouble with compiling Soplex, try to add the following to the Makefile:
+If you have trouble with compiling Soplex, try to add the following to the 
+Makefile:
 
 USRCXXFLAGS = -arch x86_64 -arch i386
 
-It can be that you have to add execution rights to compile.sh by
+It can be possible that you have to add execution rights to the compile.sh by
 
 chmod +x compile.sh
+
+*******************************************************************************
