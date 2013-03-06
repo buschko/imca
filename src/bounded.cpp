@@ -372,7 +372,7 @@ void compute_probabilistic_vector(SparseMatrix* ma, vector<Real>& v, vector<Real
 * @param tb the given time bound
 * @param is_imc indicates if MA is an IMC
 */
-Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon, Real ta, Real tb, bool is_imc, Real interval) {
+Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon, Real ta, Real tb, bool is_imc, Real interval,Real interval_start) {
 
 	// Check whether the given time interval is zero
 	if( ta > tb ) {
@@ -551,8 +551,10 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 		cout << "iterations: " << steps_for_interval<< endl;
 		cout << "step duration: " << tau <<endl;
 		unsigned long interval_step = round(interval/tau);
+		unsigned long interval_start_point = round(interval_start/tau);
 		unsigned long counter=0;
 		cout << "interval step: " << interval_step <<endl;
+		cout << "interval start: " << interval_start_point << endl;
 		
 		
 		for(unsigned long i=0; i <= steps_for_interval; i++){
@@ -568,6 +570,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 			
 			if(counter==interval_step && interval != tb) {
 			
+				if(i >= interval_start_point){
 				Real prob;
 				if(max)
 					prob=0;
@@ -588,6 +591,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 				}
 				
 				printf("tb=%.5g Maximal time-bounded reachability probability: %.10g\n", i*tau,prob);
+				}
 			
 				counter=0;
 			} else {

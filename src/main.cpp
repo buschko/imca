@@ -74,6 +74,7 @@ double begin, end;
 #define TO_STR       "--to"
 #define IMC_STR "-imc"
 #define INTERVAL_STR "-i"
+#define INTERVAL_START_STR "-b"
 #define TIME_POINTS_STR "-Tp"
 
 // Boolean macros for option checking
@@ -106,6 +107,7 @@ static bool is_expected_time_present = false;
 static bool is_time_bounded_present = false;
 static bool is_lra_present = false;
 static bool is_interval_present = false;
+static bool is_interval_start_present = false;
 static bool is_imc = false;
 
 static bool is_lower_bound_present = false;
@@ -120,7 +122,8 @@ static const char * ma_file  = NULL;	/* pointer to the input file */
 static Real epsilon = 1e-6;				/* default error bound for time-bounded reachability */
 static Real ta = 0;						/* default lower bound for time interval ( time-bounded reachability ) */
 static Real tb = 0;						/* default upper bound for time interval ( time-bounded reachability ) */
-static Real interval = 0;			/* The interval step for time-bounded reachability /*
+static Real interval = 0;			/* The interval step for time-bounded reachability */
+static Real interval_start = 0;			/* The interval step for time-bounded reachability */
 
 using namespace std;
 
@@ -346,6 +349,25 @@ static void parseParams(int argc, char *argv[]) {
 					exit(EXIT_FAILURE);
 				}
 			}
+		}else if( strcmp(argv[i], INTERVAL_START_STR) == 0  ){
+			if( is_interval_start_present ) {
+				printf("ERROR: '%s' is repeated.\n", argv[i]);
+				exit(EXIT_FAILURE);
+			} else if(i+1 >= argc ) {
+				printf("ERROR: No interval start specified.\n");
+				exit(EXIT_FAILURE);
+			} else {
+				char *toEnd;
+				interval_start = strtod(argv[i+1], &toEnd);
+				if( *toEnd == '\0' && interval_start > 0) {
+					is_interval_start_present = true;
+					i++;
+				}
+				else {
+					printf("ERROR: The specified interval step ('%s') is invalid. After '%s' must be a real value greater than zero.\n", argv[i+1], argv[i]);
+					exit(EXIT_FAILURE);
+				}
+			}
 		} else if( strcmp(argv[i], MIN_MODE_STR) == 0 ){
 			if( !is_min_present ){
 				is_min_present = true;
@@ -557,7 +579,7 @@ int main(int argc, char* argv[]) {
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
 			printf("\nCompute maximal time-bounded reachability inside interval [%g,%g] with precision %g, please wait.\n", ta, tb, epsilon);
-			tmp=compute_time_bounded_reachability(ma,true,epsilon,ta,tb,is_imc,interval);
+			tmp=compute_time_bounded_reachability(ma,true,epsilon,ta,tb,is_imc,interval,interval_start);
 			if(interval==tb)
 				printf("Maximal time-bounded reachability probability: %.10g\n", tmp);
 			else
@@ -576,8 +598,11 @@ int main(int argc, char* argv[]) {
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
 			printf("\nCompute minimal time-bounded reachability inside interval [%g,%g] with precision %g, please wait.\n", ta, tb, epsilon);
-			tmp=compute_time_bounded_reachability(ma,false,epsilon,ta,tb,is_imc,interval);
-			printf("Minimal time-bounded reachability probability: %.10g\n", tmp);
+			tmp=compute_time_bounded_reachability(ma,false,epsilon,ta,tb,is_imc,interval,interval_start);
+			if(interval==tb)
+				printf("Maximal time-bounded reachability probability: %.10g\n", tmp);
+			else
+				printf("tb=%.5g Maximal time-bounded reachability probability: %.10g\n", tb,tmp);
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
