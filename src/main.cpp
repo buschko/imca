@@ -558,7 +558,10 @@ int main(int argc, char* argv[]) {
 			#endif
 			printf("\nCompute maximal time-bounded reachability inside interval [%g,%g] with precision %g, please wait.\n", ta, tb, epsilon);
 			tmp=compute_time_bounded_reachability(ma,true,epsilon,ta,tb,is_imc,interval);
-			printf("Maximal time-bounded reachability probability: %.10g\n", tmp);
+			if(interval==tb)
+				printf("Maximal time-bounded reachability probability: %.10g\n", tmp);
+			else
+				printf("tb=%.5g Maximal time-bounded reachability probability: %.10g\n", tb,tmp);
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;

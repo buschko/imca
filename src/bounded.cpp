@@ -566,7 +566,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 				compute_probabilistic_vector(discrete_ma,v,u,max, true);
 			}
 			
-			if(counter==interval_step) {
+			if(counter==interval_step && interval != tb) {
 			
 				Real prob;
 				if(max)
