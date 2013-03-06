@@ -568,9 +568,9 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 				compute_probabilistic_vector(discrete_ma,v,u,max, true);
 			}
 			
-			if(counter==interval_step && interval != tb) {
+			if(i >= interval_start_point){
+			if((counter==interval_step || i==interval_start_point) && interval != tb) {
 			
-				if(i >= interval_start_point){
 				Real prob;
 				if(max)
 					prob=0;
@@ -591,11 +591,11 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 				}
 				
 				printf("tb=%.5g Maximal time-bounded reachability probability: %.10g\n", i*tau,prob);
-				}
 			
 				counter=0;
 			} else {
 				counter++;
+			}
 			}
 		}
 		SparseMatrix_free(discrete_ma);
