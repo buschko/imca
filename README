@@ -98,6 +98,15 @@ identification over one action.
                     5. Miscellaneous information
 -------------------------------------------------------------------------------
 
+If you run into a segmentation fault for computing the long-run average, your 
+available stack memory is to small. In Unix systems you can set the stack 
+memory as follows:
+
+ulimit -s <kb>
+
+where <kb> should be substituted with the new memory size in kb. By omitting
+<kb>, the command will print the current stack size in kb.
+
 If you have trouble with compiling Soplex, try to add the following to the 
 Makefile:
 
