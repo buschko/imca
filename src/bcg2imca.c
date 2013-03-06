@@ -146,25 +146,21 @@ dstring *nonmarkovian;
 		printf ("\t\thidden label (hidden gate = %s)\n", bcg_gate);
 	}
 
-	// to our surprise, next line _does_ need strdup; without it, we get
-	// wrong results (above, "rate 0.2" is printed as value of bcg_gate,
-	// but, without strdup below, we may get "0.2" as value of bcg_label_string
-	bcg_label_string = strdup(BCG_OT_LABEL_STRING (bcg_graph, bcg_label_number));
+	bcg_label_string = BCG_OT_LABEL_STRING (bcg_graph, bcg_label_number);
 	printf ("\t\tlabel string = %s\n", bcg_label_string);
 
 	//ignore selfloops (due to DFT condition)
 	if(bcg_state_1!=bcg_state_2) {
 		// add edge
 		if(strncmp(bcg_label_string,"rate",4)==0){
-			strcpy(bcg_label_string+0, bcg_label_string+5); // obtain the rate from string
-			dstring_printf(markovian,"* s%lu %s\n",bcg_state_2,bcg_label_string);
+			dstring_printf(markovian,"* s%lu %s\n",bcg_state_2,bcg_label_string+5); // obtain the rate from string
 		} else {
 			dstring_printf(nonmarkovian,"s%lu %s\n",bcg_state_1,bcg_label_string);
 			dstring_printf(nonmarkovian,"* s%lu 1\n",bcg_state_2);
 		}
 	}
 
-	free(bcg_label_string);
+	//free(bcg_label_string);
 }
 
 int main(int argc, char* argv[]) {
