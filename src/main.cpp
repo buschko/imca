@@ -328,7 +328,7 @@ static void parseParams(int argc, char *argv[]) {
 				}
 			}
 		}else if( strcmp(argv[i], INTERVAL_STR) == 0  ){
-			if( is_error_bound_present ) {
+			if( is_interval_present ) {
 				printf("ERROR: '%s' is repeated.\n", argv[i]);
 				exit(EXIT_FAILURE);
 			} else if(i+1 >= argc ) {
