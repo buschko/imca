@@ -359,12 +359,12 @@ static void parseParams(int argc, char *argv[]) {
 			} else {
 				char *toEnd;
 				interval_start = strtod(argv[i+1], &toEnd);
-				if( *toEnd == '\0' && interval_start > 0) {
+				if( *toEnd == '\0' && interval_start >= 0) {
 					is_interval_start_present = true;
 					i++;
 				}
 				else {
-					printf("ERROR: The specified interval step ('%s') is invalid. After '%s' must be a real value greater than zero.\n", argv[i+1], argv[i]);
+					printf("ERROR: The specified interval step ('%s') is invalid. After '%s' must be a real value greater equal than zero.\n", argv[i+1], argv[i]);
 					exit(EXIT_FAILURE);
 				}
 			}
