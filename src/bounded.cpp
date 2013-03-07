@@ -553,6 +553,8 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 		unsigned long interval_step = round(interval/tau);
 		unsigned long interval_start_point = round(interval_start/tau);
 		unsigned long counter=0;
+		Real tmp_step = interval;
+		interval=interval_start;
 		cout << "interval step: " << interval_step <<endl;
 		cout << "interval start: " << interval_start_point << endl;
 		
@@ -590,8 +592,12 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 					}
 				}
 				
-				printf("tb=%.5g Maximal time-bounded reachability probability: %.10g\n", i*tau,prob);
-			
+				Real tmp = i*tau - interval;
+				tmp = i*tau - tmp;
+				
+				printf("tb=%.5g Maximal time-bounded reachability probability: %.10g  (Real tb=%.5g)\n", tmp,prob,i*tau);
+				
+				interval += tmp_step;
 				counter=0;
 			} else {
 				counter++;
