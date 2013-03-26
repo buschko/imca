@@ -135,6 +135,11 @@ static void print_intro(void) {
 	printf("|                  Interactive Markov Chain Analyzer                |\n");
 	printf("|                        IMCA Version 1.5 beta                      |\n");
 	printf("|             Binary build date: %s @ %s             |\n", __DATE__, __TIME__);
+	#ifdef __SOPLEX__
+	printf("|                using SoPlex \"http://soplex.zib.de/\"               |\n");
+	#else
+	printf("|          using lp_solve \"http://lpsolve.sourceforge.net/\"         |\n");
+	#endif
 	printf("|                                                                   |\n");
 	printf("|                  Copyright (C) RWTH Aachen, 2012.                 |\n");
 	printf("|             Copyright (C) University of Twente, 2013.             |\n");
