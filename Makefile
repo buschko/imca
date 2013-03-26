@@ -52,12 +52,15 @@ OSTYPE		:=	$(shell uname -s | tr '[:upper:]' '[:lower:]' | \
 HOSTNAME	:=	$(shell uname -n | tr '[:upper:]' '[:lower:]')
 
 #-----------------------------------------------------------------------------
-# Soplex Libaries
+# Soplex Libaries -- path to Soplex library has to be adjusted (only if option 
+#                    SOPLEX=true is active ) --
 #-----------------------------------------------------------------------------
 SOPLEXSRC	= /Users/guckd/lib/soplex-1.7.0
 SOPLEXLIB	= $(SOPLEXSRC)/lib/libsoplex.a
 SOPLEXINCLUDE	= $(SOPLEXSRC)/src
 SOPLEXLINK	= $(SOPLEXSRC)/lib/libsoplex.a
+SOPLEX		= false
+SOPLEXVAR	= __SOPLEX__
 
 #-----------------------------------------------------------------------------
 # Options
@@ -84,7 +87,11 @@ AR		=	ar
 AR_o		= #
 ZLIB		=	-lz
 GMPLIB		=	-lgmpxx -lgmp
-#TIMELIB		=	-lrt
+ifndef __APPLE__
+TIMELIB		=	
+else
+TIMELIB		=	-lrt
+endif
 
 
 SRCDIR		=	src
@@ -121,18 +128,35 @@ FLAGS		=	-g -Wall -D NDEBUG
 else
 FLAGS		=	-O2
 endif
+ifeq ($(SOPLEX),true)
 CPPFLAGS	=	-I $(INCLUDEDIR) -I $(SOPLEXINCLUDE) $(ZLIB) $(GMPLIB) $(TIMELIB)
+else
+CPPFLAGS	=	-I $(INCLUDEDIR) $(ZLIB) $(GMPLIB) $(TIMELIB)
+endif
 CXXFLAGS	=	
 BINOFLAGS	=	
 LIBOFLAGS	=	
+ifeq ($(SOPLEX),true)
 LDFLAGS		+=	-I $(INCLUDEDIR) -I $(SOPLEXINCLUDE) $(SOPLEXLIB) $(ZLIB) $(GMPLIB) $(TIMELIB)
+else
+LDFLAGS		+=	-I $(INCLUDEDIR) $(ZLIB) $(GMPLIB) $(TIMELIB)
+endif
 ARFLAGS		=	cr
 DFLAGS		=	-MM
 VFLAGS		=	--tool=memcheck --leak-check=yes --show-reachable=yes #--gen-suppressions=yes
 
+ifeq ($(SOPLEX),true)
 INCLUDES	=	-I $(INCLUDEDIR) -I $(SOPLEXINCLUDE)
+else
+INCLUDES	=	-I $(INCLUDEDIR)
+endif
 
 LN_s		=	ln -s
+
+ifeq ($(SOPLEX),true)
+FLAGS		+=	-D$(SOPLEXVAR)
+endif
+
 
 ifeq ($(VERBOSE),false)
 .SILENT:	$(LIBLINK) $(LIBSHORTLINK) $(BINLINK) $(BINSHORTLINK) $(BINFILE) $(LIBFILE) $(BINOBJFILES) $(LIBOBJFILES)

@@ -31,6 +31,7 @@ The tool is distributed under the GNU General Public License (GPL):
 
 	IMCA/LICENSE
 	
+	
 For the use of bcg2imca you need to acquire a CADP Licence 
 (free for academical usage):
 
@@ -38,6 +39,20 @@ For the use of bcg2imca you need to acquire a CADP Licence
 	
 Note, that the .imc input format have only legacy support, which 
 can lead to problems. If it is possible, use the .ma input format.
+
+
+IMCA can be compiled with 2 different linear programming solvers!
+
+The default solver is "LP_SOLVE" which is distributwet under LGPL:
+
+http://lpsolve.sourceforge.net/5.5/LGPL.htm
+
+The second solver is "SoPlex" which licence can be found here:
+
+http://soplex.zib.de/licence.shtml
+
+Note: Soplex is free for academic use. How to compile with SoPlex is described
+in Section 3.
     
 -------------------------------------------------------------------------------
                     2. Distribution structure
@@ -70,13 +85,15 @@ FILE STRUCTURE:
                     3. Makefile information
 -------------------------------------------------------------------------------
 
-You have to adjust the path location for the Soplex library.
+If you want to use Soplex you have to follow those two steps:
 
-Line 57: SOPLEXSRC
+1. adjust the path location for the Soplex library.
 
-If you compile on a MAC you have to comment out with #:
+   Line 57: SOPLEXSRC = your_path_to_the_soplex_library
+   
+2. compile IMCA as follows:
 
-Line 87: TIMELIB
+   make SOPLEX=true
 
 -------------------------------------------------------------------------------
                     4. bcg2imca information
