@@ -51,6 +51,8 @@ OSTYPE		:=	$(shell uname -s | tr '[:upper:]' '[:lower:]' | \
 			-e 's/mingw.*/mingw/')
 HOSTNAME	:=	$(shell uname -n | tr '[:upper:]' '[:lower:]')
 
+UNAME := $(shell uname)
+
 #-----------------------------------------------------------------------------
 # Soplex Libaries -- path to Soplex library has to be adjusted (only if option 
 #                    SOPLEX=true is active ) --
@@ -87,10 +89,10 @@ AR		=	ar
 AR_o		= #
 ZLIB		=	-lz
 GMPLIB		=	-lgmpxx -lgmp
-ifndef __APPLE__
-TIMELIB		=	
-else
+ifeq ($(UNAME), Linux)
 TIMELIB		=	-lrt
+else
+TIMELIB		=	
 endif
 
 
