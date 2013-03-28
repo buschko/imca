@@ -31,7 +31,10 @@
 
 #include <map>
 #include <string>
+
+#ifdef __SOPLEX__
 #include "soplex.h"
+#endif
 
 using namespace std;
 using namespace soplex;

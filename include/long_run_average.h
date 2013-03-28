@@ -28,8 +28,12 @@
 #ifndef LONG_RUN_AVERAGE_H
 #define LONG_RUN_AVERAGE_H
 
+
 #include "sparse.h"
+
+#ifdef __SOPLEX__
 #include "soplex.h"
+#endif
 
 using namespace soplex;
 

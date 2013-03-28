@@ -32,6 +32,7 @@
 		B96D6AE41664FDEA00B9A9BE /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../Makefile; sourceTree = "<group>"; };
 		B96D6AE51664FDF300B9A9BE /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = README; path = ../README; sourceTree = "<group>"; };
 		B96D6AE61664FDFB00B9A9BE /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
+		B98752501704446800F35D50 /* sccs2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sccs2.h; sourceTree = "<group>"; };
 		B9B5298916CBA3E100E6A0DD /* sccs2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sccs2.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -71,6 +72,7 @@
 		B96D6AD91664FDE200B9A9BE /* include */ = {
 			isa = PBXGroup;
 			children = (
+				B98752501704446800F35D50 /* sccs2.h */,
 				B96D6ADA1664FDE200B9A9BE /* bcg2imca.h */,
 				B96D6ADB1664FDE200B9A9BE /* bounded.h */,
 				B96D6ADC1664FDE200B9A9BE /* debug.h */,

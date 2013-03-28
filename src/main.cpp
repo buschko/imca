@@ -33,8 +33,11 @@
 #include <string.h>
 #include <map>
 #include <string>
-#include "soplex.h"
 #include <popt.h>
+
+#ifdef __SOPLEX__
+#include "soplex.h"
+#endif
 
 #ifndef __APPLE__
 #include <malloc.h>

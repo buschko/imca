@@ -9,8 +9,11 @@
 #define	SCCS2_H
 
 #include "sparse.h"
-#include "soplex.h"
 #include <vector>
+
+#ifdef __SOPLEX__
+#include "soplex.h"
+#endif
 
 using namespace soplex;
 

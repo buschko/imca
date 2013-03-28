@@ -29,7 +29,10 @@
 #define READ_FILE_H
 
 #include "sparse.h"
+
+#ifdef __SOPLEX__
 #include "soplex.h"
+#endif
 
 #define MAX_LINE_LENGTH 1024
 #define MARKOV_ACTION "!"

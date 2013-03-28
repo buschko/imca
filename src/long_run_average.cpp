@@ -32,7 +32,10 @@
 #include <string>
 #include <vector>
 
+#ifdef __SOPLEX__
 #include "soplex.h"
+#endif
+
 #include "sccs.h"
 #include "sccs2.h"
 #include "read_file.h"
