@@ -29,7 +29,10 @@
 #define EXPECTED_TIME_H
 
 #include "sparse.h"
+
+#ifdef __SOPLEX__
 #include "soplex.h"
+#endif
 
 using namespace soplex;
 

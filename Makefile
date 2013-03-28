@@ -65,6 +65,11 @@ SOPLEX		= false
 SOPLEXVAR	= __SOPLEX__
 
 #-----------------------------------------------------------------------------
+# lp_solve Libaries -- path to lp_solve library has to be adjusted --
+#-----------------------------------------------------------------------------
+LPSOLVEINCLUDE	= /opt/local/include/lpsolve
+
+#-----------------------------------------------------------------------------
 # Options
 #-----------------------------------------------------------------------------
 DEBUG		=	false
@@ -133,7 +138,7 @@ endif
 ifeq ($(SOPLEX),true)
 CPPFLAGS	=	-I $(INCLUDEDIR) -I $(SOPLEXINCLUDE) $(ZLIB) $(GMPLIB) $(TIMELIB)
 else
-CPPFLAGS	=	-I $(INCLUDEDIR) $(ZLIB) $(GMPLIB) $(TIMELIB)
+CPPFLAGS	=	-I $(INCLUDEDIR) $(ZLIB) $(GMPLIB) $(TIMELIB) -I $(LPSOLVEINCLUDE)
 endif
 CXXFLAGS	=	
 BINOFLAGS	=	
@@ -141,7 +146,7 @@ LIBOFLAGS	=
 ifeq ($(SOPLEX),true)
 LDFLAGS		+=	-I $(INCLUDEDIR) -I $(SOPLEXINCLUDE) $(SOPLEXLIB) $(ZLIB) $(GMPLIB) $(TIMELIB)
 else
-LDFLAGS		+=	-I $(INCLUDEDIR) $(ZLIB) $(GMPLIB) $(TIMELIB)
+LDFLAGS		+=	-I $(INCLUDEDIR) $(ZLIB) $(GMPLIB) $(TIMELIB) -I $(LPSOLVEINCLUDE) 
 endif
 ARFLAGS		=	cr
 DFLAGS		=	-MM
@@ -150,7 +155,7 @@ VFLAGS		=	--tool=memcheck --leak-check=yes --show-reachable=yes #--gen-suppressi
 ifeq ($(SOPLEX),true)
 INCLUDES	=	-I $(INCLUDEDIR) -I $(SOPLEXINCLUDE)
 else
-INCLUDES	=	-I $(INCLUDEDIR)
+INCLUDES	=	-I $(INCLUDEDIR) -I $(LPSOLVEINCLUDE)
 endif
 
 LN_s		=	ln -s

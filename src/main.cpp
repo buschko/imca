@@ -52,6 +52,8 @@
 #include "long_run_average.h"
 #include "bounded.h"
 
+//#include "/opt/local/include/lpsolve/lp_lib.h"
+
 #ifndef __APPLE__
 #include <time.h>
 struct timespec tp;
@@ -434,6 +436,9 @@ int main(int argc, char* argv[]) {
 	// helpers to calculate allocated memory
 	unsigned long int sp1=0,sp2=0;
 	#endif
+	
+	//REAL test(0);
+	Real test;
 	
 	#ifndef __APPLE__
 	// get memory info before model is loaded
