@@ -45,5 +45,7 @@ using namespace soplex;
 */
 extern Real compute_expected_time(SparseMatrix*, bool);
 
+extern Real expected_time_value_iteration(SparseMatrix*, bool);
+
 
 #endif

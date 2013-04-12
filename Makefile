@@ -93,7 +93,7 @@ LINKCXX_o	=	-o #
 AR		=	ar
 AR_o		= #
 ZLIB		=	-lz
-GMPLIB		=	-lgmpxx -lgmp
+GMPLIB		=	-lgmpxx -lgmp -lstdc++
 ifeq ($(UNAME), Linux)
 TIMELIB		=	-lrt
 else
@@ -138,22 +138,22 @@ endif
 ifeq ($(SOPLEX),true)
 CPPFLAGS	=	-I $(INCLUDEDIR) -I $(SOPLEXINCLUDE) $(ZLIB) $(GMPLIB) $(TIMELIB)
 else
-CPPFLAGS	=	-I $(INCLUDEDIR) $(ZLIB) $(GMPLIB) $(TIMELIB) -I $(LPSOLVEINCLUDE)
+CPPFLAGS	=	-I $(INCLUDEDIR) $(ZLIB) $(GMPLIB) $(TIMELIB) -I $(LPSOLVEINCLUDE) /opt/local/lib/liblpsolve55.dylib /opt/local/lib/liblpsolve55.a
 endif
 CXXFLAGS	=	
 BINOFLAGS	=	
 LIBOFLAGS	=	
 ifeq ($(SOPLEX),true)
-LDFLAGS		+=	-I $(INCLUDEDIR) -I $(SOPLEXINCLUDE) $(SOPLEXLIB) $(ZLIB) $(GMPLIB) $(TIMELIB)
+LDFLAGS		+=	-I $(INCLUDEDIR) -I $(SOPLEXINCLUDE) $(SOPLEXLIB) $(ZLIB) $(GMPLIB) $(TIMELIB) 
 else
-LDFLAGS		+=	-I $(INCLUDEDIR) $(ZLIB) $(GMPLIB) $(TIMELIB) -I $(LPSOLVEINCLUDE) 
+LDFLAGS		+=	-I $(INCLUDEDIR) $(ZLIB) $(GMPLIB) $(TIMELIB) -I $(LPSOLVEINCLUDE) /opt/local/lib/liblpsolve55.dylib /opt/local/lib/liblpsolve55.a
 endif
 ARFLAGS		=	cr
 DFLAGS		=	-MM
 VFLAGS		=	--tool=memcheck --leak-check=yes --show-reachable=yes #--gen-suppressions=yes
 
 ifeq ($(SOPLEX),true)
-INCLUDES	=	-I $(INCLUDEDIR) -I $(SOPLEXINCLUDE)
+INCLUDES	=	-I $(INCLUDEDIR) -I $(SOPLEXINCLUDE) 
 else
 INCLUDES	=	-I $(INCLUDEDIR) -I $(LPSOLVEINCLUDE)
 endif
@@ -169,7 +169,7 @@ ifeq ($(VERBOSE),false)
 .SILENT:	$(LIBLINK) $(LIBSHORTLINK) $(BINLINK) $(BINSHORTLINK) $(BINFILE) $(LIBFILE) $(BINOBJFILES) $(LIBOBJFILES)
 endif
 
-all: $(TMPDIR) $(LIBFILE) $(BINFILE) $(LIBLINK) $(LIBSHORTLINK) $(BINLINK) $(BINSHORTLINK) $(SOPLEXLINK)
+all: $(TMPDIR) $(LIBFILE) $(BINFILE) $(LIBLINK) $(LIBSHORTLINK) $(BINLINK) $(BINSHORTLINK) $(SOPLEXLINK) 
 
 #-----------------------------------------------------------------------------
 # SHARED Libaries

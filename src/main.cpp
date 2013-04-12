@@ -33,10 +33,18 @@
 #include <string.h>
 #include <map>
 #include <string>
-#include <popt.h>
+//#include <popt.h>
 
+
+// choose between SoPlex and LP_solve
 #ifdef __SOPLEX__
 #include "soplex.h"
+#else
+// have to include gmp for REAL arithmetic
+#include "gmp.h"
+#include <math.h>
+// define location in Makefile
+#include "/opt/local/include/lpsolve/lp_lib.h"
 #endif
 
 #ifndef __APPLE__
@@ -51,8 +59,6 @@
 #include "sccs2.h"
 #include "long_run_average.h"
 #include "bounded.h"
-
-//#include "/opt/local/include/lpsolve/lp_lib.h"
 
 #ifndef __APPLE__
 #include <time.h>
@@ -521,8 +527,10 @@ int main(int argc, char* argv[]) {
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
 			printf("\nCompute maximal expected time, please wait.\n");
-			tmp = compute_expected_time(ma,true);	
-			printf("Maximal expected time: %.10g\n", tmp);
+			//tmp = compute_expected_time(ma,true);
+			//printf("Maximal expected time: %.10g\n", tmp);
+			tmp=expected_time_value_iteration(ma,true);
+			printf("Maximal expected time value iteration: %.10g\n", tmp);
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -536,9 +544,11 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
-			printf("\nCompute minimal expected time, please wait.\n");	
-			tmp = compute_expected_time(ma,false);	
-			printf("Minimal expected time: %.10g\n\n", tmp);
+			printf("\nCompute minimal expected time, please wait.\n");
+			//tmp = compute_expected_time(ma,false);
+			//printf("Minimal expected time: %.10g\n\n", tmp);
+			tmp=expected_time_value_iteration(ma,false);
+			printf("Minimal expected time value iteration: %.10g\n", tmp);
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;

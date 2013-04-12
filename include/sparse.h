@@ -34,10 +34,16 @@
 
 #ifdef __SOPLEX__
 #include "soplex.h"
+#else
+//#include "gmp.h"
+#include <gmpxx.h>
+#include "/opt/local/include/lpsolve/lp_lib.h"
 #endif
 
 using namespace std;
+#ifdef __SOPLEX__
 using namespace soplex;
+#endif
 
 typedef struct SparseMatrix SparseMatrix;
 

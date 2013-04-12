@@ -440,7 +440,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 			compute_markovian_vector(discrete_ma,v,u, true);
 			// compute u for Probabilistic states
 			if(is_imc){
-				// if MA is in fact an IMC we can simplify the computation
+				// if MA is in fact an IMC we can simplify the computation (slower than the PA computation TODO: find bug)
 				compute_interactive_vector(discrete_ma,v,u,max,locks,reach);
 			}else {
 				compute_probabilistic_vector(discrete_ma,v,u,max, true);
