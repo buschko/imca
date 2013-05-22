@@ -148,9 +148,8 @@ static void set_constraints_ext(SoPlex& lp_model, SparseMatrix *ma, bool max, bo
 * @param ma the MA
 * @param v Markovian vector
 * @param u result vector
-* @param is_MA_made_absorbing: if true then all goal states are made absorbing, otherwise not
 */
-void compute_markovian_vector(SparseMatrix* ma, vector<Real>& v, const vector<Real> &u){
+void compute_markovian_vector(SparseMatrix* ma, vector<Real>& v, const vector<Real> &u, bool* locks){
 	unsigned long *row_starts = (unsigned long *) ma->row_counts;
 	unsigned long *choice_starts = (unsigned long *) ma->choice_counts;
 	unsigned long *rate_starts = (unsigned long *) ma->rate_counts;
@@ -164,7 +163,9 @@ void compute_markovian_vector(SparseMatrix* ma, vector<Real>& v, const vector<Re
 		// Look at Markovian states
 		if(goals[state_nr]){
 			v[state_nr]=0;
-		}else{
+		}else if(locks[state_nr]){
+			v[state_nr]=infinity;
+		}else {
 			if(!ma->isPS[state_nr])
 			{
 				for (unsigned long choice_nr = state_start; choice_nr < state_end; choice_nr++) {
@@ -197,7 +198,7 @@ void compute_markovian_vector(SparseMatrix* ma, vector<Real>& v, const vector<Re
 * @param u result vector
 * @param max maximum/minimum
 */
-void compute_probabilistic_vector(SparseMatrix* ma, vector<Real>& v, vector<Real>& u, bool max){
+void compute_probabilistic_vector(SparseMatrix* ma, vector<Real>& v, vector<Real>& u, bool max, bool* locks){
 
 	const Real precision = 1e-7;
 	unsigned long statecount = ma-> n;
@@ -225,7 +226,7 @@ void compute_probabilistic_vector(SparseMatrix* ma, vector<Real>& v, vector<Real
 		for (unsigned long s_idx = 0; s_idx < statecount; s_idx++) {
 			unsigned long state_start = row_starts[s_idx];
 			unsigned long state_end = row_starts[s_idx + 1];
-			if ( ma -> isPS[s_idx] && !ma -> goals[s_idx] ){  // do processing only if the state is interactive
+			if ( ma -> isPS[s_idx] && !ma -> goals[s_idx] && !locks[s_idx]){  // do processing only if the state is interactive
 				if (max)
 					u[s_idx] = 0.0;
 				else
@@ -251,6 +252,7 @@ void compute_probabilistic_vector(SparseMatrix* ma, vector<Real>& v, vector<Real
 				}
 				if( fabs(u[s_idx] - v[s_idx]) >= precision )
 					done = false;
+					
 
 			}
 		}
@@ -262,8 +264,8 @@ void compute_probabilistic_vector(SparseMatrix* ma, vector<Real>& v, vector<Real
 			}
 		}
 
-
 	}
+	
 }
 
 /**
@@ -278,7 +280,7 @@ Real expected_time_value_iteration(SparseMatrix* ma, bool max) {
 	 * Define value iteration likewise to time-bounded reachability
 	 * with expected time property
 	 */
-	 
+	
 	unsigned long num_states = ma->n;
 	vector<Real> v(num_states,infinity); // Markovian vector
 	vector<Real> u(num_states,infinity); // Probabilistic vector
@@ -290,8 +292,13 @@ Real expected_time_value_iteration(SparseMatrix* ma, bool max) {
 			v[state_nr]=0;
 		}
 	}
-	// in case MA is an IMC: precomputation of paths for interactive states
-	vector< vector<unsigned long> > reach;
+	
+	bool *locks;
+	if(max) {
+		locks=compute_locks_weak(ma);
+	} else {
+		locks=compute_locks_strong(ma);
+	}
 	
 	cout << "start value iteration" << endl;
 	
@@ -299,10 +306,11 @@ Real expected_time_value_iteration(SparseMatrix* ma, bool max) {
 	
 	while(!done){
 		tmp=u;
+		//done=true;
 		// compute v for Markovian states: from b dwon to a, we make discrete model absorbing
-		compute_markovian_vector(ma,v,u);
+		compute_markovian_vector(ma,v,u,locks);
 		// compute u for Probabilistic states
-		compute_probabilistic_vector(ma,v,u,max);
+		compute_probabilistic_vector(ma,v,u,max,locks);
 		if(tmp==u)
 			done=true;
 	}

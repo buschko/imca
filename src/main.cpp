@@ -84,6 +84,7 @@ double begin, end;
 //#define FROM_STR     "--from"
 #define TO_STR       "--to"
 #define IMC_STR "-imc"
+#define VAL_STR "-val"
 #define INTERVAL_STR "-i"
 #define INTERVAL_START_STR "-b"
 #define TIME_POINTS_STR "-Tp"
@@ -120,6 +121,7 @@ static bool is_lra_present = false;
 static bool is_interval_present = false;
 static bool is_interval_start_present = false;
 static bool is_imc = false;
+static bool is_val = false;
 
 static bool is_lower_bound_present = false;
 static bool is_upper_bound_present = false;
@@ -175,6 +177,7 @@ static void print_usage(void) {
 	printf("                          '-T' for upper bound '-F' for lower bound \n");
 	printf("                          '-e' for error bound '-i' for interval output\n");
 	printf("                          '-i' only available for [0,T]\n");
+	printf("                          '-val for expected-time value iteration\n");
 	//printf("                          '-Tp {a,b,c}' for several time points (i XOR Tp)\n");
 	//printf("	<model type>	- define if .ma input is an IMC {-imc} \n");
 }
@@ -402,6 +405,12 @@ static void parseParams(int argc, char *argv[]) {
 			}else{
 				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
 			}
+		}else if( strcmp(argv[i], VAL_STR) == 0 ){
+			if( !is_val ){
+				is_val = true;
+			}else{
+				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
+			}
 		} 
 	}
 	
@@ -527,10 +536,13 @@ int main(int argc, char* argv[]) {
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
 			printf("\nCompute maximal expected time, please wait.\n");
-			//tmp = compute_expected_time(ma,true);
-			//printf("Maximal expected time: %.10g\n", tmp);
-			tmp=expected_time_value_iteration(ma,true);
-			printf("Maximal expected time value iteration: %.10g\n", tmp);
+			if(!is_val){
+				tmp = compute_expected_time(ma,true);
+				printf("Maximal expected time: %.10g\n", tmp);
+			} else {
+				tmp=expected_time_value_iteration(ma,true);
+				printf("Maximal expected time value iteration: %.10g\n", tmp);
+			}
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -545,10 +557,13 @@ int main(int argc, char* argv[]) {
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
 			printf("\nCompute minimal expected time, please wait.\n");
-			//tmp = compute_expected_time(ma,false);
-			//printf("Minimal expected time: %.10g\n\n", tmp);
-			tmp=expected_time_value_iteration(ma,false);
-			printf("Minimal expected time value iteration: %.10g\n", tmp);
+			if(!is_val) {
+				tmp = compute_expected_time(ma,false);
+				printf("Minimal expected time: %.10g\n\n", tmp);
+			} else {
+				tmp=expected_time_value_iteration(ma,false);
+				printf("Minimal expected time value iteration: %.10g\n", tmp);
+			}
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -623,7 +638,7 @@ int main(int argc, char* argv[]) {
 			printf("\nCompute minimal time-bounded reachability inside interval [%g,%g] with precision %g, please wait.\n", ta, tb, epsilon);
 			tmp=compute_time_bounded_reachability(ma,false,epsilon,ta,tb,is_imc,interval,interval_start);
 			if(interval==tb)
-				printf("Maximal time-bounded reachability probability: %.10g\n", tmp);
+				printf("Minimal time-bounded reachability probability: %.10g\n", tmp);
 			else
 				printf("tb=%.5g Maximal time-bounded reachability probability: %.10g\n", tb,tmp);
 			#ifndef __APPLE__
