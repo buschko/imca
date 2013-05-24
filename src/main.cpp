@@ -501,9 +501,14 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
-			printf("\nCompute maximal unbounded reachability, please wait.\n");	
-			tmp = compute_unbounded_reachability(ma,true);	
-			printf("Maximal unbounded reachability: %.10g\n", tmp);
+			printf("\nCompute maximal unbounded reachability, please wait.\n");
+			if(!is_val){
+				tmp = compute_unbounded_reachability(ma,true);	
+				printf("Maximal unbounded reachability: %.10g\n", tmp);
+			}else {
+				tmp=unbounded_value_iteration(ma,true);
+				printf("Maximal unbounded reachability: %.10g\n", tmp);
+			}
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -518,8 +523,13 @@ int main(int argc, char* argv[]) {
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
 			printf("\nCompute minimal unbounded reachability, please wait.\n");	
-			tmp = compute_unbounded_reachability(ma,false);	
-			printf("Minimal unbounded reachability: %.10g\n", tmp);
+			if(!is_val){
+				tmp = compute_unbounded_reachability(ma,false);
+				printf("Minimal unbounded reachability: %.10g\n", tmp);
+			}else {
+				tmp=unbounded_value_iteration(ma,false);
+				printf("Minimal unbounded reachability: %.10g\n", tmp);
+			}
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;

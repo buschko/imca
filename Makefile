@@ -61,7 +61,7 @@ SOPLEXSRC	= /Users/guckd/lib/soplex-1.7.0
 SOPLEXLIB	= $(SOPLEXSRC)/lib/libsoplex.a
 SOPLEXINCLUDE	= $(SOPLEXSRC)/src
 SOPLEXLINK	= $(SOPLEXSRC)/lib/libsoplex.a
-SOPLEX		= false
+SOPLEX		= true
 SOPLEXVAR	= __SOPLEX__
 
 #-----------------------------------------------------------------------------

@@ -23,6 +23,7 @@
 */
 
 #include "sccs.h"
+#include "sccs2.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -250,6 +251,7 @@ static void strongconnect_strong(SparseMatrix *ma, unsigned long v, vector<long>
 			}
 		}
 	}
+	
 	
 	if(bad_choice) {
 		bad[v]=true;
@@ -595,6 +597,11 @@ bool* compute_locks_strong(SparseMatrix *ma, bool* bad) {
 		bad_dist[i]=false;
 	}
 	
+	
+	//unsigned long scc_nr=1;
+	//compute_SCC_decomposition_tarjan(ma, lock_states, bad, bad_dist, scc_nr);
+	
+	
 	i = 0;
 	bool new_bad=false;
 	dbg_printf("SCC strong computation start.\n");
@@ -603,12 +610,17 @@ bool* compute_locks_strong(SparseMatrix *ma, bool* bad) {
 	while(idx < ma->n) {
 		if(index[idx]<0 && !bad[idx]) {
 			strongconnect_strong(ma, idx, index, lowlink, i, scc_nr, stack, bad, lock_states, nr_states, new_bad, bad_dist);
-			if(!new_bad)
+			//function_strongconnect(ma,v,lock_states,stack,);
+			//dbg_printf("check.\n");
+			if(!new_bad){
 				new_bad=check_if_bad(ma,lock_states,scc_nr,bad_dist);
+			}
 		}
 		idx++;
+		//dbg_printf("idx: %d.\n",idx);
 		if(new_bad)
 		{
+			dbg_printf("new.\n");
 			index=indextmp;
 			lowlink=lowlinktmp;
 			stack=stacktmp;

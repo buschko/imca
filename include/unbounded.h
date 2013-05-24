@@ -45,5 +45,7 @@ using namespace soplex;
 */
 extern Real compute_unbounded_reachability(SparseMatrix*, bool);
 
+extern Real unbounded_value_iteration(SparseMatrix*, bool);
+
 
 #endif

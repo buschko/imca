@@ -27,5 +27,7 @@ extern SparseMatrixMEC* mEC_decomposition_previous_algorithm(SparseMatrix*);
 
 extern SparseMatrixMEC* mEC_decomposition_previous_algorithm_without_attractor(SparseMatrix*, vector<unsigned long>&);
 
+extern void compute_SCC_decomposition_tarjan(SparseMatrix *ma, vector<unsigned long>& scc_states, bool* bad_states, bool* bad_transitions, unsigned long& scc_nr);
+
 #endif	/* SCCS2_H */
 

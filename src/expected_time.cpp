@@ -293,11 +293,16 @@ Real expected_time_value_iteration(SparseMatrix* ma, bool max) {
 		}
 	}
 	
-	bool *locks;
+	bool *locks=(bool *)malloc(ma->n * sizeof(bool));
+	/*
 	if(max) {
 		locks=compute_locks_weak(ma);
 	} else {
 		locks=compute_locks_strong(ma);
+	}*/
+	
+	for(unsigned long i=0; i<ma->n; i++) {
+		locks[i]=false;
 	}
 	
 	cout << "start value iteration" << endl;
