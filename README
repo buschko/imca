@@ -93,7 +93,13 @@ If you want to use Soplex you have to follow those two steps:
    
 2. compile IMCA as follows:
 
-   make SOPLEX=true
+   make
+   
+3. if you don't have Soplex use
+	
+   make SOPLEX=false
+   
+   NOTE: not functional at the moment without Soplex!
 
 -------------------------------------------------------------------------------
                     4. bcg2imca information
