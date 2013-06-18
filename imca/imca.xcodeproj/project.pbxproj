@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		B944F0AF17705D5800209BC2 /* expected_reward.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = expected_reward.h; sourceTree = "<group>"; };
+		B944F0B017705DC600209BC2 /* expected_reward.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = expected_reward.cpp; sourceTree = "<group>"; };
 		B96D6ACD1664FDDC00B9A9BE /* .kdev_include_paths */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .kdev_include_paths; sourceTree = "<group>"; };
 		B96D6ACE1664FDDC00B9A9BE /* bcg2imca.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bcg2imca.c; sourceTree = "<group>"; };
 		B96D6ACF1664FDDC00B9A9BE /* bounded.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bounded.cpp; sourceTree = "<group>"; };
@@ -57,6 +59,7 @@
 				B96D6ACF1664FDDC00B9A9BE /* bounded.cpp */,
 				B96D6AD01664FDDC00B9A9BE /* debug.cpp */,
 				B96D6AD11664FDDC00B9A9BE /* expected_time.cpp */,
+				B944F0B017705DC600209BC2 /* expected_reward.cpp */,
 				B96D6AD21664FDDC00B9A9BE /* long_run_average.cpp */,
 				B96D6AD31664FDDC00B9A9BE /* main.cpp */,
 				B96D6AD41664FDDC00B9A9BE /* read_file.cpp */,
@@ -77,6 +80,7 @@
 				B96D6ADB1664FDE200B9A9BE /* bounded.h */,
 				B96D6ADC1664FDE200B9A9BE /* debug.h */,
 				B96D6ADD1664FDE200B9A9BE /* expected_time.h */,
+				B944F0AF17705D5800209BC2 /* expected_reward.h */,
 				B96D6ADE1664FDE200B9A9BE /* long_run_average.h */,
 				B96D6ADF1664FDE200B9A9BE /* read_file.h */,
 				B96D6AE01664FDE200B9A9BE /* read_file_imc.h */,

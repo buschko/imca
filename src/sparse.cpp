@@ -2,6 +2,7 @@
 * IMCA is a analyzing tool for unbounded reachability probabilities, expected-
 * time, and long-run averages for Interactive Markov Chains and Markov Automata.
 * Copyright (C) RWTH Aachen, 2012
+*				UTwente, 2013
 * 	Author: Dennis Guck
 *
 * This program is free software: you can redistribute it and/or modify
@@ -51,6 +52,7 @@ SparseMatrix *SparseMatrix_new(unsigned long num_states, map<string,unsigned lon
 	model->initials = initials;
 	model->goals = goals;
 	model->isPS = isPS;
+	model->rewards = NULL;
 	model->non_zeros = NULL;
 	model->exit_rates = NULL;
 	model->row_counts = (unsigned char *) row_starts;
@@ -110,6 +112,7 @@ SparseMatrix *SparseMatrixDiscrete_new(SparseMatrix *ma)
 	model->row_counts = (unsigned char *) row_starts;
 	model->rate_counts = (unsigned char *) rate_starts;
 	model->choice_counts = (unsigned char *) choice_starts;
+	model->rewards = NULL;
 	
 	// values to assign
 	initials = (bool *) model->initials;
@@ -218,6 +221,10 @@ void SparseMatrix_free(SparseMatrix *sparse) {
 	if (sparse->non_zeros != NULL) {
 		dbg_printf("free non zeros\n");
 		free(sparse->non_zeros);
+	}
+	if (sparse->rewards != NULL) {
+		dbg_printf("free rewards\n");
+		free(sparse->rewards);
 	}
 	if (sparse->exit_rates != NULL) {
 		dbg_printf("free exit rates\n");

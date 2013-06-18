@@ -1,12 +1,35 @@
 /**
- * New version of the sccs.cpp for an QMA project: Improving MEC Decomposition
- * in the IMCA tool. This class contains a the old, and the two new MEC Decomposition
- * algorithms as proposed in a paper by Chatterjee and Henzinger: Faster and Dynamic
- * Algorithms For Maximal End-Component Decomposition And Related Graph Problems In
- * Probabilistic Verfication.
- * 
- * Author: Daan van Beek (s0167789)
- */
+* IMCA is a analyzing tool for unbounded reachability probabilities, expected-
+* time, and long-run averages for Interactive Markov Chains and Markov Automata.
+* Copyright (C) RWTH Aachen, 2012
+*				UTwente, 2013
+* 	Author: Dennis Guck
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+* 
+* @file scc2.cpp
+* @author Daan van Beek (s0167789)
+* @version 1.0
+
+* New version of the sccs.cpp for an QMA project: Improving MEC Decomposition
+* in the IMCA tool. This class contains a the old, and the two new MEC Decomposition
+* algorithms as proposed in a paper by Chatterjee and Henzinger: Faster and Dynamic
+* Algorithms For Maximal End-Component Decomposition And Related Graph Problems In
+* Probabilistic Verfication.
+*
+*/
+
 #include "sccs2.h"
 #include "sccs.h"
 
