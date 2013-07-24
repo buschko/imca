@@ -603,7 +603,6 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 					reward=0;
 					sscanf(s, "%s%s%lf", src, act, &reward);
 					rewards[reward_index] = reward;
-					cout << reward << endl;
 					reward_index++;
 				}else {
 					sscanf(s, "%s%s", src, act);
