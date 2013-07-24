@@ -471,12 +471,14 @@ Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC 
 	}
 	//printf("no init\n");
 	
+	
 	bool *locks;
 	if(max) {
 		locks=compute_locks_strong(ma,bad);
 	} else {
 		locks=compute_locks_weak(ma,bad);
 	}
+	
 	
 	/* first step: build the lp model */
 	dbg_printf("make obj fct\n");
@@ -908,6 +910,7 @@ Real compute_long_run_average(SparseMatrix *ma, bool max) {
 		unsigned long mec_end = row_starts[mec_nr + 1];
 		for(unsigned long state_nr=mec_start; state_nr < mec_end; state_nr++) {
 			mec[cols[state_nr]]=true;
+			//printf("%s\n",(ma->states_nr.find(cols[state_nr])->second).c_str());
 		}
 		SoPlex lp_model;
 		/* first step: build the lp model */

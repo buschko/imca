@@ -44,7 +44,7 @@ SparseMatrix *SparseMatrix_new(unsigned long num_states, map<string,unsigned lon
 	bool * isPS = (bool *) malloc(num_states * sizeof(bool));
 	SparseMatrix *model = (SparseMatrix*)malloc(sizeof(SparseMatrix));
 	model->n = num_states;
-	cout << "" ;
+	cout << "" ; // This line currently prevents a segmentation fault under OSX. Do not delete it! TODO: fix this.
     model->states = states;
 	model->states_nr = states_nr;
     //model->states.insert(states.begin(),states.end());
@@ -153,7 +153,9 @@ SparseMatrix *SparseMatrixDiscrete_new(SparseMatrix *ma)
 	unsigned long num_non_zeros = ma->non_zero_n + num_ms;
 	Real * non_zeros = (Real *) malloc(num_non_zeros * sizeof(Real));
 	unsigned long * cols = (unsigned long *) malloc(num_non_zeros * sizeof(unsigned long));
+	Real * rewards = (Real *) malloc(num_choices * sizeof(Real));
 	model->non_zeros = non_zeros;
+	model->rewards = rewards;
 	model->cols = cols;
 	model->non_zero_n = num_non_zeros;
 	choice_starts = (unsigned long *) model->choice_counts;

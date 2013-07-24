@@ -61,6 +61,7 @@
 #include "sccs2.h"
 #include "long_run_average.h"
 #include "bounded.h"
+#include "bounded_reward.h"
 
 #ifndef __APPLE__
 #include <time.h>
@@ -80,6 +81,7 @@ double begin, end;
 #define UNBOUND_STR "-ub"
 #define EXP_TIME_STR "-et"
 #define EXP_REWARD_STR "-er"
+#define TIME_REWARD_STR "-tr"
 #define LONG_RUN_AVERAGE_STR "-lra"
 #define TIME_BOUNDED_STR "-tb"
 #define MIN_MODE_STR "-min"
@@ -121,6 +123,7 @@ static bool is_unbound_present = false;
 static bool is_expected_time_present = false;
 static bool is_expected_reward_present = false;
 static bool is_time_bounded_present = false;
+static bool is_time_reward_present = false;
 static bool is_lra_present = false;
 static bool is_interval_present = false;
 static bool is_interval_start_present = false;
@@ -222,7 +225,7 @@ static void checkComputation(){
 		exit(EXIT_FAILURE);
       
 	}
-	if(!is_expected_time_present && !is_unbound_present && !is_lra_present && !is_time_bounded_present){
+	if(!is_expected_time_present && !is_unbound_present && !is_lra_present && !is_time_bounded_present && !is_expected_reward_present && !is_time_reward_present){
 		printf("ERROR: No computation type was set.\n");
 		print_usage();
 		exit(EXIT_FAILURE);
@@ -232,15 +235,15 @@ static void checkComputation(){
 		print_usage();
 		exit(EXIT_FAILURE);
 	}
-	if( is_time_bounded_present && !is_lower_bound_present && !is_upper_bound_present) {
+	if( (is_time_bounded_present || is_time_reward_present) && !is_lower_bound_present && !is_upper_bound_present) {
 		printf("ERROR: To compute time bounded reachability, for time interval an upper bound (with '--to' or '-T') and optionally a lower bound (with '--from' or '-F' and default value of 0) are required.\n");
 		print_usage();
 		exit(EXIT_FAILURE);
 	}
-	if( is_time_bounded_present && !is_lower_bound_present && is_upper_bound_present) {
+	if( (is_time_bounded_present || is_time_reward_present) && !is_lower_bound_present && is_upper_bound_present) {
 		printf("WARNING: No lower bound for time interval specified. The default value is %f.\n",ta);
 	}
-	if( is_time_bounded_present && !is_error_bound_present ) {
+	if( (is_time_bounded_present || is_time_reward_present) && !is_error_bound_present ) {
 		printf("WARNING: No error bound specified. The default value is %f.\n", epsilon);
 	}
 }
@@ -298,6 +301,12 @@ static void parseParams(int argc, char *argv[]) {
 		} else if( strcmp(argv[i], TIME_BOUNDED_STR) == 0 ){
 			if( !is_time_bounded_present ){
 				is_time_bounded_present = true;
+			}else{
+				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
+			}
+		} else if( strcmp(argv[i], TIME_REWARD_STR) == 0 ){
+			if( !is_time_reward_present ){
+				is_time_reward_present = true;
 			}else{
 				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
 			}
@@ -675,6 +684,49 @@ int main(int argc, char* argv[]) {
 				printf("Minimal time-bounded reachability probability: %.10g\n", tmp);
 			else
 				printf("tb=%.5g Maximal time-bounded reachability probability: %.10g\n", tb,tmp);
+			#ifndef __APPLE__
+			clock_gettime(CLOCK_REALTIME, &tp);
+			end = 1e9*tp.tv_sec + tp.tv_nsec;
+			printf("Computation Time: %f seconds\n", (end-begin)*1e-9);
+			#else
+			printf("Computation Time: ??? seconds\n");
+			#endif
+		}
+	}
+	if(is_time_reward_present && is_mrm_present){
+		if(interval == 0){
+			interval=tb;
+		}
+		if(is_max_present){
+			#ifndef __APPLE__
+			clock_gettime(CLOCK_REALTIME, &tp);
+			begin = 1e9*tp.tv_sec + tp.tv_nsec;
+			#endif
+			printf("\nCompute maximal time-bounded reward reachability inside interval [%g,%g] with precision %g, please wait.\n", ta, tb, epsilon);
+			tmp=compute_time_bounded_reward_reachability(ma,true,epsilon,ta,tb,is_imc,interval,interval_start);
+			if(interval==tb)
+				printf("Maximal time-bounded reward reachability probability: %.10g\n", tmp);
+			else
+				printf("tb=%.5g Maximal time-bounded reward reachability probability: %.10g\n", tb,tmp);
+			#ifndef __APPLE__
+			clock_gettime(CLOCK_REALTIME, &tp);
+			end = 1e9*tp.tv_sec + tp.tv_nsec;
+			printf("Computation Time: %f seconds\n", (end-begin)*1e-9);
+			#else
+			printf("Computation Time: ??? seconds\n");
+			#endif
+		}
+		if(is_min_present){
+			#ifndef __APPLE__
+			clock_gettime(CLOCK_REALTIME, &tp);
+			begin = 1e9*tp.tv_sec + tp.tv_nsec;
+			#endif
+			printf("\nCompute minimal time-bounded reward reachability inside interval [%g,%g] with precision %g, please wait.\n", ta, tb, epsilon);
+			tmp=compute_time_bounded_reward_reachability(ma,false,epsilon,ta,tb,is_imc,interval,interval_start);
+			if(interval==tb)
+				printf("Minimal time-bounded reward reachability probability: %.10g\n", tmp);
+			else
+				printf("tb=%.5g Maximal time-bounded reward reachability probability: %.10g\n", tb,tmp);
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
