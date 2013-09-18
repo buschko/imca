@@ -2,6 +2,7 @@
 * IMCA is a analyzing tool for unbounded reachability probabilities, expected-
 * time, and long-run averages for Interactive Markov Chains and Markov Automata.
 * Copyright (C) RWTH Aachen, 2012
+*				UTwente, 2013
 * 	Author: Dennis Guck
 *
 * This program is free software: you can redistribute it and/or modify
@@ -339,7 +340,7 @@ static void init_states(unsigned long *line_no, bool *error, FILE *p, const char
 * @param p MA file
 * @param model MA for which allocations will be done
 */
-static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE *p, const char *filename, SparseMatrix *model, vector<unsigned long> deadlocks) {
+static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE *p, const char *filename, SparseMatrix *model, vector<unsigned long> deadlocks, bool mrm) {
 	char s[MAX_LINE_LENGTH];
 	char src[MAX_LINE_LENGTH];
 	char dst[MAX_LINE_LENGTH];
@@ -426,8 +427,9 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 					}	
 					
 					/* probabilistic transitions are choosen before markovian transitions */
-					if((isPS[from] && !is_ms) || (!isPS[from] && is_ms))
+					if((isPS[from] && !is_ms) || (!isPS[from] && is_ms)){
 						num_choice++;
+					}
 					
 					last_from = from;
 				}	
@@ -503,6 +505,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 	if (!*error) {
 		unsigned long * choice_starts = (unsigned long *) calloc((size_t) (num_choice + 1), sizeof(unsigned long));
 		Real * non_zeros = (Real *) malloc(num_non_zeros * sizeof(Real));
+		Real * rewards = (Real *) malloc(num_choice * sizeof(Real));
 		unsigned long * cols = (unsigned long *) malloc(num_non_zeros * sizeof(unsigned long));
 		model->choice_counts = (unsigned char *) choice_starts;
 		model->non_zeros = non_zeros;
@@ -510,6 +513,8 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 		model->choices_n = num_choice;
 		model->non_zero_n = num_non_zeros;
 		model->max_exit_rate=max_exit_rate;
+		if(mrm)
+			model->rewards=rewards;
 	}
 }
 
@@ -522,10 +527,11 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 * @param filename of MA file
 * @param ma the transitions shall be added
 */
-static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const char *filename, SparseMatrix *ma, vector<unsigned long> deadlocks) {
+static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const char *filename, SparseMatrix *ma, vector<unsigned long> deadlocks,bool mrm) {
 	unsigned long choice_index = 0;
 	unsigned long choice_size = 0;
 	unsigned long nz_index = 0;
+	unsigned long reward_index = 0;
 	char src[MAX_LINE_LENGTH];
 	unsigned long from;
 	unsigned long last_from = 0;
@@ -535,12 +541,14 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 	char act[MAX_LINE_LENGTH];
 	bool bad=false;
 	unsigned long last_to = -1;
+	Real reward;
 	
 	Real tmp = 0;
 	unsigned int old_index;
 
 	if (!*error) {
 		Real *non_zeros = ma->non_zeros;
+		Real *rewards = ma->rewards;
 		unsigned long *cols = ma->cols;
 		unsigned long *choice_starts = (unsigned long *) ma->choice_counts;
 		unsigned long *row_starts = (unsigned long *) ma->row_counts;
@@ -590,7 +598,15 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 			} else {
 				last_to = -1;
 				/* just read a line "state act" */
-				sscanf(s, "%s%s", src, act);
+				// if mrm we also read in the reward
+				if(mrm){
+					reward=0;
+					sscanf(s, "%s%s%lf", src, act, &reward);
+					rewards[reward_index] = reward;
+					reward_index++;
+				}else {
+					sscanf(s, "%s%s", src, act);
+				}
 				from=states.find(src)->second;
 				/* probabilistic transitions are choosen before markovian transitions */
 				if(strcmp(act,MARKOV_ACTION) == 0 && isPS[from])
@@ -657,9 +673,10 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 	
 }
 
-void print_model(SparseMatrix *ma)
+void print_model(SparseMatrix *ma, bool mrm)
 {
 	unsigned long i;
+	unsigned long tau=1;
 	unsigned long state_nr;
 	unsigned long choice_nr;
 	map<unsigned long,string> states_nr = ma->states_nr;
@@ -667,6 +684,7 @@ void print_model(SparseMatrix *ma)
 	unsigned long *rate_starts = (unsigned long *) ma->rate_counts;
 	unsigned long *choice_starts = (unsigned long *) ma->choice_counts;
 	Real *non_zeros = ma->non_zeros;
+	Real *rewards = ma->rewards;
 	Real *exit_rates = ma->exit_rates;
 	unsigned long *cols = ma->cols;
 	Real prob;
@@ -683,6 +701,11 @@ void print_model(SparseMatrix *ma)
 			unsigned long i_start = choice_starts[choice_nr];
 			unsigned long i_end = choice_starts[choice_nr + 1];
 			dbg_printf("choice_starts: %li choice_ends: %li\n",i_start,i_end);
+			printf("choice %d\n",tau);
+			if(mrm){
+				printf("reward: %lg\n",rewards[choice_nr]);
+			}
+			tau++;
 			for (i = i_start; i < i_end; i++) {
 				prob=non_zeros[i];
 				unsigned long r_start = rate_starts[state_nr];
@@ -694,10 +717,11 @@ void print_model(SparseMatrix *ma)
 				printf("%s - %lg -> %s\n",(states_nr.find(state_nr)->second).c_str(),prob,(states_nr.find(cols[i])->second).c_str());
 			}
 		}
+		tau=1;
 		unsigned long i_start = rate_starts[state_nr];
 		unsigned long i_end = rate_starts[state_nr + 1];
 		for (i = i_start; i < i_end; i++) {
-			printf("ExitRate(%s): %lf\n",(states_nr.find(state_nr)->second).c_str(),exit_rates[i]);
+			printf("ExitRate(%s): %lg\n",(states_nr.find(state_nr)->second).c_str(),exit_rates[i]);
 		}
 		if(initials[state_nr])
 			printf("initial state %s\n",(states_nr.find(state_nr)->second).c_str());
@@ -775,7 +799,7 @@ void print_lp_info(SoPlex lp_model) {
 * @param filename file to read MA from
 * @return MA read from file
 */
-SparseMatrix *read_MA_SparseMatrix_file(const char *filename)
+SparseMatrix *read_MA_SparseMatrix_file(const char *filename, bool mrm)
 {
 	bool error = false;
 	unsigned long line_no;
@@ -842,7 +866,7 @@ SparseMatrix *read_MA_SparseMatrix_file(const char *filename)
 	line_no = 1;
 	
 	if (!error) {
-		reserve_transition_memory(&line_no, &error, p, filename, model, deadlocks);
+		reserve_transition_memory(&line_no, &error, p, filename, model, deadlocks, mrm);
 	}
 	
 	if (!error) {
@@ -850,22 +874,22 @@ SparseMatrix *read_MA_SparseMatrix_file(const char *filename)
 	}
 	//cout << "fourth pass" << endl;
 	/* fourth pass on file: save transitions */
-	read_transitions(&line_no, &error, p, filename, model, deadlocks);
+	read_transitions(&line_no, &error, p, filename, model, deadlocks,mrm);
     
 	if (p != NULL) {
 		fclose(p);
 	}
     
 	if (error) {
-		/* free the halfly-complete MDP structure if an error has occured */
+		/* free the halfly-complete MA structure if an error has occured */
 		SparseMatrix_free(model);
 		model = NULL;
 	}else{
-		//print_model(model);
+		//print_model(model,mrm);
 		print_model_info(model);
 	}
 	
-	//print_model(model);
+	//print_model(model,mrm);
 	
 	return model;
 }

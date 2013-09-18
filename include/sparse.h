@@ -2,6 +2,7 @@
 * IMCA is a analyzing tool for unbounded reachability probabilities, expected-
 * time, and long-run averages for Interactive Markov Chains and Markov Automata.
 * Copyright (C) RWTH Aachen, 2012
+*				UTwente, 2013
 * 	Author: Dennis Guck
 *
 * This program is free software: you can redistribute it and/or modify
@@ -64,6 +65,7 @@ struct SparseMatrix
 	
 	Real *non_zeros;			/* transition probabilities */
 	Real *exit_rates;			/* exit rates for Markovian states */
+	Real *rewards;			/* rewards for Markovian states and probabilistic transitions */
 	Real max_exit_rate;			/* max exit rate */
 	unsigned long *cols;			/* successors */
 	unsigned char *row_counts;		/* pointer to state */

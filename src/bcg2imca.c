@@ -1,11 +1,35 @@
-/*
- * Original Example from http://www.inrialpes.fr/vasy/cadp/man/bcg_read.html, from Hubert Garavel. 
- * Changed version of Silvio De Carolis for his Masterthesis "Zuverlaessigkeitsanalyse auf dynamischen Fehlerbaeumen" at the chair of computer science 2 RWTH-Aachen
- * Original comments in english, Silvio De Carolis comments in german.
- * Extended by Dennis Guck for use in dftcalc -> CADP -> IMCA Tool-chain
- * Extended by Axel Belinfante to collect markovian and non-markovian edges seprately,
- *     using dstring, based on make_message example from Linux man page printf(3) 
- */
+/**
+* IMCA is a analyzing tool for unbounded reachability probabilities, expected-
+* time, and long-run averages for Interactive Markov Chains and Markov Automata.
+* Copyright (C) RWTH Aachen, 2012
+*				UTwente, 2013
+* 	Author: Dennis Guck
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+* 
+* @file bcg2imca.cpp
+* @brief Transform CADP .bcg file to IMCA .ma format
+* @author Dennis Guck
+* @version 1.0
+*
+* Original Example from http://www.inrialpes.fr/vasy/cadp/man/bcg_read.html, from Hubert Garavel.
+* Changed version of Silvio De Carolis for his Masterthesis "Zuverlaessigkeitsanalyse auf dynamischen Fehlerbaeumen" at the chair of computer science 2 RWTH-Aachen
+* Original comments in english, Silvio De Carolis comments in german.
+* Extended by Dennis Guck for use in dftcalc -> CADP -> IMCA Tool-chain
+* Extended by Axel Belinfante to collect markovian and non-markovian edges seprately,
+*     using dstring, based on make_message example from Linux man page printf(3)
+*/
 
 #include "bcg_user.h"
 #include "bcg_transition.h"

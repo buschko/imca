@@ -18,36 +18,23 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 * 
-* @file bcg2imca.cpp
-* @brief Transform CADP .bcg file to IMCA .ma format
-* @author Dennis Guck
+* 
+* @file bounded_reward.cpp
+* @brief Compute the time-bounded reachability for an MA
+* @author Dennis Guck, Hassan Hatefi
 * @version 1.0
 *
-* Original code from http://www.inrialpes.fr/vasy/cadp/man/bcg_read.html, from Hubert Garavel. 
-* Changed version of Silvio De Carolis for his Masterthesis "Zuverlaessigkeitsanalyse auf dynamischen Fehlerbaeumen" at the chair of computer science 2 at RWTH-Aachen.
-* Original comments in english, Silvio De Carolis comments in german.
-* Extended by Dennis Guck for use in dftcalc -> CADP -> IMCA tool-chain.
-* 
 */
 
-#ifndef __BCG_TO_IMCA
-#define __BCG_TO_IMCA
-#ifdef __cplusplus
-	extern "C" {
-#endif 
-#include "stdio.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "bcg_user.h"
 
+#ifndef BOUNDED_REWARD_H
+#define BOUNDED_REWARD_H
 
+#include "sparse.h"
+#include "soplex.h"
 
-void bcg2imca (char* fname);
+using namespace soplex;
 
+extern Real compute_time_bounded_reward_reachability(SparseMatrix* ma, bool max, Real epsilon, Real ta, Real tb, bool is_imc, Real interval,Real interval_start);
 
-#ifdef __cplusplus
-	}
-#endif 
-
-#endif // __BCG_TO_IMCA
+#endif

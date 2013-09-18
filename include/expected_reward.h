@@ -17,37 +17,34 @@
 *
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*
 * 
-* @file bcg2imca.cpp
-* @brief Transform CADP .bcg file to IMCA .ma format
+* @file expected_reward.cpp
+* @brief Compute the expected time for an MA
 * @author Dennis Guck
 * @version 1.0
 *
-* Original code from http://www.inrialpes.fr/vasy/cadp/man/bcg_read.html, from Hubert Garavel. 
-* Changed version of Silvio De Carolis for his Masterthesis "Zuverlaessigkeitsanalyse auf dynamischen Fehlerbaeumen" at the chair of computer science 2 at RWTH-Aachen.
-* Original comments in english, Silvio De Carolis comments in german.
-* Extended by Dennis Guck for use in dftcalc -> CADP -> IMCA tool-chain.
-* 
 */
 
-#ifndef __BCG_TO_IMCA
-#define __BCG_TO_IMCA
-#ifdef __cplusplus
-	extern "C" {
-#endif 
-#include "stdio.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "bcg_user.h"
+#ifndef EXPECTED_REWARD_H
+#define EXPECTED_REWARD_H
+
+#include "sparse.h"
+
+#ifdef __SOPLEX__
+#include "soplex.h"
+#endif
+
+using namespace soplex;
+
+/**
+* Computes expected reward for MA with rewards.
+*
+* @param ma file to read MA from
+* @param max identifier for min or max
+* @return expected reward 
+*/
+extern Real expected_reward_value_iteration(SparseMatrix*, bool);
 
 
-
-void bcg2imca (char* fname);
-
-
-#ifdef __cplusplus
-	}
-#endif 
-
-#endif // __BCG_TO_IMCA
+#endif

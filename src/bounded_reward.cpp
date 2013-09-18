@@ -24,7 +24,7 @@
 */
 
 
-#include "bounded.h"
+#include "bounded_reward.h"
 #include "read_file.h"
 #include "debug.h"
 #include "sccs.h"
@@ -38,7 +38,7 @@
 * @param epsilon epsilon bound
 * @param tb time bound
 */
-Real compute_error_bound(SparseMatrix* ma, Real epsilon, Real tb) {
+Real compute_error_bound_reward(SparseMatrix* ma, Real epsilon, Real tb) {
 	Real tau;
 	// TODO: add lambda to read in function
 	Real lambda=ma->max_exit_rate;
@@ -53,7 +53,7 @@ Real compute_error_bound(SparseMatrix* ma, Real epsilon, Real tb) {
 * @param tau discretization factor
 * @return discretized MA
 */
-SparseMatrix* discretize_model(SparseMatrix* ma, Real tau) {
+SparseMatrix* discretize_model_reward(SparseMatrix* ma, Real tau) {
 	SparseMatrix* discrete_ma;
 	dbg_printf("memory alloc.\n");
 	discrete_ma=SparseMatrixDiscrete_new(ma);
@@ -67,6 +67,7 @@ SparseMatrix* discretize_model(SparseMatrix* ma, Real tau) {
 	//unsigned long *d_choice_starts = (unsigned long *) discrete_ma->choice_counts;
 	//unsigned long *d_row_starts = (unsigned long *) discrete_ma->row_counts;
 	Real *non_zeros = discrete_ma->non_zeros;
+	Real *rewards = discrete_ma->rewards;
 	unsigned long *cols = discrete_ma->cols;
 	unsigned long nz_index = 0;
 	//unsigned long choice_index = 0;
@@ -90,9 +91,10 @@ SparseMatrix* discretize_model(SparseMatrix* ma, Real tau) {
 				Real exit_rate = ma->exit_rates[r_start];
 				//Real tmp=Real(1)-exp(-(exit_rate*tau));
 				// precision of Real could be to small (exp_estau)
-				Real estau = -(exit_rate * tau);	
+				Real estau = -(exit_rate * tau);
 				Real exp_estau = exp(estau);
 				Real exp_estau_com = Real(1)-exp_estau;
+				rewards[choice_nr]=exp(-ma->rewards[choice_nr]*tau);
 				bool loop=false;
 				for (unsigned long i = i_start; i < i_end; i++) {
 					Real prob = ma->non_zeros[i]/exit_rate;
@@ -136,11 +138,12 @@ SparseMatrix* discretize_model(SparseMatrix* ma, Real tau) {
 * @param u result vector
 * @param is_MA_made_absorbing: if true then all goal states are made absorbing, otherwise not
 */
-void compute_markovian_vector(SparseMatrix* ma, vector<Real>& v, const vector<Real> &u, bool is_MA_made_absorbing){
+void compute_markovian_vector_with_reward(SparseMatrix* ma, vector<Real>& v, const vector<Real> &u, bool is_MA_made_absorbing){
 	unsigned long *row_starts = (unsigned long *) ma->row_counts;
 	unsigned long *choice_starts = (unsigned long *) ma->choice_counts;
 	unsigned long *cols = ma->cols;
 	Real* non_zeros = ma->non_zeros;
+	Real* rewards = ma->rewards;
 	bool *goals = ma->goals;
 	for (unsigned long state_nr = 0; state_nr < ma->n; state_nr++) {
 		unsigned long state_start = row_starts[state_nr];
@@ -156,8 +159,9 @@ void compute_markovian_vector(SparseMatrix* ma, vector<Real>& v, const vector<Re
 					unsigned long i_start = choice_starts[choice_nr];
 					unsigned long i_end = choice_starts[choice_nr + 1];
 					v[state_nr]=0;
+					v[state_nr] += rewards[choice_nr];
 					for (unsigned long i = i_start; i < i_end; i++) {
-						v[state_nr] += non_zeros[i] * u[cols[i]];
+						v[state_nr] +=  non_zeros[i] * u[cols[i]];
 					}
 				}
 			}else {
@@ -165,122 +169,6 @@ void compute_markovian_vector(SparseMatrix* ma, vector<Real>& v, const vector<Re
 			}
 		}
 	}
-}
-
-/**
-* computes one step for Interactive states
-*
-* @param ma the MA
-* @param v Markovian vector
-* @param u result vector
-* @param max maximum/minimum
-* @param locks Lock set for states never reach a goal state
-* @param reach reachability for interactive states
-*/
-void compute_interactive_vector(SparseMatrix* ma, vector<Real> v, vector<Real>& u, bool max, bool* locks, vector< vector<unsigned long> > reach) {
-	bool *goals = ma->goals;
-	vector<unsigned long>::const_iterator r;
-	for (unsigned long state_nr = 0; state_nr < ma->n; state_nr++) {
-		if(locks[state_nr]){
-			u[state_nr] = 0;
-		}else if (goals[state_nr]){
-			u[state_nr] = 1;
-		}else{
-			if(max) {
-				u[state_nr]=0;
-				for(r=reach[state_nr].begin(); r<reach[state_nr].end(); r++) {
-					if(u[state_nr] < v[(*r)]){
-						u[state_nr] = v[(*r)];
-					}
-				}
-			}else {
-				u[state_nr]=1;
-				for(r=reach[state_nr].begin(); r<reach[state_nr].end(); r++) {
-					if(u[state_nr] > v[(*r)]){
-						u[state_nr] = v[(*r)];
-					}
-				}
-			}
-		}
-	}
-}
-
-/**
-* computes reachability for interactive states
-*
-* @param ma the MA
-* @param state_nr the actual state
-* @param visited states visited before
-*/
-void interactiveReachability(SparseMatrix* ma, const unsigned long state_nr, vector<unsigned long>& visited) {
-	unsigned long dst;
-	visited[state_nr]=1;
-	
-	unsigned long *row_starts = (unsigned long *) ma->row_counts;
-	unsigned long *choice_starts = (unsigned long *) ma->choice_counts;
-	unsigned long *cols = ma->cols;
-	bool *goals = ma->goals;
-	unsigned long state_start = row_starts[state_nr];
-	unsigned long state_end = row_starts[state_nr + 1];
-	
-	if(!goals[state_nr]){
-		if(ma->isPS[state_nr])
-		{
-			for (unsigned long choice_nr = state_start; choice_nr < state_end; choice_nr++) {
-				// Add up all outgoing rates of the distribution
-				unsigned long i_start = choice_starts[choice_nr];
-				unsigned long i_end = choice_starts[choice_nr + 1];
-				for (unsigned long i = i_start; i < i_end; i++) {
-					dst=cols[i];
-					if(visited[dst]==0) {
-						interactiveReachability(ma,dst,visited);
-					}
-				}
-			}
-		}
-	}
-}
-
-/**
-* computes reachability for interactive states
-*
-* @param ma the MA
-* @param state_nr the actual state
-*/
-vector<unsigned long> interactiveReachability(SparseMatrix* ma, const unsigned long state) {
-	vector<unsigned long> visited(ma->n);
-	vector<unsigned long> goals;
-	unsigned long x;
-	for(x=0; x < ma->n; x++) {
-		visited[x]=0;
-	}
-	interactiveReachability(ma,state, visited);
-	for(x=0; x < ma->n; x++) {
-		if(visited[x]==1) {
-		goals.push_back(x);
-		}
-	}
-	return goals;
-}
-
-/**
-* computes reachability for interactive states
-*
-* @param ma the MA
-*/
-vector< vector<unsigned long> > interactiveReachability(SparseMatrix* ma) {
-	vector< vector<unsigned long> > r;
-	vector<unsigned long> reachSucc;
-	unsigned long s_idx;
-	unsigned long statecount = ma->n;
-	
-	for (s_idx = 0; s_idx < statecount; s_idx++) {
-		reachSucc.clear();
-		reachSucc=interactiveReachability(ma,s_idx);
-		r.push_back(reachSucc);
-	}
-	
-	return r;
 }
 
 /**
@@ -292,7 +180,7 @@ vector< vector<unsigned long> > interactiveReachability(SparseMatrix* ma) {
 * @param max maximum/minimum
 * @param is_MA_made_absorbing: if true then all goal states are made absorbing, otherwise not
 */
-void compute_probabilistic_vector(SparseMatrix* ma, vector<Real>& v, vector<Real>& u, bool max, bool is_MA_made_absorbing){
+void compute_probabilistic_vector_with_reward(SparseMatrix* ma, vector<Real>& v, vector<Real>& u, bool max, bool is_MA_made_absorbing){
 
 	const Real precision = 1e-7;
 	unsigned long statecount = ma-> n;
@@ -300,6 +188,7 @@ void compute_probabilistic_vector(SparseMatrix* ma, vector<Real>& v, vector<Real
 	unsigned long *choice_starts = (unsigned long *) ma->choice_counts;
 	unsigned long *cols = ma->cols;
 	Real* non_zeros = ma->non_zeros;
+	Real* rewards = ma->rewards;
 
 	// Initialization
 	for (unsigned long s_idx = 0; s_idx < statecount; s_idx++) {
@@ -329,6 +218,8 @@ void compute_probabilistic_vector(SparseMatrix* ma, vector<Real>& v, vector<Real
 				// find the max/min prob. to reach Markovians and store it to tmp
 				for (unsigned long choice_nr = state_start; choice_nr < state_end; choice_nr++) {
 					Real tmp = 0;
+					// add reward
+					tmp += rewards[choice_nr];
 					// Add up all outgoing rates of the distribution
 					unsigned long i_start = choice_starts[choice_nr];
 					unsigned long i_end = choice_starts[choice_nr + 1];
@@ -373,7 +264,7 @@ void compute_probabilistic_vector(SparseMatrix* ma, vector<Real>& v, vector<Real
 * @param tb the given time bound
 * @param is_imc indicates if MA is an IMC
 */
-Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon, Real ta, Real tb, bool is_imc, Real interval,Real interval_start) {
+Real compute_time_bounded_reward_reachability(SparseMatrix* ma, bool max, Real epsilon, Real ta, Real tb, bool is_imc, Real interval,Real interval_start) {
 
 	// Check whether the given time interval is zero
 	if( ta > tb ) {
@@ -393,25 +284,12 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 	}
 	// in case MA is an IMC: precomputation of paths for interactive states
 	vector< vector<unsigned long> > reach;
-	bool *locks;
-	if(is_imc) {
-		cout << "precomputation" << endl;
-		if(max){
-			locks=compute_locks_strong(ma);
-			//{s' in S | s ~>i* s'}
-			reach = interactiveReachability(ma);
-		}else{
-			locks=compute_locks_weak(ma);
-			//{s' in PS U G | s ~>min* s'}
-			reach = interactiveReachability(ma); 
-		}
-	}
 	
 	cout << "start value iteration" << endl;
 	if( ta > 0 ) {
 		//TODO one unique function that tell you what should be tau1 and what tau2
 		// compute the upper bound of discretization step
-		Real tau = compute_error_bound(ma, epsilon,tb);
+		Real tau = compute_error_bound_reward(ma, epsilon,tb);
 
 		unsigned long steps; // stores the number of steps should be taken
 		Real current_tau;    // stores the current value of tau which is calculated to make sure the number of steps is a integral value
@@ -423,7 +301,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 
 		// discretize model with respect to the current value of tau 'current_tau'
 		dbg_printf("discretize model for interval [%g,%g] ... \n", ta, tb);
-		discrete_ma = discretize_model(ma,current_tau);
+		discrete_ma = discretize_model_reward(ma,current_tau);
 		dbg_printf("model discretized\n");
 		//print_model(discrete_ma);
 		
@@ -438,14 +316,9 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 		
 		for(unsigned long i=0; i < steps; i++){
 			// compute v for Markovian states: from b dwon to a, we make discrete model absorbing
-			compute_markovian_vector(discrete_ma,v,u, true);
+			compute_markovian_vector_with_reward(discrete_ma,v,u, true);
 			// compute u for Probabilistic states
-			if(is_imc){
-				// if MA is in fact an IMC we can simplify the computation (slower than the PA computation TODO: find bug)
-				compute_interactive_vector(discrete_ma,v,u,max,locks,reach);
-			}else {
-				compute_probabilistic_vector(discrete_ma,v,u,max, true);
-			}
+			compute_probabilistic_vector_with_reward(discrete_ma,v,u,max, true);
 			
 			/*
 			if(counter==interval_step) {
@@ -486,7 +359,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 
 		// discretize model with respect to the current value of tau 'current_tau'
 		dbg_printf("discretize model for interval [0,%g] ... \n", ta);
-		discrete_ma = discretize_model(ma,current_tau);
+		discrete_ma = discretize_model_reward(ma,current_tau);
 		dbg_printf("model discretized\n");
 		//print_model(discrete_ma);
 
@@ -494,14 +367,9 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 
 		for(unsigned long i=0; i < steps; i++){
 			// compute v for Markovian states: shift up to a, we don't make discrete model absorbing
-			compute_markovian_vector(discrete_ma,v,u, false);
+			compute_markovian_vector_with_reward(discrete_ma,v,u, false);
 			// compute u for Probabilistic states
-			if(is_imc){
-				// if MA is in fact an IMC we can simplify the computation
-				compute_interactive_vector(discrete_ma,v,u,max,locks,reach);
-			}else {
-				compute_probabilistic_vector(discrete_ma,v,u,max, false);
-			}
+			compute_probabilistic_vector_with_reward(discrete_ma,v,u,max, false);
 			
 			/*
 			if(counter==interval_step) {
@@ -540,10 +408,10 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 
 	} else { // if a == 0
 		// compute discretisation step
-		Real tau = compute_error_bound(ma, epsilon,tb);
+		Real tau = compute_error_bound_reward(ma, epsilon,tb);
 		// discretize model for the fi
 		dbg_printf("discretize model\n");
-		SparseMatrix* discrete_ma = discretize_model(ma,tau);
+		SparseMatrix* discrete_ma = discretize_model_reward(ma,tau);
 		dbg_printf("model discretized\n");
 		//print_model(discrete_ma);
 
@@ -562,14 +430,9 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 		
 		for(unsigned long i=0; i <= steps_for_interval; i++){
 			// compute v for Markovian states: from b dwon to a, we make discrete model absorbing
-			compute_markovian_vector(discrete_ma,v,u, true);
+			compute_markovian_vector_with_reward(discrete_ma,v,u, true);
 			// compute u for Probabilistic states
-			if(is_imc){
-				// if MA is in fact an IMC we can simplify the computation
-				compute_interactive_vector(discrete_ma,v,u,max,locks,reach);
-			}else {
-				compute_probabilistic_vector(discrete_ma,v,u,max, true);
-			}
+			compute_probabilistic_vector_with_reward(discrete_ma,v,u,max, true);
 			
 			if(i >= interval_start_point){
 			if((counter==interval_step || i==interval_start_point) && interval != tb) {

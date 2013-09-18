@@ -2,6 +2,7 @@
 * IMCA is a analyzing tool for unbounded reachability probabilities, expected-
 * time, and long-run averages for Interactive Markov Chains and Markov Automata.
 * Copyright (C) RWTH Aachen, 2012
+*				UTwente, 2013
 * 	Author: Dennis Guck
 *
 * This program is free software: you can redistribute it and/or modify
@@ -55,10 +56,12 @@
 #include "read_file_imc.h"
 #include "unbounded.h"
 #include "expected_time.h"
+#include "expected_reward.h"
 #include "sccs.h"
 #include "sccs2.h"
 #include "long_run_average.h"
 #include "bounded.h"
+#include "bounded_reward.h"
 
 #ifndef __APPLE__
 #include <time.h>
@@ -68,15 +71,17 @@ double begin, end;
 
 /* List of possible models */
 #define MA_MODE_STR "ma"
-#define IMC_MODE_STR "imc"
+#define MRM_MODE_STR "mrm"
 
 /* List of possible file extensions */
 #define MA_FILE_EXT ".ma"
-#define IMC_FILE_EXT ".imc"
+#define MRM_FILE_EXT ".mrm"
 
 /* This is the list of possible options */
 #define UNBOUND_STR "-ub"
 #define EXP_TIME_STR "-et"
+#define EXP_REWARD_STR "-er"
+#define TIME_REWARD_STR "-tr"
 #define LONG_RUN_AVERAGE_STR "-lra"
 #define TIME_BOUNDED_STR "-tb"
 #define MIN_MODE_STR "-min"
@@ -111,12 +116,14 @@ double begin, end;
 * Boolean flags whether certain files were loaded or not
 */
 static bool is_ma_present = false;
-static bool is_imc_present = false;
+static bool is_mrm_present = false;
 static bool is_max_present = false;
 static bool is_min_present = false;
 static bool is_unbound_present = false;
 static bool is_expected_time_present = false;
+static bool is_expected_reward_present = false;
 static bool is_time_bounded_present = false;
+static bool is_time_reward_present = false;
 static bool is_lra_present = false;
 static bool is_interval_present = false;
 static bool is_interval_start_present = false;
@@ -170,9 +177,9 @@ static void print_intro(void) {
 */
 static void print_usage(void) {
 	printf("Usage: imca <model file> <min/max> <computation> <options>\n");
-	printf("	<model file>	- could be one of {.ma, .imc}\n");
+	printf("	<model file>	- could be one of {.ma}\n");
 	printf("	<min/max>	- could be '-min' or '-max' or both\n");
-	printf("	<computation>	- could be one or more of {-ub, -et, -lra, -tb}\n");
+	printf("	<computation>	- could be one or more of {-ub, -et, -lra, -tb, -er}\n");
 	printf("	<options>	- time- and error-bound for tb (default epsilon=1e-6)  \n");
 	printf("                          '-T' for upper bound '-F' for lower bound \n");
 	printf("                          '-e' for error bound '-i' for interval output\n");
@@ -212,13 +219,13 @@ static bool isValidExtension(const char * filename, char * extension, int * ext_
 * This function checks if all required parameters are set
 */
 static void checkComputation(){
-	if(!is_ma_present && !is_imc_present) {
+	if(!is_ma_present && !is_mrm_present) {
 		printf("ERROR: No model type was set.\n");
 		print_usage();
 		exit(EXIT_FAILURE);
       
 	}
-	if(!is_expected_time_present && !is_unbound_present && !is_lra_present && !is_time_bounded_present){
+	if(!is_expected_time_present && !is_unbound_present && !is_lra_present && !is_time_bounded_present && !is_expected_reward_present && !is_time_reward_present){
 		printf("ERROR: No computation type was set.\n");
 		print_usage();
 		exit(EXIT_FAILURE);
@@ -228,15 +235,15 @@ static void checkComputation(){
 		print_usage();
 		exit(EXIT_FAILURE);
 	}
-	if( is_time_bounded_present && !is_lower_bound_present && !is_upper_bound_present) {
+	if( (is_time_bounded_present || is_time_reward_present) && !is_lower_bound_present && !is_upper_bound_present) {
 		printf("ERROR: To compute time bounded reachability, for time interval an upper bound (with '--to' or '-T') and optionally a lower bound (with '--from' or '-F' and default value of 0) are required.\n");
 		print_usage();
 		exit(EXIT_FAILURE);
 	}
-	if( is_time_bounded_present && !is_lower_bound_present && is_upper_bound_present) {
+	if( (is_time_bounded_present || is_time_reward_present) && !is_lower_bound_present && is_upper_bound_present) {
 		printf("WARNING: No lower bound for time interval specified. The default value is %f.\n",ta);
 	}
-	if( is_time_bounded_present && !is_error_bound_present ) {
+	if( (is_time_bounded_present || is_time_reward_present) && !is_error_bound_present ) {
 		printf("WARNING: No error bound specified. The default value is %f.\n", epsilon);
 	}
 }
@@ -253,16 +260,15 @@ static void parseParams(int argc, char *argv[]) {
 	{
 		if( isValidExtension( argv[i], extension, &ext_length ) ){
 			if( strcmp(extension, MA_FILE_EXT) == 0 ){
-				if( !is_ma_present ){
+				if( !is_ma_present && !is_mrm_present ){
 					is_ma_present = true;
 					ma_file = argv[i];
 				}else{
 					printf("WARNING: A model has already noticed before, skipping the '%s' file.\n", argv[i]);
 				}
-			} else if( strcmp(extension, IMC_FILE_EXT) == 0 ){
-				if( !is_ma_present ){
-					is_imc_present = true;
-					is_imc = true;
+			} else if( strcmp(extension, MRM_FILE_EXT) == 0 ){
+				if( !is_ma_present && !is_mrm_present ){
+					is_mrm_present = true;
 					ma_file = argv[i];
 				}else{
 					printf("WARNING: A model has already noticed before, skipping the '%s' file.\n", argv[i]);
@@ -280,6 +286,12 @@ static void parseParams(int argc, char *argv[]) {
 			}else{
 				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
 			}
+		} else if( strcmp(argv[i], EXP_REWARD_STR) == 0 ){
+			if( !is_expected_reward_present ){
+				is_expected_reward_present = true;
+			}else{
+				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
+			}
 		} else if( strcmp(argv[i], LONG_RUN_AVERAGE_STR) == 0 ){
 			if( !is_lra_present ){
 				is_lra_present = true;
@@ -289,6 +301,12 @@ static void parseParams(int argc, char *argv[]) {
 		} else if( strcmp(argv[i], TIME_BOUNDED_STR) == 0 ){
 			if( !is_time_bounded_present ){
 				is_time_bounded_present = true;
+			}else{
+				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
+			}
+		} else if( strcmp(argv[i], TIME_REWARD_STR) == 0 ){
+			if( !is_time_reward_present ){
+				is_time_reward_present = true;
 			}else{
 				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
 			}
@@ -418,27 +436,13 @@ static void parseParams(int argc, char *argv[]) {
 }
 
 /**
-* Load the .imc file
-*/
-static void loadIMC(const char *filename) {
-	if(is_imc_present) {
-		printf("Loading the '%s' file, please wait.\n", filename);
-		ma = read_IMC_SparseMatrix_file(filename);
-		if(ma == NULL ){
-			printf("ERROR: The '%s' file '%s' was not found or is incorrect!\n",IMC_FILE_EXT, filename);
-			exit(EXIT_FAILURE);
-		}
-	}
-}
-
-/**
 * Load the .ma file
 */
 static void loadMA(const char *filename) {
-	if(is_ma_present) {
+	if(is_ma_present || is_mrm_present) {
 		printf("Loading the '%s' file, please wait.\n", filename);
-		ma = read_MA_SparseMatrix_file(filename);
-		if(ma == NULL ){
+		ma = read_MA_SparseMatrix_file(filename,is_mrm_present);
+		if(ma == NULL){
 			printf("ERROR: The '%s' file '%s' was not found or is incorrect!\n",MA_FILE_EXT, filename);
 			exit(EXIT_FAILURE);
 		}
@@ -466,13 +470,8 @@ int main(int argc, char* argv[]) {
 	/// Parse and validate the input parameters
 	parseParams(argc, argv);
 	
-	if(is_ma_present)
-	{
-		/// load the MA from file
-		loadMA(ma_file);
-	} else if(is_imc_present) {
-		loadIMC(ma_file);
-	}
+	/// load the MA from file
+	loadMA(ma_file);
 	
 	#ifndef __APPLE__
 	// get memory info after model is loaded
@@ -583,6 +582,40 @@ int main(int argc, char* argv[]) {
 			#endif
 		}
 	}
+	if(is_expected_reward_present && is_mrm_present){
+		if(is_max_present){
+			#ifndef __APPLE__
+			clock_gettime(CLOCK_REALTIME, &tp);
+			begin = 1e9*tp.tv_sec + tp.tv_nsec;
+			#endif
+			printf("\nCompute maximal expected reward, please wait.\n");
+			tmp=expected_reward_value_iteration(ma,true);
+			printf("Maximal expected reward: %.10g\n", tmp);
+			#ifndef __APPLE__
+			clock_gettime(CLOCK_REALTIME, &tp);
+			end = 1e9*tp.tv_sec + tp.tv_nsec;
+			printf("Computation Time: %f seconds\n", (end-begin)*1e-9);
+			#else
+			printf("Computation Time: ??? seconds\n");
+			#endif
+		}
+		if(is_min_present){
+			#ifndef __APPLE__
+			clock_gettime(CLOCK_REALTIME, &tp);
+			begin = 1e9*tp.tv_sec + tp.tv_nsec;
+			#endif
+			printf("\nCompute minimal expected reward, please wait.\n");
+			tmp=expected_time_value_iteration(ma,false);
+			printf("Minimal expected reward: %.10g\n", tmp);
+			#ifndef __APPLE__
+			clock_gettime(CLOCK_REALTIME, &tp);
+			end = 1e9*tp.tv_sec + tp.tv_nsec;
+			printf("Computation Time: %f seconds\n", (end-begin)*1e-9);
+			#else
+			printf("Computation Time: ??? seconds\n");
+			#endif
+		}
+	}
 	if(is_lra_present){
 		if(is_max_present){
 			#ifndef __APPLE__
@@ -651,6 +684,49 @@ int main(int argc, char* argv[]) {
 				printf("Minimal time-bounded reachability probability: %.10g\n", tmp);
 			else
 				printf("tb=%.5g Maximal time-bounded reachability probability: %.10g\n", tb,tmp);
+			#ifndef __APPLE__
+			clock_gettime(CLOCK_REALTIME, &tp);
+			end = 1e9*tp.tv_sec + tp.tv_nsec;
+			printf("Computation Time: %f seconds\n", (end-begin)*1e-9);
+			#else
+			printf("Computation Time: ??? seconds\n");
+			#endif
+		}
+	}
+	if(is_time_reward_present && is_mrm_present){
+		if(interval == 0){
+			interval=tb;
+		}
+		if(is_max_present){
+			#ifndef __APPLE__
+			clock_gettime(CLOCK_REALTIME, &tp);
+			begin = 1e9*tp.tv_sec + tp.tv_nsec;
+			#endif
+			printf("\nCompute maximal time-bounded reward reachability inside interval [%g,%g] with precision %g, please wait.\n", ta, tb, epsilon);
+			tmp=compute_time_bounded_reward_reachability(ma,true,epsilon,ta,tb,is_imc,interval,interval_start);
+			if(interval==tb)
+				printf("Maximal time-bounded reward reachability probability: %.10g\n", tmp);
+			else
+				printf("tb=%.5g Maximal time-bounded reward reachability probability: %.10g\n", tb,tmp);
+			#ifndef __APPLE__
+			clock_gettime(CLOCK_REALTIME, &tp);
+			end = 1e9*tp.tv_sec + tp.tv_nsec;
+			printf("Computation Time: %f seconds\n", (end-begin)*1e-9);
+			#else
+			printf("Computation Time: ??? seconds\n");
+			#endif
+		}
+		if(is_min_present){
+			#ifndef __APPLE__
+			clock_gettime(CLOCK_REALTIME, &tp);
+			begin = 1e9*tp.tv_sec + tp.tv_nsec;
+			#endif
+			printf("\nCompute minimal time-bounded reward reachability inside interval [%g,%g] with precision %g, please wait.\n", ta, tb, epsilon);
+			tmp=compute_time_bounded_reward_reachability(ma,false,epsilon,ta,tb,is_imc,interval,interval_start);
+			if(interval==tb)
+				printf("Minimal time-bounded reward reachability probability: %.10g\n", tmp);
+			else
+				printf("tb=%.5g Maximal time-bounded reward reachability probability: %.10g\n", tb,tmp);
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
