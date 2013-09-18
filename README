@@ -5,8 +5,8 @@
 IMCA 1.5 beta is a command-line tool for analyzing unbounded reachability 
 probabilities, expected-time, and long-run averages. We support analyzing of 
 Interactive Markov Chains and Markov Automata. This version do not provide all 
-functionalities from prior Versions including a GUI, time-bounded reachability 
-probabilities, as well as Scheduler synthesis.
+functionalities from prior Versions including a GUI, as well as a Scheduler 
+synthesis.
 
 In this document you will find general information about the IMCA
 distribution.
@@ -43,16 +43,20 @@ can lead to problems. If it is possible, use the .ma input format.
 
 IMCA can be compiled with 2 different linear programming solvers!
 
-The default solver is "LP_SOLVE" which is distributwet under LGPL:
-
-http://lpsolve.sourceforge.net/5.5/LGPL.htm
-
-The second solver is "SoPlex" which licence can be found here:
+The default solver is "SoPlex" which licence can be found here:
 
 http://soplex.zib.de/licence.shtml
 
 Note: Soplex is free for academic use. How to compile with SoPlex is described
 in Section 3.
+
+The second solver is "LP_SOLVE" which is distributwet under LGPL:
+
+http://lpsolve.sourceforge.net/5.5/LGPL.htm
+
+Note: lpsolve is currently not integrated!
+
+
     
 -------------------------------------------------------------------------------
                     2. Distribution structure
@@ -115,7 +119,8 @@ The usage of the program is as follows:
         <goal action>   - transition leading to success
 		
 Note, that the condition for extracting goal states currently only support the 
-identification over one action. 
+identification over one action. Further, selfloops are ignored in the 
+translation!
 
 -------------------------------------------------------------------------------
                     5. Miscellaneous information
