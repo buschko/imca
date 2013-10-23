@@ -426,6 +426,8 @@ void attractor_remove(SparseMatrix *ma, bool* u0_states, bool* bad_states, bool*
             }
         }
     }
+	
+	free(attractor_set);
     
     /*printf("attractor_set:\n");
     for(int j = 0; j < ma->n; j++){
