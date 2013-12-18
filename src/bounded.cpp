@@ -435,6 +435,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 		// value iteration
 		cout << "iterations: " << (unsigned long) ceil((tb - ta) / tau) + (unsigned long) ceil(ta / tau) << endl;
 		printf("step duration for interval [%g,%g]: %g\n", ta, tb, current_tau);
+		cout << "iterations: " << (unsigned long) ceil((tb - ta) / tau) << endl;
 		
 		for(unsigned long i=0; i < steps; i++){
 			// compute v for Markovian states: from b dwon to a, we make discrete model absorbing
@@ -482,7 +483,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 		SparseMatrix_free(discrete_ma);
 
 		steps = (unsigned long) ceil( (ta + current_tau) / tau); // calculating the number of steps for interval [0,a]
-		current_tau = (ta + current_tau) / steps;                                // recalculate tau based on the number of steps
+		current_tau = (ta + current_tau) / steps;                // recalculate tau based on the number of steps
 
 		// discretize model with respect to the current value of tau 'current_tau'
 		dbg_printf("discretize model for interval [0,%g] ... \n", ta);
@@ -491,8 +492,9 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 		//print_model(discrete_ma);
 
 		printf("step duration for interval [0,%g]: %g\n", ta, current_tau);
+		cout << "iterations: " << (unsigned long) ceil( (ta + current_tau) / tau) << endl;
 
-		for(unsigned long i=0; i < steps; i++){
+		for(unsigned long i=0; i < steps; ++i){
 			// compute v for Markovian states: shift up to a, we don't make discrete model absorbing
 			compute_markovian_vector(discrete_ma,v,u, false);
 			// compute u for Probabilistic states
@@ -615,8 +617,10 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 	else
 		prob=1;
 	bool *initials = ma->initials;
+	printf("vector(%d) [",num_states);
 	for (unsigned long state_nr = 0; state_nr < num_states; state_nr++) {
 		//cout << (ma->states_nr.find(state_nr)->second).c_str() << ": " << u[state_nr] << endl;
+		printf(" %lf,",u[state_nr]);
 		if(initials[state_nr]){
 			if(max){
 				if(prob<u[state_nr])
@@ -627,6 +631,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 			}
 		}
 	}
+	printf(" ]\n");
 	
 	
 	return prob;

@@ -38,6 +38,8 @@
 		B96D6AE61664FDFB00B9A9BE /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		B98752501704446800F35D50 /* sccs2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sccs2.h; sourceTree = "<group>"; };
 		B9B5298916CBA3E100E6A0DD /* sccs2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sccs2.cpp; sourceTree = "<group>"; };
+		B9CFFDFD1861DD1100A58492 /* long_run_reward.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = long_run_reward.cpp; sourceTree = "<group>"; };
+		B9CFFDFE1861DD1900A58492 /* long_run_reward.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = long_run_reward.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -55,6 +57,7 @@
 		B96D6ACC1664FDDC00B9A9BE /* src */ = {
 			isa = PBXGroup;
 			children = (
+				B9CFFDFD1861DD1100A58492 /* long_run_reward.cpp */,
 				B9B5298916CBA3E100E6A0DD /* sccs2.cpp */,
 				B96D6ACD1664FDDC00B9A9BE /* .kdev_include_paths */,
 				B96D6ACE1664FDDC00B9A9BE /* bcg2imca.c */,
@@ -78,6 +81,7 @@
 		B96D6AD91664FDE200B9A9BE /* include */ = {
 			isa = PBXGroup;
 			children = (
+				B9CFFDFE1861DD1900A58492 /* long_run_reward.h */,
 				B98752501704446800F35D50 /* sccs2.h */,
 				B96D6ADA1664FDE200B9A9BE /* bcg2imca.h */,
 				B96D6ADB1664FDE200B9A9BE /* bounded.h */,
@@ -118,7 +122,7 @@
 		B96D6AC11664FCFB00B9A9BE /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0460;
+				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = "Dennis Guck";
 			};
 			buildConfigurationList = B96D6AC41664FCFB00B9A9BE /* Build configuration list for PBXProject "imca" */;
@@ -161,7 +165,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 			};
@@ -184,7 +188,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				SDKROOT = macosx;
 			};
 			name = Release;

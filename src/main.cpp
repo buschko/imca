@@ -60,6 +60,7 @@
 #include "sccs.h"
 #include "sccs2.h"
 #include "long_run_average.h"
+#include "long_run_reward.h"
 #include "bounded.h"
 #include "bounded_reward.h"
 
@@ -83,6 +84,7 @@ double begin, end;
 #define EXP_REWARD_STR "-er"
 #define TIME_REWARD_STR "-tr"
 #define LONG_RUN_AVERAGE_STR "-lra"
+#define LONG_RUN_REWARD_STR "-lrr"
 #define TIME_BOUNDED_STR "-tb"
 #define MIN_MODE_STR "-min"
 #define MAX_MODE_STR "-max"
@@ -93,6 +95,7 @@ double begin, end;
 #define INTERVAL_STR "-i"
 #define INTERVAL_START_STR "-b"
 #define TIME_POINTS_STR "-Tp"
+#define MEC_STR "-mec"
 
 // Boolean macros for option checking
 #define IS_LOWER_BOUND(str) (strncmp(str,"--from", 7) == 0 || strncmp(str, "-F", 3 ) == 0)
@@ -125,10 +128,12 @@ static bool is_expected_reward_present = false;
 static bool is_time_bounded_present = false;
 static bool is_time_reward_present = false;
 static bool is_lra_present = false;
+static bool is_lrr_present = false;
 static bool is_interval_present = false;
 static bool is_interval_start_present = false;
 static bool is_imc = false;
 static bool is_val = false;
+static bool is_mec = false;
 
 static bool is_lower_bound_present = false;
 static bool is_upper_bound_present = false;
@@ -179,7 +184,7 @@ static void print_usage(void) {
 	printf("Usage: imca <model file> <min/max> <computation> <options>\n");
 	printf("	<model file>	- could be one of {.ma}\n");
 	printf("	<min/max>	- could be '-min' or '-max' or both\n");
-	printf("	<computation>	- could be one or more of {-ub, -et, -lra, -tb, -er}\n");
+	printf("	<computation>	- could be one or more of {-ub, -et, -lra, -tb, -er, -lrr}\n");
 	printf("	<options>	- time- and error-bound for tb (default epsilon=1e-6)  \n");
 	printf("                          '-T' for upper bound '-F' for lower bound \n");
 	printf("                          '-e' for error bound '-i' for interval output\n");
@@ -225,7 +230,7 @@ static void checkComputation(){
 		exit(EXIT_FAILURE);
       
 	}
-	if(!is_expected_time_present && !is_unbound_present && !is_lra_present && !is_time_bounded_present && !is_expected_reward_present && !is_time_reward_present){
+	if(!is_expected_time_present && !is_unbound_present && !is_lra_present && !is_time_bounded_present && !is_expected_reward_present && !is_time_reward_present && !is_mec && !is_lrr_present){
 		printf("ERROR: No computation type was set.\n");
 		print_usage();
 		exit(EXIT_FAILURE);
@@ -289,6 +294,12 @@ static void parseParams(int argc, char *argv[]) {
 		} else if( strcmp(argv[i], EXP_REWARD_STR) == 0 ){
 			if( !is_expected_reward_present ){
 				is_expected_reward_present = true;
+			}else{
+				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
+			}
+		} else if( strcmp(argv[i], LONG_RUN_REWARD_STR) == 0 ){
+			if( !is_lrr_present ){
+				is_lrr_present = true;
 			}else{
 				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
 			}
@@ -429,7 +440,13 @@ static void parseParams(int argc, char *argv[]) {
 			}else{
 				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
 			}
-		} 
+		}else if( strcmp(argv[i], MEC_STR) == 0 ){
+			if( !is_mec ){
+				is_mec = true;
+			}else{
+				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
+			}
+		}
 	}
 	
 	checkComputation();
@@ -650,6 +667,40 @@ int main(int argc, char* argv[]) {
 			#endif
 		}
 	}
+	if(is_lrr_present && is_mrm_present){
+		if(is_max_present){
+			#ifndef __APPLE__
+			clock_gettime(CLOCK_REALTIME, &tp);
+			begin = 1e9*tp.tv_sec + tp.tv_nsec;
+			#endif
+			printf("\nCompute maximal LRA, please wait.\n");
+			tmp=compute_long_run_reward(ma,true);
+			printf("Maximal LRA: %.10g\n", tmp);
+			#ifndef __APPLE__
+			clock_gettime(CLOCK_REALTIME, &tp);
+			end = 1e9*tp.tv_sec + tp.tv_nsec;
+			printf("Computation Time: %f seconds\n", (end-begin)*1e-9);
+			#else
+			printf("Computation Time: ??? seconds\n");
+			#endif
+		}
+		if(is_min_present){
+			#ifndef __APPLE__
+			clock_gettime(CLOCK_REALTIME, &tp);
+			begin = 1e9*tp.tv_sec + tp.tv_nsec;
+			#endif
+			printf("\nCompute minimal LRA, please wait.\n");
+			tmp=compute_long_run_reward(ma,false);
+			printf("Minimal LRA: %.10g\n", tmp);
+			#ifndef __APPLE__
+			clock_gettime(CLOCK_REALTIME, &tp);
+			end = 1e9*tp.tv_sec + tp.tv_nsec;
+			printf("Computation Time: %f seconds\n", (end-begin)*1e-9);
+			#else
+			printf("Computation Time: ??? seconds\n");
+			#endif
+		}
+	}
 	if(is_time_bounded_present){
 		if(interval == 0){
 			interval=tb;
@@ -735,6 +786,30 @@ int main(int argc, char* argv[]) {
 			printf("Computation Time: ??? seconds\n");
 			#endif
 		}
+	}
+	if(is_mec){
+	/*********************************************************************
+	 *               MEC testsuite
+	 ********************************************************************/
+		printf("MEC computation start.\n");
+		SparseMatrixMEC *mecs;
+		mecs=mEC_decomposition_previous_algorithm(ma);
+		map<unsigned long,string> states_nr = ma->states_nr;
+		unsigned long *row_starts = (unsigned long *) mecs->row_counts;
+		unsigned long *cols = mecs->cols;
+		for(unsigned long mec_nr=0; mec_nr < mecs->n; mec_nr++) {
+			unsigned long mec_start = row_starts[mec_nr];
+			unsigned long mec_end = row_starts[mec_nr + 1];
+			printf("MEC #%d: %d States\n",mec_nr+1,mec_end-mec_start);
+			if(is_max_present){
+				printf("{");
+				for (int state_nr = mec_start; state_nr < mec_end-1; state_nr++) {
+					printf("%s,",(states_nr.find(cols[state_nr])->second).c_str());
+				}
+				printf("%s}\n",(states_nr.find(cols[mec_end-1])->second).c_str());
+			}
+		}
+		SparseMatrixMEC_free(mecs);
 	}
 	
 	SparseMatrix_free(ma);

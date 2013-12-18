@@ -19,15 +19,15 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 * 
 * 
-* @file long_run_average.cpp
-* @brief Compute the long-run average for an MA
+* @file long_run_reward.cpp
+* @brief Compute the long-run reward for an MA
 * @author Dennis Guck
 * @version 1.0
 *
 */
 
-#ifndef LONG_RUN_AVERAGE_H
-#define LONG_RUN_AVERAGE_H
+#ifndef LONG_RUN_REWARD_H
+#define LONG_RUN_REWARD_H
 
 
 #include "sparse.h"
@@ -39,13 +39,13 @@
 using namespace soplex;
 
 /**
-* Computes long-run average for MA.
+* Computes long-run reward for MA.
 *
 * @param ma file to read MA from
 * @param max identifier for min or max
-* @return long-run average
+* @return long-run reward
 */
-extern Real compute_long_run_average(SparseMatrix*, bool);
+extern Real compute_long_run_reward(SparseMatrix*, bool);
 
 
 #endif

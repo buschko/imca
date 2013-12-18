@@ -101,8 +101,6 @@ void function_strongconnect(SparseMatrix *ma,unsigned long v, vector<unsigned lo
                 //printf("c");
                 dst=cols[choice_start];
                 if(index[(long)dst]< 0 && !bad_states[dst]){
-					if(v==47360)
-						printf("here\n");
                     //printf("d");
                     // Successor w has not yet been visited; recurse on it
                     function_strongconnect(ma,dst,scc_states,stack,stack_precense,bad_states,bad_transitions,i,index,lowlink,scc_nr); //stronglyconnect(w)
