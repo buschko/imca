@@ -622,7 +622,7 @@ int main(int argc, char* argv[]) {
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
 			printf("\nCompute minimal expected reward, please wait.\n");
-			tmp=expected_time_value_iteration(ma,false);
+			tmp=expected_reward_value_iteration(ma,false);
 			printf("Minimal expected reward: %.10g\n", tmp);
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
