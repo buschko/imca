@@ -812,7 +812,7 @@ int main(int argc, char* argv[]) {
 		SparseMatrixMEC_free(mecs);
 	}
 	
-	//SparseMatrix_free(ma);
+	SparseMatrix_free(ma);
 		
 	return 0;
 }

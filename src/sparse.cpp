@@ -251,9 +251,12 @@ void SparseMatrix_free(SparseMatrix *sparse) {
 		dbg_printf("free choice counts\n");
 		free(sparse->choice_counts);
 	}
+    
+    sparse->states.clear();
+    sparse->states_nr.clear();
 	
-	dbg_printf("free sparse matrix\n");
-	free(sparse);
+	//dbg_printf("free sparse matrix\n");
+	//free(sparse);
 }
 
 /**
