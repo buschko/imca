@@ -962,7 +962,7 @@ Real compute_long_run_average(SparseMatrix *ma, bool max) {
 	dbg_printf("SSP end\n");
 	free(locks);
     SparseMatrixMEC_free(mecs);
-	free(mecs);
+	delete(mecs);
 
 	return lra;
 }
