@@ -506,7 +506,6 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 	if (!*error) {
 		unsigned long * choice_starts = (unsigned long *) calloc((size_t) (num_choice + 1), sizeof(unsigned long));
 		Real * non_zeros = (Real *) malloc(num_non_zeros * sizeof(Real));
-		Real * rewards = (Real *) malloc(num_choice * sizeof(Real));
 		unsigned long * cols = (unsigned long *) malloc(num_non_zeros * sizeof(unsigned long));
 		model->choice_counts = (unsigned char *) choice_starts;
 		model->non_zeros = non_zeros;
@@ -515,6 +514,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 		model->non_zero_n = num_non_zeros;
 		model->max_exit_rate=max_exit_rate;
 		if(mrm){
+            Real * rewards = (Real *) malloc(num_choice * sizeof(Real));
 			model->rewards=rewards;
         }
 	}
