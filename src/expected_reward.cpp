@@ -245,7 +245,8 @@ Real expected_reward_value_iteration(SparseMatrix* ma, bool max) {
 			}
 		}
 	}
-
+    
+    free(locks);
 	 
 	return obj;
 }
