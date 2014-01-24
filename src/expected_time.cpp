@@ -294,7 +294,7 @@ Real expected_time_value_iteration(SparseMatrix* ma, bool max) {
 		}
 	}
 	
-	bool *locks=(bool *)malloc(ma->n * sizeof(bool));
+	bool *locks=(bool *)malloc((ma->n-1) * sizeof(bool));
 	/*
 	if(max) {
 		locks=compute_locks_weak(ma);
