@@ -84,8 +84,8 @@ static void read_states(unsigned long *line_no, bool *error, FILE *p, const char
 			++(*line_no);
 		} else {
 			sscanf(s, "%s%s", state, act);
-			//ret=tmp.insert(pair<string,unsigned long>(state,state_nr));
-			if(tmp.insert(pair<string,unsigned long>(state,state_nr)).second == true){//(ret.second == true){
+			ret=tmp.insert(pair<string,unsigned long>(state,state_nr));
+			if(ret.second == true){
 				tmp_nr.insert(pair<unsigned long,string>(state_nr,state));
 				state_nr++;
 			} 
