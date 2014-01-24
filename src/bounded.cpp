@@ -608,6 +608,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 			}
 		}
 		SparseMatrix_free(discrete_ma);
+        free(discrete_ma);
 
 	}
 	// find prob. for initial state and return
