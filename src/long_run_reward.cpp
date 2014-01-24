@@ -476,6 +476,7 @@ Real compute_stochastic_shortest_path_problem_lrr(SparseMatrix *ma, SparseMatrix
 		if(initials[state_nr])
 			dbg_printf("test %s\n",(ma->states_nr.find(state_nr)->second).c_str());
 		if(initials[state_nr] && mec[state_nr]){
+			free(bad);
 			return lra[state_nr];
 		}
 		if(mec[state_nr])
