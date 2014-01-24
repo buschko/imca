@@ -673,9 +673,9 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
-			printf("\nCompute maximal LRA, please wait.\n");
+			printf("\nCompute maximal LRR, please wait.\n");
 			tmp=compute_long_run_reward(ma,true);
-			printf("Maximal LRA: %.10g\n", tmp);
+			printf("Maximal LRR ratio: %.10g\n", tmp);
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -689,9 +689,9 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
-			printf("\nCompute minimal LRA, please wait.\n");
+			printf("\nCompute minimal LRR, please wait.\n");
 			tmp=compute_long_run_reward(ma,false);
-			printf("Minimal LRA: %.10g\n", tmp);
+			printf("Minimal LRR ratio: %.10g\n", tmp);
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;

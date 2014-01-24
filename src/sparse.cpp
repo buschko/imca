@@ -42,9 +42,10 @@ SparseMatrix *SparseMatrix_new(unsigned long num_states, map<string,unsigned lon
 	bool * initials = (bool *) malloc(num_states * sizeof(bool));
 	bool * goals = (bool *) malloc(num_states * sizeof(bool));
 	bool * isPS = (bool *) malloc(num_states * sizeof(bool));
-	SparseMatrix *model = (SparseMatrix*)malloc(sizeof(SparseMatrix));
+	//SparseMatrix *model = (SparseMatrix*)malloc(sizeof(SparseMatrix));
+    SparseMatrix *model=new SparseMatrix;
 	model->n = num_states;
-	cout << "" ; // This line currently prevents a segmentation fault under OSX. Do not delete it! TODO: fix this.
+	//cout << "" ; // This line currently prevents a segmentation fault under OSX. Do not delete it! TODO: fix this.
     model->states = states;
 	model->states_nr = states_nr;
     //model->states.insert(states.begin(),states.end());
@@ -72,7 +73,8 @@ SparseMatrixMEC *SparseMatrixMEC_new(unsigned long num_states, unsigned long num
 {
 	unsigned long *row_starts = (unsigned long *) calloc((size_t) (num_mecs + 1),sizeof(unsigned long));
 	unsigned long * cols = (unsigned long *) malloc(num_states * sizeof(unsigned long));
-	SparseMatrixMEC *mec = (SparseMatrixMEC*)malloc(sizeof(SparseMatrixMEC));
+	//SparseMatrixMEC *mec = (SparseMatrixMEC*)malloc(sizeof(SparseMatrixMEC));
+    SparseMatrixMEC *mec =new SparseMatrixMEC;
 	mec->n = num_mecs;
 	mec->row_counts = (unsigned char *) row_starts;
 	mec->cols = cols;
@@ -98,7 +100,8 @@ SparseMatrix *SparseMatrixDiscrete_new(SparseMatrix *ma)
 	bool * goals = (bool *) malloc(num_states * sizeof(bool));
 	bool * isPS = (bool *) malloc(num_states * sizeof(bool));
 	Real * exit_rates = (Real *) malloc(num_ms * sizeof(Real));
-	SparseMatrix *model = (SparseMatrix*)malloc(sizeof(SparseMatrix));
+	//SparseMatrix *model = (SparseMatrix*)malloc(sizeof(SparseMatrix));
+    SparseMatrix *model=new SparseMatrix;
 	model->n = num_states;
 	model->ms_n = num_ms;
 	model->choices_n = num_choices;

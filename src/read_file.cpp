@@ -349,6 +349,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 	Real exit_rate=0;
 	Real max_exit_rate=0;
 	Real prob;
+    Real reward;
 	unsigned long exit_index = 0;
 	unsigned long num_choice = 0;
 	unsigned long num_non_zeros = 0;
@@ -513,8 +514,9 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 		model->choices_n = num_choice;
 		model->non_zero_n = num_non_zeros;
 		model->max_exit_rate=max_exit_rate;
-		if(mrm)
+		if(mrm){
 			model->rewards=rewards;
+        }
 	}
 }
 
@@ -541,7 +543,7 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 	char act[MAX_LINE_LENGTH];
 	bool bad=false;
 	unsigned long last_to = -1;
-	Real reward;
+	//Real r=0;
 	
 	Real tmp = 0;
 	unsigned int old_index;
@@ -600,9 +602,10 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 				/* just read a line "state act" */
 				// if mrm we also read in the reward
 				if(mrm){
-					reward=0;
+					Real reward=0;
 					sscanf(s, "%s%s%lf", src, act, &reward);
 					rewards[reward_index] = reward;
+                    //r += reward;
 					reward_index++;
 				}else {
 					sscanf(s, "%s%s", src, act);
@@ -670,6 +673,9 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 			}
 		}
 	}
+    if(mrm){
+        //ma->reward=r;
+    }
 	
 }
 
@@ -849,6 +855,7 @@ SparseMatrix *read_MA_SparseMatrix_file(const char *filename, bool mrm)
 	
 	line_no = 1;
 	
+    //cout << "reserve memory" << endl;
 	if (!error) {
 		model = SparseMatrix_new(num_states, states, states_nr); /* create MA model and reserve state memory */
 	}
