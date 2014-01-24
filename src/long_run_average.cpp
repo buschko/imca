@@ -552,6 +552,7 @@ Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC 
 		obj = 0;
 	}
     
+    free(locks);
     free(bad);
 		
 	return obj;
@@ -961,7 +962,7 @@ Real compute_long_run_average(SparseMatrix *ma, bool max) {
 	dbg_printf("SSP end\n");
 	free(locks);
     SparseMatrixMEC_free(mecs);
-	//free(mecs);
+	free(mecs);
 
 	return lra;
 }

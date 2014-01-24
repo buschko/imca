@@ -274,5 +274,5 @@ void SparseMatrixMEC_free(SparseMatrixMEC *sparse) {
 		free(sparse->row_counts);
 	}
 	
-	free(sparse);
+	//free(sparse);
 }
