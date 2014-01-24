@@ -341,6 +341,7 @@ Real expected_time_value_iteration(SparseMatrix* ma, bool max) {
 		}
 	}
 
+    free(locks);
 	 
 	return obj;
 }
