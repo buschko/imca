@@ -810,6 +810,7 @@ int main(int argc, char* argv[]) {
 			}
 		}
 		SparseMatrixMEC_free(mecs);
+        delete(mecs);
 	}
 	
 	SparseMatrix_free(ma);

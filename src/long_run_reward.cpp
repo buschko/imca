@@ -880,6 +880,68 @@ Real long_run_reward_ssp_value_iteration(SparseMatrix *ma, SparseMatrixMEC *mecs
 	return u[k];
 }
 
+Real get_mec_reward(SparseMatrix *ma, vector<bool> mec, SoPlex lp_model) {
+	Real amount=0;
+    Real lrr = lp_model.objValue();
+    
+    DVector results(lp_model.nCols());
+    lp_model.getPrimal(results);
+    
+    unsigned long i;
+	unsigned long state_nr;
+	unsigned long choice_nr;
+	unsigned long states = ma->n + 1;
+	bool *goals = ma->goals;
+	unsigned long *row_starts = (unsigned long *) ma->row_counts;
+	unsigned long *rate_starts = (unsigned long *) ma->rate_counts;
+	unsigned long *choice_starts = (unsigned long *) ma->choice_counts;
+	Real *non_zeros = ma->non_zeros;
+	Real *rewards = ma->rewards;
+	Real *exit_rates = ma->exit_rates;
+	unsigned long *cols = ma->cols;
+    
+    bool bad=false;
+    Real check;
+    
+    for (state_nr = 0; state_nr < ma->n; state_nr++) {
+		if(mec[state_nr]){// && !locks[state_nr]) {
+            if(ma->isPS[state_nr]) {
+			unsigned long state_start = row_starts[state_nr];
+			unsigned long state_end = row_starts[state_nr + 1];
+			for (choice_nr = state_start; choice_nr < state_end; choice_nr++) {
+				/* Add up all outgoing rates of the distribution */
+				unsigned long i_start = choice_starts[choice_nr];
+				unsigned long i_end = choice_starts[choice_nr + 1];
+                check = 0;
+				for (i = i_start; i < i_end; i++) {
+					if(mec[cols[i]] && !bad) {
+						check += non_zeros[i] * results[cols[i]];
+					}
+					else{
+						bad=true;
+					}
+				}
+				if(!bad) {
+                    check -= lrr*rewards[choice_nr];
+                    //cout << check << " == " << results[state_nr] << endl;
+					if(check == results[state_nr]) {
+						amount += rewards[choice_nr];
+                        choice_nr=state_end;
+                    }
+                }
+				bad=false;
+			}
+            } else {
+                unsigned long rate_nr = rate_starts[state_nr];
+                unsigned long reward_nr = row_starts[state_nr];
+                amount += rewards[reward_nr]/exit_rates[rate_nr];
+            }
+		}
+	}
+    
+    return amount;
+}
+
 /**
 * Computes long-run reward for MA.
 *
@@ -907,6 +969,7 @@ Real compute_long_run_reward(SparseMatrix *ma, bool max) {
 	vector<bool> mec(ma->n,false);
 	vector<bool> mec_tmp(ma->n,false);
 	vector<Real> lra_mec(mecs->n);
+    vector<Real> reward_mec(mecs->n);
 	
 	unsigned long *row_starts = (unsigned long *) mecs->row_counts;
 	unsigned long *cols = mecs->cols;
@@ -931,10 +994,14 @@ Real compute_long_run_reward(SparseMatrix *ma, bool max) {
 		SPxSolver::Status stat;
 		lp_model.setDelta(1e-6);
 		stat = lp_model.solve();
-		dbg_printf("LRA Mec %ld: %.10lg\n",mec_nr+1,lp_model.objValue());
-		printf("LRA Mec %ld: %.10lg\n",mec_nr+1,lp_model.objValue());
+		dbg_printf("LRR ratio Mec %ld: %.10lg\n",mec_nr+1,lp_model.objValue());
+		printf("LRR ratio Mec %ld: %.10lg\n",mec_nr+1,lp_model.objValue());
 		//cout << long_run_average_value_iteration(ma,max) << cout;
 		lra_mec[mec_nr]=lp_model.objValue();
+        reward_mec[mec_nr]=lra_mec[mec_nr]*get_mec_reward(ma,mec,lp_model);
+        
+        printf("Average LRR Mec %ld: %.10lg\n",mec_nr+1, reward_mec[mec_nr]);
+        
 		mec=mec_tmp;
 		//lp_model.clear();
 		//lp_model.clearBasis();
@@ -953,6 +1020,7 @@ Real compute_long_run_reward(SparseMatrix *ma, bool max) {
 	dbg_printf("SSP\n");
 	Real lra=0;
 	lra = compute_stochastic_shortest_path_problem_lrr(ma,mecs,lra_mec,max);
+    printf("\nAverage %s LRR: %.10lg\n",max?"maximum":"minimum",compute_stochastic_shortest_path_problem_lrr(ma,mecs,reward_mec,max));
 	dbg_printf("SSP end\n");
 	free(locks);
     SparseMatrixMEC_free(mecs);
