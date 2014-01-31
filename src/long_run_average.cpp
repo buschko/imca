@@ -942,19 +942,19 @@ Real compute_long_run_average(SparseMatrix *ma, bool max) {
 		printf("LRA Mec %ld: %.10lg\n",mec_nr+1,lp_model.objValue());
 		//cout << long_run_average_value_iteration(ma,max) << cout;
 		lra_mec[mec_nr]=lp_model.objValue();
+        
+        /* DEBUG OUTPUT */
+		DVector probs(lp_model.nCols());
+         lp_model.getPrimal(probs);
+         unsigned long state_nr;
+         for (state_nr = 0; state_nr < ma->n; state_nr++) {
+         Real tmp = probs[state_nr];
+         cout << state_nr << ": prob " << tmp << endl;
+         }
+        
 		mec=mec_tmp;
 		//lp_model.clear();
 		//lp_model.clearBasis();
-		
-		/* DEBUG OUTPUT */
-		/*DVector probs(lp_model.nCols());
-		lp_model.getPrimal(probs);
-		unsigned long state_nr;
-		for (state_nr = 0; state_nr < ma->n; state_nr++) {
-			Real tmp = probs[state_nr];
-			cout << state_nr << ": prob " << tmp << endl;
-		}*/
-		
 	}
 	
 	dbg_printf("SSP\n");

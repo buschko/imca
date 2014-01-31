@@ -222,7 +222,109 @@ static void set_constraints_lrr(SoPlex& lp_model, SparseMatrix *ma, bool max, ve
 					}
 					if(exit_rate > 0 && reward < 0){
 						reward /= exit_rate;
-					} else if(exit_rate > 0) {
+					} else if(exit_rate > 0 && reward != 0) {
+						reward = -1/exit_rate;
+					}
+					if (reward < 0 && exit_rate == 0){
+						//row.add(ma->n,reward);
+                    } else {
+                        row.add(ma->n,(-1/exit_rate));
+                    }
+					// write condition
+					if(goals[state_nr]) {
+						lp_model.addRow(LPRow(row,LPRow::Type(m), reward));
+					} else {
+						lp_model.addRow(LPRow(row,LPRow::Type(m), 0));
+					}
+				}
+				row.~DSVector();
+				bad=false;
+			}
+		}
+	}	
+}
+
+/**
+ * sets the constraints for the linear program
+ *
+ * @param lp_model linear program
+ * @param ma the MA
+ * @param max identifier for maximum/minimum
+ */
+static void set_constraints_lrr_ratio(SoPlex& lp_model, SparseMatrix *ma, bool max, vector<bool> mec, bool *locks) {
+	unsigned long i;
+	unsigned long state_nr;
+	unsigned long choice_nr;
+	unsigned long states = ma->n + 1;
+	bool *goals = ma->goals;
+	//map<unsigned long,string> states_nr = ma->states_nr;
+	unsigned long *row_starts = (unsigned long *) ma->row_counts;
+	unsigned long *rate_starts = (unsigned long *) ma->rate_counts;
+	unsigned long *choice_starts = (unsigned long *) ma->choice_counts;
+	Real *non_zeros = ma->non_zeros;
+	Real *rewards = ma->rewards;
+	Real *exit_rates = ma->exit_rates;
+	unsigned long *cols = ma->cols;
+	Real prob;
+	Real rate;
+	Real exit_rate;
+	Real reward;
+	int m=0; // greater equal 0
+	if(!max)
+		m=2; // less equal 0
+	
+	
+	//DSVector row(states+1);
+	bool loop;
+	bool bad=false;
+	
+	for (state_nr = 0; state_nr < ma->n; state_nr++) {
+		if(mec[state_nr]){// && !locks[state_nr]) {
+			unsigned long state_start = row_starts[state_nr];
+			unsigned long state_end = row_starts[state_nr + 1];
+			for (choice_nr = state_start; choice_nr < state_end; choice_nr++) {
+				DSVector row(states);
+				loop=false;
+				/* Add up all outgoing rates of the distribution */
+				unsigned long i_start = choice_starts[choice_nr];
+				unsigned long i_end = choice_starts[choice_nr + 1];
+				for (i = i_start; i < i_end; i++) {
+					if(mec[cols[i]]) {
+						prob=non_zeros[i];
+						rate=0;
+						unsigned long r_start = rate_starts[state_nr];
+						unsigned long r_end = rate_starts[state_nr + 1];
+						for (unsigned long j = r_start; j < r_end; j++) {
+							prob /= exit_rates[j];
+							rate = -1/exit_rates[j];
+						}
+						//printf("%s - %lf -> %s\n",(states_nr.find(state_nr)->second).c_str(),prob,(states_nr.find(cols[i])->second).c_str());
+						if(state_nr==cols[i]) {
+							loop=true;
+							row.add(state_nr,-1.0+prob);
+						} else {
+							row.add(cols[i],prob);
+						}
+					}
+					else{
+						bad=true;
+					}
+				}
+				if(!bad) {
+					if(!loop)
+						row.add(state_nr,-1.0);
+					// adding reward
+					exit_rate=0;
+					// get reward
+					reward = (-1)*rewards[choice_nr];
+					unsigned long r_start = rate_starts[state_nr];
+					unsigned long r_end = rate_starts[state_nr + 1];
+					for (unsigned long j = r_start; j < r_end; j++) {
+						exit_rate = exit_rates[j];
+					}
+					if(exit_rate > 0 && reward < 0){
+						reward /= exit_rate;
+					} else if(exit_rate > 0 && reward != 0) {
 						reward = -1/exit_rate;
 					}
 					if (reward < 0)
@@ -240,6 +342,7 @@ static void set_constraints_lrr(SoPlex& lp_model, SparseMatrix *ma, bool max, ve
 		}
 	}	
 }
+
 
 /**
 * sets the constraints for the linear program
@@ -994,33 +1097,33 @@ Real compute_long_run_reward(SparseMatrix *ma, bool max) {
 		SPxSolver::Status stat;
 		lp_model.setDelta(1e-6);
 		stat = lp_model.solve();
-		dbg_printf("LRR ratio Mec %ld: %.10lg\n",mec_nr+1,lp_model.objValue());
-		printf("LRR ratio Mec %ld: %.10lg\n",mec_nr+1,lp_model.objValue());
+		dbg_printf("LRR Mec %ld: %.10lg\n",mec_nr+1,lp_model.objValue());
+		printf("LRR Mec %ld: %.10lg\n",mec_nr+1,lp_model.objValue());
 		//cout << long_run_average_value_iteration(ma,max) << cout;
 		lra_mec[mec_nr]=lp_model.objValue();
-        reward_mec[mec_nr]=lra_mec[mec_nr]*get_mec_reward(ma,mec,lp_model);
+        reward_mec[mec_nr]=lp_model.objValue();
+        //reward_mec[mec_nr]=lra_mec[mec_nr]*get_mec_reward(ma,mec,lp_model);
         
-        printf("Average LRR Mec %ld: %.10lg\n",mec_nr+1, reward_mec[mec_nr]);
+        //printf("Average LRR Mec %ld: %.10lg\n",mec_nr+1, reward_mec[mec_nr]);
+        
+        /* DEBUG OUTPUT */
+		/*DVector probs(lp_model.nCols());
+        lp_model.getPrimal(probs);
+        unsigned long state_nr;
+        for (state_nr = 0; state_nr < ma->n; state_nr++) {
+        Real tmp = probs[state_nr];
+        cout << state_nr << ": prob " << tmp << endl;
+        }*/
         
 		mec=mec_tmp;
 		//lp_model.clear();
 		//lp_model.clearBasis();
-		
-		/* DEBUG OUTPUT */
-		/*DVector probs(lp_model.nCols());
-		lp_model.getPrimal(probs);
-		unsigned long state_nr;
-		for (state_nr = 0; state_nr < ma->n; state_nr++) {
-			Real tmp = probs[state_nr];
-			cout << state_nr << ": prob " << tmp << endl;
-		}*/
-		
 	}
 	
 	dbg_printf("SSP\n");
 	Real lra=0;
 	lra = compute_stochastic_shortest_path_problem_lrr(ma,mecs,lra_mec,max);
-    printf("\nAverage %s LRR: %.10lg\n",max?"maximum":"minimum",compute_stochastic_shortest_path_problem_lrr(ma,mecs,reward_mec,max));
+    //printf("\nAverage %s LRR: %.10lg\n",max?"maximum":"minimum",compute_stochastic_shortest_path_problem_lrr(ma,mecs,reward_mec,max));
 	dbg_printf("SSP end\n");
 	free(locks);
     SparseMatrixMEC_free(mecs);
