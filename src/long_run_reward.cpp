@@ -272,8 +272,7 @@ static void set_constraints_lrr_ratio(SoPlex& lp_model, SparseMatrix *ma, bool m
 	int m=0; // greater equal 0
 	if(!max)
 		m=2; // less equal 0
-	
-	
+    
 	//DSVector row(states+1);
 	bool loop;
 	bool bad=false;
@@ -876,6 +875,7 @@ Real long_run_reward_value_iteration(SparseMatrix* ma, bool max) {
 		v[k] = 1.0;
 	// initialize goal states
 	bool *goals = ma->goals;
+    
 	for (unsigned long state_nr = 0; state_nr < num_states; state_nr++) {
 		Real exit_rate;
 		unsigned long r_start = rate_starts[state_nr];
@@ -942,6 +942,7 @@ Real long_run_reward_ssp_value_iteration(SparseMatrix *ma, SparseMatrixMEC *mecs
 		v[k] = 1.0;
 	// initialize goal states
 	bool *goals = ma->goals;
+    
 	for (unsigned long state_nr = 0; state_nr < num_states; state_nr++) {
 		Real exit_rate;
 		unsigned long r_start = rate_starts[state_nr];

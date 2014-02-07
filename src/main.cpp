@@ -669,6 +669,24 @@ int main(int argc, char* argv[]) {
 		}
 	}
 	if(is_lrr_present && is_mrm_present){
+        
+        vector<bool> goals(ma->n,false);
+        
+        int n_goal=0;
+        
+        for (unsigned long state_nr = 0; state_nr < ma->n; state_nr++) {
+            if(ma->goals[state_nr]){
+                n_goal++;
+                goals[state_nr]=true;
+            }
+        }
+        
+        if(n_goal==0){
+            for (unsigned long state_nr = 0; state_nr < ma->n; state_nr++) {
+                ma->goals[state_nr]=true;
+            }
+        }
+        
 		if(is_max_present){
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
@@ -701,6 +719,13 @@ int main(int argc, char* argv[]) {
 			printf("Computation Time: ??? seconds\n");
 			#endif
 		}
+        
+        for (unsigned long state_nr = 0; state_nr < ma->n; state_nr++) {
+            if(!goals[state_nr]){
+                ma->goals[state_nr]=false;
+            }
+        }
+        
 	}
 	if(is_time_bounded_present){
 		if(interval == 0){
