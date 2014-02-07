@@ -158,7 +158,7 @@ using namespace std;
 static void print_intro(void) {
 	printf(" ------------------------------------------------------------------- \n");
 	printf("|                  Interactive Markov Chain Analyzer                |\n");
-	printf("|                        IMCA Version 1.5 beta                      |\n");
+	printf("|                        IMCA Version 1.6 beta                      |\n");
 	printf("|             Binary build date: %s @ %s             |\n", __DATE__, __TIME__);
 	#ifdef __SOPLEX__
 	printf("|                using SoPlex \"http://soplex.zib.de/\"               |\n");
@@ -167,7 +167,7 @@ static void print_intro(void) {
 	#endif
 	printf("|                                                                   |\n");
 	printf("|                  Copyright (C) RWTH Aachen, 2012.                 |\n");
-	printf("|             Copyright (C) University of Twente, 2013.             |\n");
+	printf("|          Copyright (C) University of Twente, 2013-2014.           |\n");
 	printf("|                         Author: Dennis Guck                       |\n");
 	printf("|           IMCA is distributed under the GPL conditions            |\n");
 	printf("|            (GPL stands for GNU General Public License)            |\n");    
