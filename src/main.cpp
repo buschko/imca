@@ -720,9 +720,11 @@ int main(int argc, char* argv[]) {
 			#endif
 		}
         
-        for (unsigned long state_nr = 0; state_nr < ma->n; state_nr++) {
-            if(!goals[state_nr]){
-                ma->goals[state_nr]=false;
+        if(n_goal==0){
+            for (unsigned long state_nr = 0; state_nr < ma->n; state_nr++) {
+                if(!goals[state_nr]){
+                    ma->goals[state_nr]=false;
+                }
             }
         }
         
