@@ -267,6 +267,7 @@ static void parseParams(int argc, char *argv[]) {
 			if( strcmp(extension, MA_FILE_EXT) == 0 ){
 				if( !is_ma_present && !is_mrm_present ){
 					is_ma_present = true;
+                    is_mrm_present = true;
 					ma_file = argv[i];
 				}else{
 					printf("WARNING: A model has already noticed before, skipping the '%s' file.\n", argv[i]);
