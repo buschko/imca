@@ -815,7 +815,6 @@ bool* compute_locks_weak(SparseMatrix *ma, bool* bad) {
 	
 	dbg_printf("\n");
 	
-	free(bad);
     free(bad_dist);
 	
 	return locks;

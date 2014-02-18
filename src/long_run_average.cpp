@@ -472,7 +472,9 @@ Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC 
 	}
 	//printf("no init\n");
 	
-	
+	//free(bad);
+
+    
 	bool *locks;
 	if(max) {
 		locks=compute_locks_strong(ma,bad);
@@ -480,7 +482,7 @@ Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC 
 		locks=compute_locks_weak(ma,bad);
 	}
 	
-	free(bad);
+	//free(bad);
 
 	/* first step: build the lp model */
 	dbg_printf("make obj fct\n");
@@ -555,6 +557,7 @@ Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC 
 	}
     
     	free(locks);
+        free(bad);
 		
 	return obj;
 }
