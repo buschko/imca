@@ -31,23 +31,8 @@
 */
 
 #include "sccs2.h"
-#include "sccs.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <map>
-#include <string>
-#include <vector>
-#include <ctime>
-#include <time.h>
-#include <stack>
-#include <pthread.h>
 
 #include "debug.h"
-
-using namespace std;
 
 /**
  * test if element is in vector

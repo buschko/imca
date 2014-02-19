@@ -32,17 +32,14 @@
 #include <map>
 #include <string>
 #include <vector>
-
-#ifdef __SOPLEX__
-#include "soplex.h"
-#endif
+#include <iostream>
 
 #include "sccs.h"
 #include "read_file.h"
 
-using namespace std;
-using namespace soplex;
+using std::vector;
 
+#ifdef __SOPLEX__
 /**
 * sets the objective function and bounds for goal states
 *
@@ -142,6 +139,83 @@ static void set_constraints_ext(SoPlex& lp_model, SparseMatrix *ma, bool max, bo
 	
 	
 }
+
+/**
+* Computes expected time for MA.
+*
+* @param ma file to read MA from
+* @param max identifier for min or max
+* @return expected time
+*/
+Real compute_expected_time(SparseMatrix* ma, bool max) {
+	SoPlex lp_model;
+	bool *locks;
+	if(max) {
+		locks=compute_locks_weak(ma);
+	} else {
+		locks=compute_locks_strong(ma);
+	}
+	// printf("LP computation start.\n");
+
+	/*for (unsigned int x = 0; x < ma->n; x++) {
+		if(locks[x]){
+			cout << x << endl;
+		}
+	}*/
+
+	/* first step: build the lp model */
+	set_obj_function_ext(lp_model,ma,max,locks);
+	set_constraints_ext(lp_model,ma,max,locks);
+
+	//lp_model.writeFile("file.lp", NULL, NULL, NULL);
+	// TODO: find out why LP model causes segfault in some cases (temporary BUGFIX: load model from file)
+	//lp_model.readFile("file.lp");
+
+	/* solve the LP */
+	SPxSolver::Status stat;
+	//lp_model.setDelta(1e-6);
+	stat = lp_model.solve();
+
+	//print_lp_info(lp_model);
+
+	/* find the max or min prob. for an initial state */
+	Real obj;
+	double inf = soplex::infinity;
+	if(max)
+		obj=0;
+	else
+		obj=inf;
+
+	/* show if optimal solution */
+	if( stat == SPxSolver::OPTIMAL ) {
+		printf("LP solved to optimality.\n\n");
+		//printf("Objective value is %lf.\n",lp_model.objValue());
+
+		DVector probs(lp_model.nCols());
+		lp_model.getPrimal(probs);
+
+		bool *initials = ma->initials;
+		unsigned long state_nr;
+		for (state_nr = 0; state_nr < ma->n; state_nr++) {
+			if(initials[state_nr]){
+				Real tmp = probs[state_nr];
+				if(max && tmp > obj)
+					obj=tmp;
+				else if(!max && tmp < obj)
+					obj = tmp;
+			}
+		}
+
+	} else if ( stat == SPxSolver::INFEASIBLE) {
+		fprintf(stderr, "LP is infeasible.\n\n");
+	}
+
+	free(locks);
+
+	return obj;
+}
+
+#endif //__SOPLEX__
 
 /**
 * computes one step for Markovian states
@@ -306,7 +380,7 @@ Real expected_time_value_iteration(SparseMatrix* ma, bool max) {
 		locks[i]=false;
 	}
 	
-	cout << "start value iteration" << endl;
+	std::cout << "start value iteration" << std::endl;
 	
 	bool done=false;
 	
@@ -343,81 +417,5 @@ Real expected_time_value_iteration(SparseMatrix* ma, bool max) {
 
     free(locks);
 	 
-	return obj;
-}
-
-
-/**
-* Computes expected time for MA.
-*
-* @param ma file to read MA from
-* @param max identifier for min or max
-* @return expected time
-*/
-Real compute_expected_time(SparseMatrix* ma, bool max) {
-	SoPlex lp_model;
-	bool *locks;
-	if(max) {
-		locks=compute_locks_weak(ma);
-	} else {
-		locks=compute_locks_strong(ma);
-	}
-	// printf("LP computation start.\n");
-	
-	/*for (unsigned int x = 0; x < ma->n; x++) {
-		if(locks[x]){
-			cout << x << endl;
-		}
-	}*/
-	
-	/* first step: build the lp model */
-	set_obj_function_ext(lp_model,ma,max,locks);
-	set_constraints_ext(lp_model,ma,max,locks);
-	
-	//lp_model.writeFile("file.lp", NULL, NULL, NULL);
-	// TODO: find out why LP model causes segfault in some cases (temporary BUGFIX: load model from file)
-	//lp_model.readFile("file.lp");
-	
-	/* solve the LP */
-	SPxSolver::Status stat;
-	//lp_model.setDelta(1e-6);
-	stat = lp_model.solve();
-	
-	//print_lp_info(lp_model);	
-	
-	/* find the max or min prob. for an initial state */
-	Real obj;
-	double inf = soplex::infinity;
-	if(max)
-		obj=0;
-	else
-		obj=inf;
-		
-	/* show if optimal solution */
-	if( stat == SPxSolver::OPTIMAL ) {
-		printf("LP solved to optimality.\n\n");
-		//printf("Objective value is %lf.\n",lp_model.objValue());
-		
-		DVector probs(lp_model.nCols());
-		lp_model.getPrimal(probs);
-		
-		bool *initials = ma->initials;
-		unsigned long state_nr;
-		for (state_nr = 0; state_nr < ma->n; state_nr++) {
-			if(initials[state_nr]){
-				Real tmp = probs[state_nr];
-				if(max && tmp > obj)
-					obj=tmp;
-				else if(!max && tmp < obj)
-					obj = tmp;
-			}
-		}
-		
-	} else if ( stat == SPxSolver::INFEASIBLE) {
-		fprintf(stderr, "LP is infeasible.\n\n");
-	}
-	
-	free(locks);
-
 	return obj;
 }

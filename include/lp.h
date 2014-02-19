@@ -24,6 +24,9 @@ using namespace soplex;
 // define location in Makefile
 #include "lp_lib.h"
 
+typedef double Real;
+const double infinity = 1e7;
+
 #endif
 
 #endif /* LP_H_ */

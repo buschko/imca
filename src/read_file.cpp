@@ -25,17 +25,16 @@
 
 #include "read_file.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
 #include <map>
-#include <string>
 #include <vector>
+#include <iostream>
 
 #include "debug.h"
 
-using namespace std;
+using std::map;
+using std::pair;
+using std::vector;
+using std::string;
 
 /**
 * Read number of states and create a hash table for state names.
@@ -189,8 +188,8 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 			sscanf(s, "%s%s", star, state);
 			ret=tmp.insert(pair<string,unsigned long>(state,state_nr));
 			if(ret.second == true){
-				cout << "Deadlock: " << state << "    State nr = " << state_nr << endl;
-				//cout << "";
+				std::cout << "Deadlock: " << state << "    State nr = " << state_nr << std::endl;
+				//std::cout << "";
 				deadlock=true;
 				tmp_nr.insert(pair<unsigned long,string>(state_nr,state));
 				(*deadlocks).push_back(state_nr);

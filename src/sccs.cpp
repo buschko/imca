@@ -24,19 +24,12 @@
 */
 
 #include "sccs.h"
-#include "sccs2.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <map>
-#include <string>
-#include <vector>
 
 #include "debug.h"
 
-using namespace std;
+#include <vector>
+
+using std::vector;
 
 /**
  * test if element is in vector

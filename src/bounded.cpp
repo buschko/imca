@@ -30,6 +30,9 @@
 #include "sccs.h"
 #include <math.h>
 #include <vector>
+#include <iostream>
+
+using std::vector;
 
 /**
 * sets the error bound for given epsilon and tb
@@ -395,7 +398,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 	vector< vector<unsigned long> > reach;
 	bool *locks;
 	if(is_imc) {
-		cout << "precomputation" << endl;
+		std::cout << "precomputation" << std::endl;
 		if(max){
 			locks=compute_locks_strong(ma);
 			//{s' in S | s ~>i* s'}
@@ -407,7 +410,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 		}
 	}
 	
-	cout << "start value iteration" << endl;
+	std::cout << "start value iteration" << std::endl;
 	if( ta > 0 ) {
 		//TODO one unique function that tell you what should be tau1 and what tau2
 		// compute the upper bound of discretization step
@@ -429,13 +432,13 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 		
 		//unsigned long interval_step = round(interval/current_tau);
 		//unsigned long counter=0;
-		//cout << "interval step: " << interval_step <<endl;
+		//std::cout << "interval step: " << interval_step <<std::endl;
 
 
 		// value iteration
-		cout << "iterations: " << (unsigned long) ceil((tb - ta) / tau) + (unsigned long) ceil(ta / tau) << endl;
+		std::cout << "iterations: " << (unsigned long) ceil((tb - ta) / tau) + (unsigned long) ceil(ta / tau) << std::endl;
 		printf("step duration for interval [%g,%g]: %g\n", ta, tb, current_tau);
-		cout << "iterations: " << (unsigned long) ceil((tb - ta) / tau) << endl;
+		std::cout << "iterations: " << (unsigned long) ceil((tb - ta) / tau) << std::endl;
 		
 		for(unsigned long i=0; i < steps; i++){
 			// compute v for Markovian states: from b dwon to a, we make discrete model absorbing
@@ -458,7 +461,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 					prob=1;
 				bool *initials = ma->initials;
 				for (unsigned long state_nr = 0; state_nr < num_states; state_nr++) {
-					//cout << (ma->states_nr.find(state_nr)->second).c_str() << ": " << u[state_nr] << endl;
+					//std::cout << (ma->states_nr.find(state_nr)->second).c_str() << ": " << u[state_nr] << std::endl;
 					if(initials[state_nr]){
 					if(max){
 						if(prob<u[state_nr])
@@ -492,7 +495,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 		//print_model(discrete_ma);
 
 		printf("step duration for interval [0,%g]: %g\n", ta, current_tau);
-		cout << "iterations: " << (unsigned long) ceil( (ta + current_tau) / tau) << endl;
+		std::cout << "iterations: " << (unsigned long) ceil( (ta + current_tau) / tau) << std::endl;
 
 		for(unsigned long i=0; i < steps; ++i){
 			// compute v for Markovian states: shift up to a, we don't make discrete model absorbing
@@ -515,7 +518,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 					prob=1;
 				bool *initials = ma->initials;
 				for (unsigned long state_nr = 0; state_nr < num_states; state_nr++) {
-					//cout << (ma->states_nr.find(state_nr)->second).c_str() << ": " << u[state_nr] << endl;
+					//std::cout << (ma->states_nr.find(state_nr)->second).c_str() << ": " << u[state_nr] << std::endl;
 					if(initials[state_nr]){
 					if(max){
 						if(prob<u[state_nr])
@@ -551,15 +554,15 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 
 		// value iteration
 		unsigned long steps_for_interval = round(tb/tau);
-		cout << "iterations: " << steps_for_interval<< endl;
-		cout << "step duration: " << tau <<endl;
+		std::cout << "iterations: " << steps_for_interval<< std::endl;
+		std::cout << "step duration: " << tau <<std::endl;
 		unsigned long interval_step = round(interval/tau);
 		unsigned long interval_start_point = round(interval_start/tau);
 		unsigned long counter=0;
 		Real tmp_step = interval;
 		Real tmp_interval=interval_start;
-		cout << "interval step: " << interval_step <<endl;
-		cout << "interval start: " << interval_start_point << endl;
+		std::cout << "interval step: " << interval_step <<std::endl;
+		std::cout << "interval start: " << interval_start_point << std::endl;
 		
 		
 		for(unsigned long i=0; i <= steps_for_interval; i++){
@@ -583,7 +586,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 					prob=1;
 				bool *initials = ma->initials;
 				for (unsigned long state_nr = 0; state_nr < num_states; state_nr++) {
-					//cout << (ma->states_nr.find(state_nr)->second).c_str() << ": " << u[state_nr] << endl;
+					//std::cout << (ma->states_nr.find(state_nr)->second).c_str() << ": " << u[state_nr] << std::endl;
 					if(initials[state_nr]){
 					if(max){
 						if(prob<u[state_nr])
@@ -620,7 +623,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 	bool *initials = ma->initials;
 	printf("vector(%d) [",num_states);
 	for (unsigned long state_nr = 0; state_nr < num_states; state_nr++) {
-		//cout << (ma->states_nr.find(state_nr)->second).c_str() << ": " << u[state_nr] << endl;
+		//std::cout << (ma->states_nr.find(state_nr)->second).c_str() << ": " << u[state_nr] << std::endl;
 		printf(" %lf,",u[state_nr]);
 		if(initials[state_nr]){
 			if(max){

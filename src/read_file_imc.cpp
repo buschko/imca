@@ -26,14 +26,14 @@
 #include "read_file_imc.h"
 #include "read_file.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
 #include <map>
 #include <string>
+#include <vector>
 
-using namespace std;
+using std::map;
+using std::pair;
+using std::vector;
+using std::string;
 
 /**
 * Read number of states and create a hash table for state names.
@@ -648,7 +648,9 @@ SparseMatrix *read_IMC_SparseMatrix_file(const char *filename)
 		model = NULL;
 	}else{
 		//print_model(model);
+#ifdef __SOPLEX__
 		print_model_info(model);
+#endif //__SOPLEX__
 	}
 	
 	//print_model(model);

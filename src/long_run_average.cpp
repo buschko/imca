@@ -32,19 +32,15 @@
 #include <map>
 #include <string>
 #include <vector>
-
-#ifdef __SOPLEX__
-#include "soplex.h"
-#endif
+#include <iostream>
 
 #include "sccs.h"
 #include "sccs2.h"
 #include "read_file.h"
 #include "debug.h"
 
-using namespace std;
-using namespace soplex;
 
+#ifdef __SOPLEX__
 /**
 * sets the objective function and bounds for goal states
 *
@@ -534,9 +530,9 @@ Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC 
 		
 		for (state_nr = 0; state_nr < ma->n; state_nr++) {
 			if(initials[state_nr] && !mec[state_nr]){
-				//cout << ssp_nr.find(state_nr)->second << endl;
+				//std::cout << ssp_nr.find(state_nr)->second << std::endl;
 				Real tmp = probs[ssp_nr.find(state_nr)->second];
-				//cout << tmp << endl;
+				//std::cout << tmp << std::endl;
 				if(max && tmp > obj)
 					obj=tmp;
 				else if(!max && tmp < obj)
@@ -562,6 +558,105 @@ Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC 
 	
 	return obj;
 }
+
+/**
+* Computes long-run average for MA.
+*
+* @param ma file to read MA from
+* @param max identifier for min or max
+* @return lra
+*/
+Real compute_long_run_average(SparseMatrix *ma, bool max) {
+	bool *locks;
+	if(max) {
+		locks=compute_locks_strong(ma);
+	} else {
+		locks=compute_locks_weak(ma);
+	}
+
+	printf("MEC computation start.\n");
+	SparseMatrixMEC *mecs;
+	if(max) {
+		//mecs=compute_maximal_end_components(ma);
+		//mecs=compute_maximal_end_components2(ma);
+		mecs=mEC_decomposition_previous_algorithm(ma);
+	} else {
+		//mecs=compute_bottom_strongly_connected_components(ma);
+		//mecs=compute_maximal_end_components2(ma);
+		//mecs=compute_maximal_end_components(ma);
+		mecs=mEC_decomposition_previous_algorithm(ma);
+	}
+
+	printf("LP computation start.\n");
+	vector<bool> mec(ma->n,false);
+	vector<bool> mec_tmp(ma->n,false);
+	vector<Real> lra_mec(mecs->n);
+
+	unsigned long *row_starts = (unsigned long *) mecs->row_counts;
+	unsigned long *cols = mecs->cols;
+
+
+	/* TODO: Problem with LRA computation for some models! Need to be solved! */
+	for(unsigned long mec_nr=0; mec_nr < mecs->n; mec_nr++) {
+		unsigned long mec_start = row_starts[mec_nr];
+		unsigned long mec_end = row_starts[mec_nr + 1];
+		for(unsigned long state_nr=mec_start; state_nr < mec_end; state_nr++) {
+			mec[cols[state_nr]]=true;
+			//printf("%s\n",(ma->states_nr.find(cols[state_nr])->second).c_str());
+		}
+		SoPlex lp_model;
+		/* first step: build the lp model */
+		dbg_printf("set obj\n");
+		set_obj_function_lra(lp_model,ma,max,mec,locks);
+		dbg_printf("set const\n");
+		set_constraints_lra(lp_model,ma,max,mec,locks);
+		if(max){
+			//lp_model.writeFile("filemax.lp", NULL, NULL, NULL);
+			//lp_model.clear();
+			// TODO: find out why LP model causes segfault in some cases (temorary BUGFIX: load model from file)
+			//lp_model.readFile("filemax.lp");
+		}else {
+			//lp_model.writeFile("filemin.lp", NULL, NULL, NULL);
+			//lp_model.clear();
+			// TODO: find out why LP model causes segfault in some cases (temorary BUGFIX: load model from file)
+			//lp_model.readFile("filemin.lp");
+		}
+		dbg_printf("solve\n");
+		/* solve the LP */
+		SPxSolver::Status stat;
+		lp_model.setDelta(1e-6);
+		stat = lp_model.solve();
+		dbg_printf("LRA Mec %ld: %.10lg\n",mec_nr+1,lp_model.objValue());
+		printf("LRA Mec %ld: %.10lg\n",mec_nr+1,lp_model.objValue());
+		//std::cout << long_run_average_value_iteration(ma,max) << std::cout;
+		lra_mec[mec_nr]=lp_model.objValue();
+
+        /* DEBUG OUTPUT */
+		/*DVector probs(lp_model.nCols());
+         lp_model.getPrimal(probs);
+         unsigned long state_nr;
+         for (state_nr = 0; state_nr < ma->n; state_nr++) {
+         Real tmp = probs[state_nr];
+         std::cout << state_nr << ": prob " << tmp << std::endl;
+         }*/
+
+		mec=mec_tmp;
+		//lp_model.clear();
+		//lp_model.clearBasis();
+	}
+
+	dbg_printf("SSP\n");
+	Real lra=0;
+	lra = compute_stochastic_shortest_path_problem(ma,mecs,lra_mec,max);
+	dbg_printf("SSP end\n");
+	free(locks);
+    SparseMatrixMEC_free(mecs);
+	delete(mecs);
+
+	return lra;
+}
+
+#endif //__SOPLEX__
 
 /**
 * computes one step for Markovian states
@@ -613,9 +708,9 @@ void compute_markovian_vector_lra(SparseMatrix* ma, vector<Real>& v, const vecto
 					//tmp += ((non_zeros[i]/exit_rate) * u[cols[i]]) * exit_rate;
 				}
 				v[state_nr] -= (1.0/exit_rate) * u[k];
-				cout << "state: " << state_nr << ": " << v[state_nr] << endl;
+				std::cout << "state: " << state_nr << ": " << v[state_nr] << std::endl;
 				//tmp -= exit_rate * u[state_nr];
-				//cout << "tmp: " << tmp << endl;
+				//std::cout << "tmp: " << tmp << std::endl;
 				//if(lra > tmp && tmp >= 0)
 				//	lra = tmp;
 			}
@@ -649,13 +744,13 @@ void compute_markovian_vector_lra(SparseMatrix* ma, vector<Real>& v, const vecto
 					tmp += 1.0;
 				}
 				tmp -= exit_rate * v[state_nr];
-				cout << "tmp: " << tmp << endl;
+				std::cout << "tmp: " << tmp << std::endl;
 				if(lra < tmp && tmp >= 0 && tmp <= 1)
 					lra = tmp;
 			}
 		}
 	}
-	cout << "lra: " << lra << endl;
+	std::cout << "lra: " << lra << std::endl;
 	if(v[k] < lra)
 		v[k] = lra;
 }
@@ -790,7 +885,7 @@ Real long_run_average_value_iteration(SparseMatrix* ma, bool max) {
 		locks=compute_locks_strong(ma);
 	}
 	
-	cout << "start value iteration" << endl;
+	std::cout << "start value iteration" << std::endl;
 	
 	bool done=false;
 	
@@ -801,7 +896,7 @@ Real long_run_average_value_iteration(SparseMatrix* ma, bool max) {
 		compute_markovian_vector_lra(ma,v,u,locks);
 		// compute u for Probabilistic states
 		compute_probabilistic_vector_lra(ma,v,u,max,locks);
-		cout << "LRA: " << u[k] << endl;
+		std::cout << "LRA: " << u[k] << std::endl;
 		if(tmp==u)
 			done=true;
 	}
@@ -856,7 +951,7 @@ Real long_run_average_ssp_value_iteration(SparseMatrix *ma, SparseMatrixMEC *mec
 		locks=compute_locks_strong(ma);
 	}
 	
-	cout << "start value iteration" << endl;
+	std::cout << "start value iteration" << std::endl;
 	
 	bool done=false;
 	
@@ -867,107 +962,10 @@ Real long_run_average_ssp_value_iteration(SparseMatrix *ma, SparseMatrixMEC *mec
 		compute_markovian_vector_lra(ma,v,u,locks);
 		// compute u for Probabilistic states
 		compute_probabilistic_vector_lra(ma,v,u,max,locks);
-		cout << "LRA: " << u[k] << endl;
+		std::cout << "LRA: " << u[k] << std::endl;
 		if(tmp==u)
 			done=true;
 	}
 	 
 	return u[k];
-}
-
-/**
-* Computes long-run average for MA.
-*
-* @param ma file to read MA from
-* @param max identifier for min or max
-* @return lra
-*/
-Real compute_long_run_average(SparseMatrix *ma, bool max) {	
-	bool *locks;
-	if(max) {
-		locks=compute_locks_strong(ma);
-	} else {
-		locks=compute_locks_weak(ma);
-	}
-	
-	printf("MEC computation start.\n");
-	SparseMatrixMEC *mecs;
-	if(max) {
-		//mecs=compute_maximal_end_components(ma);
-		//mecs=compute_maximal_end_components2(ma);
-		mecs=mEC_decomposition_previous_algorithm(ma);
-	} else {
-		//mecs=compute_bottom_strongly_connected_components(ma);
-		//mecs=compute_maximal_end_components2(ma);
-		//mecs=compute_maximal_end_components(ma);
-		mecs=mEC_decomposition_previous_algorithm(ma);
-	}
-	
-	printf("LP computation start.\n");
-	vector<bool> mec(ma->n,false);
-	vector<bool> mec_tmp(ma->n,false);
-	vector<Real> lra_mec(mecs->n);
-	
-	unsigned long *row_starts = (unsigned long *) mecs->row_counts;
-	unsigned long *cols = mecs->cols;
-	
-	
-	/* TODO: Problem with LRA computation for some models! Need to be solved! */
-	for(unsigned long mec_nr=0; mec_nr < mecs->n; mec_nr++) {
-		unsigned long mec_start = row_starts[mec_nr];
-		unsigned long mec_end = row_starts[mec_nr + 1];
-		for(unsigned long state_nr=mec_start; state_nr < mec_end; state_nr++) {
-			mec[cols[state_nr]]=true;
-			//printf("%s\n",(ma->states_nr.find(cols[state_nr])->second).c_str());
-		}
-		SoPlex lp_model;
-		/* first step: build the lp model */
-		dbg_printf("set obj\n");
-		set_obj_function_lra(lp_model,ma,max,mec,locks);
-		dbg_printf("set const\n");
-		set_constraints_lra(lp_model,ma,max,mec,locks);
-		if(max){
-			//lp_model.writeFile("filemax.lp", NULL, NULL, NULL);
-			//lp_model.clear();
-			// TODO: find out why LP model causes segfault in some cases (temorary BUGFIX: load model from file)
-			//lp_model.readFile("filemax.lp");
-		}else {
-			//lp_model.writeFile("filemin.lp", NULL, NULL, NULL);
-			//lp_model.clear();
-			// TODO: find out why LP model causes segfault in some cases (temorary BUGFIX: load model from file)
-			//lp_model.readFile("filemin.lp");
-		}
-		dbg_printf("solve\n");
-		/* solve the LP */
-		SPxSolver::Status stat;
-		lp_model.setDelta(1e-6);
-		stat = lp_model.solve();
-		dbg_printf("LRA Mec %ld: %.10lg\n",mec_nr+1,lp_model.objValue());
-		printf("LRA Mec %ld: %.10lg\n",mec_nr+1,lp_model.objValue());
-		//cout << long_run_average_value_iteration(ma,max) << cout;
-		lra_mec[mec_nr]=lp_model.objValue();
-        
-        /* DEBUG OUTPUT */
-		/*DVector probs(lp_model.nCols());
-         lp_model.getPrimal(probs);
-         unsigned long state_nr;
-         for (state_nr = 0; state_nr < ma->n; state_nr++) {
-         Real tmp = probs[state_nr];
-         cout << state_nr << ": prob " << tmp << endl;
-         }*/
-        
-		mec=mec_tmp;
-		//lp_model.clear();
-		//lp_model.clearBasis();
-	}
-	
-	dbg_printf("SSP\n");
-	Real lra=0;
-	lra = compute_stochastic_shortest_path_problem(ma,mecs,lra_mec,max);
-	dbg_printf("SSP end\n");
-	free(locks);
-    SparseMatrixMEC_free(mecs);
-	delete(mecs);
-
-	return lra;
 }

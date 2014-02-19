@@ -31,12 +31,6 @@
 
 #include "sparse.h"
 
-#ifdef __SOPLEX__
-#include "soplex.h"
-#endif
-
-using namespace soplex;
-
 /**
  * Compute BSCCs with respect to a set of bad states
  * 

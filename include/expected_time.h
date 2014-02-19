@@ -30,13 +30,9 @@
 #define EXPECTED_TIME_H
 
 #include "sparse.h"
+#include "lp.h"
 
 #ifdef __SOPLEX__
-#include "soplex.h"
-#endif
-
-using namespace soplex;
-
 /**
 * Computes expected time for MA.
 *
@@ -45,6 +41,7 @@ using namespace soplex;
 * @return expected time 
 */
 extern Real compute_expected_time(SparseMatrix*, bool);
+#endif //__SOPLEX__
 
 extern Real expected_time_value_iteration(SparseMatrix*, bool);
 

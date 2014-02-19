@@ -36,17 +36,7 @@
 #include <string>
 //#include <popt.h>
 
-
-// choose between SoPlex and LP_solve
-#ifdef __SOPLEX__
-#include "soplex.h"
-#else
-// have to include gmp for REAL arithmetic
-#include "gmp.h"
-#include <math.h>
-// define location in Makefile
-#include "/opt/local/include/lpsolve/lp_lib.h"
-#endif
+#include "lp.h"
 
 #ifndef __APPLE__
 #include <malloc.h>
@@ -519,6 +509,7 @@ int main(int argc, char* argv[]) {
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
 			printf("\nCompute maximal unbounded reachability, please wait.\n");
+#ifdef __SOPLEX__
 			if(!is_val){
 				tmp = compute_unbounded_reachability(ma,true);	
 				printf("Maximal unbounded reachability: %.10g\n", tmp);
@@ -526,6 +517,10 @@ int main(int argc, char* argv[]) {
 				tmp=unbounded_value_iteration(ma,true);
 				printf("Maximal unbounded reachability: %.10g\n", tmp);
 			}
+#else
+			tmp=unbounded_value_iteration(ma,true);
+			printf("Maximal unbounded reachability: %.10g\n", tmp);
+#endif //__SOPLEX__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -540,6 +535,8 @@ int main(int argc, char* argv[]) {
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
 			printf("\nCompute minimal unbounded reachability, please wait.\n");	
+
+#ifdef __SOPLEX__
 			if(!is_val){
 				tmp = compute_unbounded_reachability(ma,false);
 				printf("Minimal unbounded reachability: %.10g\n", tmp);
@@ -547,6 +544,10 @@ int main(int argc, char* argv[]) {
 				tmp=unbounded_value_iteration(ma,false);
 				printf("Minimal unbounded reachability: %.10g\n", tmp);
 			}
+#else
+			tmp=unbounded_value_iteration(ma,false);
+			printf("Minimal unbounded reachability: %.10g\n", tmp);
+#endif //__SOPLEX__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -563,6 +564,8 @@ int main(int argc, char* argv[]) {
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
 			printf("\nCompute maximal expected time, please wait.\n");
+
+#ifdef __SOPLEX__
 			if(!is_val){
 				tmp = compute_expected_time(ma,true);
 				printf("Maximal expected time: %.10g\n", tmp);
@@ -570,6 +573,10 @@ int main(int argc, char* argv[]) {
 				tmp=expected_time_value_iteration(ma,true);
 				printf("Maximal expected time value iteration: %.10g\n", tmp);
 			}
+#else
+			tmp=expected_time_value_iteration(ma,true);
+			printf("Maximal expected time value iteration: %.10g\n", tmp);
+#endif //__SOPLEX__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -584,6 +591,7 @@ int main(int argc, char* argv[]) {
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
 			printf("\nCompute minimal expected time, please wait.\n");
+#ifdef __SOPLEX__
 			if(!is_val) {
 				tmp = compute_expected_time(ma,false);
 				printf("Minimal expected time: %.10g\n\n", tmp);
@@ -591,6 +599,10 @@ int main(int argc, char* argv[]) {
 				tmp=expected_time_value_iteration(ma,false);
 				printf("Minimal expected time value iteration: %.10g\n", tmp);
 			}
+#else
+			tmp=expected_time_value_iteration(ma,false);
+			printf("Minimal expected time value iteration: %.10g\n", tmp);
+#endif //__SOPLEX__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -640,9 +652,13 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
+#ifdef __SOPLEX__
 			printf("\nCompute maximal LRA, please wait.\n");
 			tmp=compute_long_run_average(ma,true);
 			printf("Maximal LRA: %.10g\n", tmp);
+#else
+			printf("LRA not supported without compiled LP solver support\n");
+#endif //__SOPLEX__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -656,9 +672,13 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
+#ifdef __SOPLEX__
 			printf("\nCompute minimal LRA, please wait.\n");
 			tmp=compute_long_run_average(ma,false);
 			printf("Minimal LRA: %.10g\n", tmp);
+#else
+			printf("LRA not supported without compiled LP solver support\n");
+#endif //__SOPLEX__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -692,9 +712,13 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
+#ifdef __SOPLEX__
 			printf("\nCompute maximal LRR, please wait.\n");
 			tmp=compute_long_run_reward(ma,true);
 			printf("Maximal LRR: %.10g\n", tmp);
+#else
+			printf("LRW not supported without compiled LP solver support\n");
+#endif //__SOPLEX__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -708,9 +732,13 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
+#ifdef __SOPLEX__
 			printf("\nCompute minimal LRR, please wait.\n");
 			tmp=compute_long_run_reward(ma,false);
 			printf("Minimal LRR: %.10g\n", tmp);
+#else
+			printf("LRW not supported without compiled LP solver support\n");
+#endif //__SOPLEX__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;

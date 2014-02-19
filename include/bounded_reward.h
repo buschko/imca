@@ -31,9 +31,7 @@
 #define BOUNDED_REWARD_H
 
 #include "sparse.h"
-#include "soplex.h"
-
-using namespace soplex;
+#include "lp.h"
 
 extern Real compute_time_bounded_reward_reachability(SparseMatrix* ma, bool max, Real epsilon, Real ta, Real tb, bool is_imc, Real interval,Real interval_start);
 
