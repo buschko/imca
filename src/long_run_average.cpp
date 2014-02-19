@@ -60,17 +60,17 @@ static void set_obj_function_lra(SoPlex& lp_model, SparseMatrix *ma, bool max, v
 	
 	/* set objective function to max, resp. min */
 	if(max)
-		lp_model.changeSense(SPxLP::MINIMIZE);
+		lp_model.changeSense(soplex::SPxLP::MINIMIZE);
 	else
-		lp_model.changeSense(SPxLP::MAXIMIZE);
+		lp_model.changeSense(soplex::SPxLP::MAXIMIZE);
 	
 	/* set objective and bounds resp. to goal states*/
 	for (state_nr = 0; state_nr < ma->n; state_nr++) {
-		if(locks[state_nr] && mec[state_nr]){
-			lp_model.addCol(LPCol(0.0, dummycol, 0, 0));
-		} else {
+		//if(locks[state_nr] && mec[state_nr]){
+		//	lp_model.addCol(LPCol(0.0, dummycol, 0, 0));
+		//} else {
 			lp_model.addCol(LPCol(0.0, dummycol, inf, 0));
-		}
+		//}
 		
 	}
 	lp_model.addCol(LPCol(1.0, dummycol, inf, 0));
@@ -93,9 +93,9 @@ static void set_obj_function_ssp(SoPlex& lp_model, SparseMatrix *ma, SparseMatri
 	
 	/* set objective function to max, resp. min */
 	if(max)
-		lp_model.changeSense(SPxLP::MINIMIZE);
+		lp_model.changeSense(soplex::SPxLP::MINIMIZE);
 	else
-		lp_model.changeSense(SPxLP::MAXIMIZE);
+		lp_model.changeSense(soplex::SPxLP::MAXIMIZE);
 	
 	/* set objective and bounds resp. to goal states*/
 	/*
@@ -483,7 +483,7 @@ Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC 
 	set_constraints_ssp(lp_model,ma,mecs,max,mec,locks,lra,ssp_nr,mecNr,lra_mec);
 
 	/* solve the LP */
-	SPxSolver::Status stat;
+	soplex::SPxSolver::Status stat;
 	dbg_printf("solve model\n");
 	stat = lp_model.solve();
 	
@@ -495,11 +495,11 @@ Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC 
 		obj=1;
 			
 	/* show if optimal solution */
-	if( stat == SPxSolver::OPTIMAL ) {
+	if( stat == soplex::SPxSolver::OPTIMAL ) {
 		printf("LP solved to optimality.\n\n");
 		//printf("Objective value is %lf.\n",lp_model.objValue());
 		//printf("before\n");
-		DVector probs(lp_model.nCols());
+		soplex::DVector probs(lp_model.nCols());
 		lp_model.getPrimal(probs);
 		
 		for (state_nr = 0; state_nr < ma->n; state_nr++) {
@@ -520,7 +520,7 @@ Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC 
 			}
 		}
 		//printf("after\n");
-	} else if ( stat == SPxSolver::INFEASIBLE) {
+	} else if ( stat == soplex::SPxSolver::INFEASIBLE) {
 		fprintf(stderr, "LP is infeasible.\n\n");
 	} else {
 		obj = 0;
@@ -597,7 +597,7 @@ Real compute_long_run_average(SparseMatrix *ma, bool max) {
 		}
 		dbg_printf("solve\n");
 		/* solve the LP */
-		SPxSolver::Status stat;
+		soplex::SPxSolver::Status stat;
 		lp_model.setDelta(1e-6);
 		stat = lp_model.solve();
 		dbg_printf("LRA Mec %ld: %.10lg\n",mec_nr+1,lp_model.objValue());
