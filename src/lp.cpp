@@ -9,6 +9,9 @@
 
 #include <assert.h>
 
+// Definme the actual Real infinity here
+const Real infinity = 1e100;
+
 LPObjective::LPObjective(unsigned long nrCols) :
 	m_cols(nrCols)
 {

@@ -30,7 +30,7 @@
 #define UNBOUNDED_H
 
 #include "sparse.h"
-#include "lp.h"
+#include "real.h"
 
 /**
 * Computes unbounded reachability for MA.

@@ -10,6 +10,8 @@
 #ifndef LP_H_
 #define LP_H_
 
+#include "real.h"
+
 // choose between SoPlex and LP_solve
 #ifdef __SOPLEX__
 
@@ -21,14 +23,9 @@ using soplex::LPRow;
 using soplex::LPCol;
 using soplex::Real;
 
-using soplex::infinity;
-
 #else
 
 #include "lp_lib.h"
-
-typedef REAL Real;
-const Real infinity = 1e7;
 
 #endif
 

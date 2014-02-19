@@ -30,7 +30,7 @@
 #define EXPECTED_TIME_H
 
 #include "sparse.h"
-#include "lp.h"
+#include "real.h"
 
 #ifdef __SOPLEX__
 /**

@@ -30,7 +30,7 @@
 #define EXPECTED_REWARD_H
 
 #include "sparse.h"
-#include "lp.h"
+#include "real.h"
 
 /**
 * Computes expected reward for MA with rewards.

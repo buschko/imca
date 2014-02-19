@@ -33,7 +33,7 @@
 #include <map>
 #include <string>
 
-#include "lp.h"
+#include "real.h"
 
 using std::map;
 using std::string;

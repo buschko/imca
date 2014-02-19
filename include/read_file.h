@@ -30,6 +30,7 @@
 #define READ_FILE_H
 
 #include "sparse.h"
+#include "lp.h"
 
 #define MAX_LINE_LENGTH 1024
 #define MARKOV_ACTION "!"
