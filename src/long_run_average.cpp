@@ -33,12 +33,16 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 #include "sccs.h"
 #include "sccs2.h"
 #include "read_file.h"
 #include "debug.h"
 
+using std::pair;
+using std::ofstream;
+using std::ifstream;
 
 #ifdef __SOPLEX__
 /**
@@ -160,9 +164,9 @@ static void set_constraints_lra(SoPlex& lp_model, SparseMatrix *ma, bool max, ve
 	unsigned long *cols = ma->cols;
 	Real prob;
 	Real rate;
-	int m=0; // greater equal 0
+	LPRow::Type m=LPRow::LESS_EQUAL; // greater equal 0
 	if(!max)
-		m=2; // less equal 0
+		m=LPRow::GREATER_EQUAL; // less equal 0
 	
 	
 	//DSVector row(states+1);
@@ -182,12 +186,10 @@ static void set_constraints_lra(SoPlex& lp_model, SparseMatrix *ma, bool max, ve
 				for (i = i_start; i < i_end; i++) {
 					if(mec[cols[i]]) {
 						prob=non_zeros[i];
-						rate=0;
 						unsigned long r_start = rate_starts[state_nr];
 						unsigned long r_end = rate_starts[state_nr + 1];
 						for (unsigned long j = r_start; j < r_end; j++) {
 							prob /= exit_rates[j];
-							rate = -1/exit_rates[j];
 						}
 						//printf("%s - %lf -> %s\n",(states_nr.find(state_nr)->second).c_str(),prob,(states_nr.find(cols[i])->second).c_str());
 						if(state_nr==cols[i]) {
@@ -213,12 +215,12 @@ static void set_constraints_lra(SoPlex& lp_model, SparseMatrix *ma, bool max, ve
 					if(rate < 0)
 						row.add(ma->n,rate);
 					if(goals[state_nr]) {
-						lp_model.addRow(LPRow(row,LPRow::Type(m), rate));
+						lp_model.addRow(LPRow(row,m, rate));
 					} else {
-						lp_model.addRow(LPRow(row,LPRow::Type(m), 0));
+						lp_model.addRow(LPRow(row,m, 0));
 					}
 				}
-				row.~DSVector();
+//				row.~DSVector();
 				bad=false;
 			}
 		}
@@ -485,7 +487,7 @@ Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC 
 	set_obj_function_ssp(lp_model,ma,mecs,max,mec,lra,locks,ssp_nr);
 	dbg_printf("make constraints\n");
 	set_constraints_ssp(lp_model,ma,mecs,max,mec,locks,lra,ssp_nr,mecNr,lra_mec);
-	
+
 	string name = getEnvVar("TMPDIR")+"tmpfileXXXXXX";
 	char *tmpname = strdup(name.c_str());
 	mkstemp(tmpname);
@@ -507,7 +509,7 @@ Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC 
 	if( remove( tmpname ) != 0 )
 		perror( "Error deleting file" );
 	
-	
+
 	/* solve the LP */
 	SPxSolver::Status stat;
 	dbg_printf("solve model\n");
