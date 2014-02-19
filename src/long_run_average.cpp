@@ -428,12 +428,6 @@ static void set_constraints_ssp(SoPlex& lp_model, SparseMatrix *ma,SparseMatrixM
 	
 }
 
-string getEnvVar( std::string const & key )
-{
-    char * val = getenv( key.c_str() );
-    return val == NULL ? std::string("") : std::string(val);
-}
-
 Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC *mecs, vector<Real> lra_mec, bool max) {
 	SoPlex lp_model;
 	vector<bool> mec(ma->n,false);
@@ -487,28 +481,6 @@ Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC 
 	set_obj_function_ssp(lp_model,ma,mecs,max,mec,lra,locks,ssp_nr);
 	dbg_printf("make constraints\n");
 	set_constraints_ssp(lp_model,ma,mecs,max,mec,locks,lra,ssp_nr,mecNr,lra_mec);
-
-	string name = getEnvVar("TMPDIR")+"tmpfileXXXXXX";
-	char *tmpname = strdup(name.c_str());
-	mkstemp(tmpname);
-	ofstream fileW(tmpname);
-	
-	lp_model.writeLPF(fileW, NULL, NULL, NULL);
-	
-	fileW.close();
-
-	//lp_model.writeFile("file.lp", NULL, NULL, NULL);
-	// TODO: find out why LP model causes segfault in some cases (temorary BUGFIX: load model from file)
-	//lp_model.readFile("file.lp");
-	
-	ifstream fileR(tmpname);
-	
-	lp_model.readLPF(fileR,NULL,NULL,NULL);
-	
-	fileR.close();
-	if( remove( tmpname ) != 0 )
-		perror( "Error deleting file" );
-	
 
 	/* solve the LP */
 	SPxSolver::Status stat;

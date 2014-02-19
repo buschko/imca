@@ -33,11 +33,16 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 #include "sccs.h"
 #include "sccs2.h"
 #include "read_file.h"
 #include "debug.h"
+
+using std::pair;
+using std::ofstream;
+using std::ifstream;
 
 #ifdef __SOPLEX__
 /**
