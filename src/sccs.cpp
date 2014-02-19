@@ -555,10 +555,9 @@ bool* compute_locks_strong(SparseMatrix *ma) {
 			bad[i]=true;
 	}
 
-	bool *tmp=compute_locks_strong(ma, bad);
+	bool *locks = compute_locks_strong(ma, bad);
 	free(bad);
-
-	return tmp;
+	return locks;
 }
 
 /**
@@ -680,7 +679,10 @@ bool* compute_locks_strong(SparseMatrix *ma, bool* bad) {
 	
 	dbg_printf("\n");
 	
+<<<<<<< HEAD
 	//free(bad);
+=======
+>>>>>>> Fix double free
 	free(bad_dist);
 	
 	return locks;
@@ -701,11 +703,10 @@ bool* compute_locks_weak(SparseMatrix *ma) {
 		if(goals[i])
 			bad[i]=true;
 	}
-	
-	bool* tmp=compute_locks_weak(ma, bad);
-	free(bad);
 
-	return tmp;
+	bool *locks = compute_locks_weak(ma, bad);
+	free(bad);
+	return locks;
 }
 
 /**
