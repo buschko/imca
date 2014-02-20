@@ -29,13 +29,18 @@ struct CmpConstrCol {
 	}
 };
 
-LPObjective::LPObjective(unsigned long nrCols) :
-	m_nrCols(nrCols)
+LPObjective::LPObjective() :
+	m_maxCol(0)
 {
+}
+
+LPObjective::~LPObjective() {
 }
 
 //bound = upper bound (lower = 0.0)
 void LPObjective::setCol(unsigned long index, Real value, Real bound) {
+	if ((index+1) > m_maxCol)
+		m_maxCol = index+1;
 	if (value == 0.0)
 		return;
 	m_cols.push_back({index, value, bound});
@@ -85,7 +90,8 @@ void LPObjective::addToModel(LPModel& model) {
 
 LPConstraint::LPConstraint() :
 	m_value(0.0),
-	m_type(GEQ)
+	m_type(GEQ),
+	m_maxCol(0)
 {
 
 }
@@ -102,6 +108,8 @@ void LPConstraint::setType(LPConstraint::Type type) {
 }
 
 void LPConstraint::setCol(unsigned long index, Real value) {
+	if ((index+1) > m_maxCol)
+		m_maxCol = index + 1;
 	if (value == 0.0)
 		return;
 	m_cols.push_back(Col(index, value));
@@ -147,8 +155,8 @@ void LPConstraint::addToModel(LPModel& model) {
 
 
 //TODO: max is for min or max lra, not LP solving, so it is inverted. Fix this in API
-LP::LP(unsigned long rows, unsigned long cols, bool max) :
-	m_rows(rows), m_cols(cols), m_maximize(max), m_result(0.0), m_objective(cols) {
+LP::LP(bool max, Real delta) :
+	m_maximize(max), m_result(0.0), m_objective() {
 #if __LPSOLVER__==_SOPLEX_
 	// Default constructor works
 	//m_model = SoPlex();
@@ -157,8 +165,9 @@ LP::LP(unsigned long rows, unsigned long cols, bool max) :
 	} else {
 		m_model.changeSense(soplex::SPxLP::MAXIMIZE);
 	}
+	m_model.setDelta(delta);
 #elif __LPSOLVER__==_LPSOLVE_
-	m_model = make_lp(rows, cols);
+	m_model = make_lp(0, 0);
 	set_add_rowmode(m_model, TRUE);
 	set_sense(m_model, max?FALSE:TRUE);
 #endif
@@ -171,10 +180,6 @@ LP::~LP() {
 #elif __LPSOLVER__==_LPSOLVE_
 	delete_lp(m_model);
 #endif
-}
-
-void LP::setObj(LPObjective objective) {
-	m_objective = objective;
 }
 
 void LP::addRow(LPConstraint constraint) {
@@ -211,33 +216,33 @@ void LP::printModel() {
 }
 
 void LP::buildModel() {
-	// Some checking
-	//assert (m_rows == m_constraints.size());
-	assert (m_cols == m_objective.getCols());
-
-	m_rows = m_constraints.size();
+	unsigned int cols = m_objective.getMaxCol();
+	std::vector< LPConstraint >::iterator constraint_it = m_constraints.begin();
+	while(constraint_it != m_constraints.end()) {
+		const unsigned long& max = (*constraint_it).getMaxCol();
+		if (cols < max)
+			cols = max;
+		++constraint_it;
+	}
+	unsigned int rows = m_constraints.size();
 
 	// Clear the model
 #if __LPSOLVER__==_SOPLEX_
 	m_model.clear();
 #elif __LPSOLVER__==_LPSOLVE_
 	delete_lp(m_model);
-	m_model = make_lp(0, m_cols);
-	//TODO: below setting triggers a bug in solving method
-	//set_add_rowmode(m_model, TRUE);
+	m_model = make_lp(rows, cols);
 	set_sense(m_model, m_maximize?FALSE:TRUE);
+
+	//TODO: below setting rowmode triggers a bug in solving method
+	//set_add_rowmode(m_model, TRUE);
 #endif
 
 	// Build the objective
 	m_objective.addToModel(m_model);
 
 	// Build the constraints
-#if __LPSOLVER__==_SOPLEX_
-#elif __LPSOLVER__==_LPSOLVE_
-	// Adjust row number estimate
-	resize_lp(m_model, m_constraints.size(), m_cols);
-#endif
-	std::vector< LPConstraint >::iterator constraint_it = m_constraints.begin();
+	constraint_it = m_constraints.begin();
 	while(constraint_it != m_constraints.end()) {
 		(*constraint_it).addToModel(m_model);
 		++constraint_it;
@@ -245,7 +250,6 @@ void LP::buildModel() {
 }
 
 bool LP::solve() {
-	//TODO: optimize the row cols number mess
 	m_primals.clear();
 	m_result = 0.0;
 
@@ -275,7 +279,7 @@ bool LP::solve() {
 
 	return (solve_res == soplex::SPxSolver::OPTIMAL);
 #elif __LPSOLVER__==_LPSOLVE_
-	//TODO: This hack prevents some segfault inside lp_solve
+	// TODO: This hack prevents some segfault inside lp_solve
 	// if row mode is enabled
 	//LPModel cp = copy_lp(m_model);
 	//delete_lp(m_model);
@@ -285,14 +289,15 @@ bool LP::solve() {
 
 	int solve_res = ::solve(m_model);
 
-	m_rows = get_Nrows(m_model);
-	m_cols = get_Ncolumns(m_model);
+	// requery row (and col) counts, they might change as a result of solving
+	int lprows = get_Nrows(m_model);
+	int lpcols = get_Ncolumns(m_model);
 
 	if (solve_res == OPTIMAL) {
 		m_result = get_objective(m_model);
-		Real* primals = new Real[1 + m_rows + m_cols];
+		Real* primals = new Real[1 + lprows + lpcols];
 		get_primal_solution(m_model, primals);
-		for(unsigned long i = 1 + m_rows; i < 1 + m_rows + m_cols; i++) {
+		for(unsigned long i = 1 + lprows; i < 1 + lprows + lpcols; i++) {
 			m_primals.push_back(primals[i]);
 		}
 		delete [] primals;

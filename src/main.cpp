@@ -511,7 +511,7 @@ int main(int argc, char* argv[]) {
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
 			printf("\nCompute maximal unbounded reachability, please wait.\n");
-#if __LPSOLVER__==_SOPLEX_
+#if __LPSOLVER__
 			if(!is_val){
 				tmp = compute_unbounded_reachability(ma,true);	
 				printf("Maximal unbounded reachability: %.10g\n", tmp);
@@ -538,7 +538,7 @@ int main(int argc, char* argv[]) {
 			#endif
 			printf("\nCompute minimal unbounded reachability, please wait.\n");	
 
-#if __LPSOLVER__==_SOPLEX_
+#if __LPSOLVER__
 			if(!is_val){
 				tmp = compute_unbounded_reachability(ma,false);
 				printf("Minimal unbounded reachability: %.10g\n", tmp);
@@ -549,7 +549,7 @@ int main(int argc, char* argv[]) {
 #else
 			tmp=unbounded_value_iteration(ma,false);
 			printf("Minimal unbounded reachability: %.10g\n", tmp);
-#endif //__SOPLEX__
+#endif //__LPSOLVER__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -567,7 +567,7 @@ int main(int argc, char* argv[]) {
 			#endif
 			printf("\nCompute maximal expected time, please wait.\n");
 
-#if __LPSOLVER__==_SOPLEX_
+#if __LPSOLVER__
 			if(!is_val){
 				tmp = compute_expected_time(ma,true);
 				printf("Maximal expected time: %.10g\n", tmp);
@@ -593,7 +593,7 @@ int main(int argc, char* argv[]) {
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
 			printf("\nCompute minimal expected time, please wait.\n");
-#if __LPSOLVER__==_SOPLEX_
+#if __LPSOLVER__
 			if(!is_val) {
 				tmp = compute_expected_time(ma,false);
 				printf("Minimal expected time: %.10g\n\n", tmp);
@@ -706,7 +706,7 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
-#if __LPSOLVER__==_SOPLEX_
+#if __LPSOLVER__
 			printf("\nCompute maximal LRR, please wait.\n");
 			tmp=compute_long_run_reward(ma,true);
 			printf("Maximal LRR: %.10g\n", tmp);
@@ -726,7 +726,7 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
-#if __LPSOLVER__==_SOPLEX_
+#if __LPSOLVER__
 			printf("\nCompute minimal LRR, please wait.\n");
 			tmp=compute_long_run_reward(ma,false);
 			printf("Minimal LRR: %.10g\n", tmp);

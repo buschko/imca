@@ -76,7 +76,6 @@ static void set_obj_function_lra(LP& lp_model, SparseMatrix *ma, vector<bool> me
 */
 static void set_obj_function_ssp(LP& lp_model, SparseMatrix *ma, SparseMatrixMEC *mecs,
 				 vector<bool> mec, vector<Real> lra, bool *locks, map<unsigned long,unsigned long>& ssp_nr) {
-	unsigned long state_nr;
 	//bool *goals = ma->goals;
 	unsigned long count=0;
 	LPObjective& objective = lp_model.getObj();
@@ -98,7 +97,7 @@ static void set_obj_function_ssp(LP& lp_model, SparseMatrix *ma, SparseMatrixMEC
 		
 	}*/
 	// add states S\MEC
-	for (state_nr = 0; state_nr < ma->n; state_nr++) {
+	for (unsigned long state_nr = 0; state_nr < ma->n; state_nr++) {
 		if(mec[state_nr]){
 			//lp_model.addCol(LPCol(0.0, dummycol, lra[state_nr], lra[state_nr]));
 		} else if(!locks[state_nr]){
@@ -463,7 +462,7 @@ Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC 
 	}
 	
 	//free(bad);
-	LP lp_model(0, ma->n, max);
+	LP lp_model(max);
 
 	/* first step: build the lp model */
 	dbg_printf("make obj fct\n");
@@ -561,7 +560,7 @@ Real compute_long_run_average(SparseMatrix *ma, bool max) {
 			mec[cols[state_nr]]=true;
 			//printf("%s\n",(ma->states_nr.find(cols[state_nr])->second).c_str());
 		}
-		LP lp_model(0, ma->n+1, max);
+		LP lp_model(max);
 		/* first step: build the lp model */
 		dbg_printf("set obj\n");
 		set_obj_function_lra(lp_model,ma,mec,locks);

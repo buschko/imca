@@ -40,7 +40,7 @@
 
 using namespace std;
 
-#if __LPSOLVER__==_SOPLEX_
+#if __LPSOLVER__
 /**
 * sets the objective function and bounds for goal states
 *
@@ -48,27 +48,20 @@ using namespace std;
 * @param ma the MA
 * @param max identifier for maximum/minimum
 */
-static void set_obj_function_unb(SoPlex& lp_model, SparseMatrix *ma, bool max, bool *locks) {
-	unsigned long state_nr;
+static void set_obj_function_unb(LP& lp_model, SparseMatrix *ma, bool max, bool *locks) {
 	bool *goals = ma->goals;
-	DSVector dummycol(0);
-	double inf = soplex::infinity;
-	
-	/* set objective function to max, resp. min */
-	if(max)
-		lp_model.changeSense(SoPlex::SPxLP::MINIMIZE);
-	else
-		lp_model.changeSense(SoPlex::SPxLP::MAXIMIZE);
-	
+	LPObjective& objective = lp_model.getObj();
+
 	/* set objective and bounds resp. to goal states*/
-	for (state_nr = 0; state_nr < ma->n; state_nr++) {
+	for (unsigned long state_nr = 0; state_nr < ma->n; state_nr++) {
 		if(!locks[state_nr]) {
 			if(goals[state_nr])
-				lp_model.addCol(LPCol(1.0, dummycol, 1.0, 1.0));
+				//TODO lower AND upper 1.0
+				objective.setCol(state_nr, 0.0, 1.0);
 			else
-				lp_model.addCol(LPCol(1.0, dummycol, inf, 0));
+				objective.setCol(state_nr, infinity, 0.0);
 		} else {
-			lp_model.addCol(LPCol(0.0, dummycol, 0, 0));
+			objective.setCol(state_nr, 0.0, 0.0);
 		}
 	}
 }
@@ -80,7 +73,7 @@ static void set_obj_function_unb(SoPlex& lp_model, SparseMatrix *ma, bool max, b
 * @param ma the MA
 * @param max identifier for maximum/minimum
 */
-static void set_constraints_unb(SoPlex& lp_model, SparseMatrix *ma, bool max, bool *locks) {
+static void set_constraints_unb(LP& lp_model, SparseMatrix *ma, bool max, bool *locks) {
 	unsigned long i;
 	unsigned long state_nr;
 	unsigned long choice_nr;
@@ -94,21 +87,18 @@ static void set_constraints_unb(SoPlex& lp_model, SparseMatrix *ma, bool max, bo
 	Real *exit_rates = ma->exit_rates;
 	unsigned long *cols = ma->cols;
 	Real prob;
-	
-	int m=0; // greater equal 0
+	LPConstraint::Type m=LPConstraint::LEQ; // greater equal 0
 	if(!max)
-		m=2; // less equal 0
-	
-	
-	DSVector row(states);
+		m=LPConstraint::GEQ; // less equal 0
+
 	bool loop;
-	
+
 	for (state_nr = 0; state_nr < ma->n; state_nr++) {
 		if(!goals[state_nr]  && !locks[state_nr]) {
 			unsigned long state_start = row_starts[state_nr];
 			unsigned long state_end = row_starts[state_nr + 1];
 			for (choice_nr = state_start; choice_nr < state_end; choice_nr++) {
-				DSVector row(states);
+				LPConstraint row;
 				loop=false;
 				/* Add up all outgoing rates of the distribution */
 				unsigned long i_start = choice_starts[choice_nr];
@@ -123,15 +113,16 @@ static void set_constraints_unb(SoPlex& lp_model, SparseMatrix *ma, bool max, bo
 					//printf("%s - %lf -> %s\n",(states_nr.find(state_nr)->second).c_str(),prob,(states_nr.find(cols[i])->second).c_str());
 					if(state_nr==cols[i]) {
 						loop=true;
-						row.add(state_nr,-1.0+prob);
+						row.setCol(state_nr,-1.0+prob);
 					} else {
-						row.add(cols[i],prob);
+						row.setCol(cols[i],prob);
 					}
 				}
 				if(!loop)
-					row.add(state_nr,-1);
-				lp_model.addRow(LPRow(row,LPRow::Type(m), 0));
-				row.~DSVector();
+					row.setCol(state_nr,-1);
+				row.setValue(0.0);
+				row.setType(m);
+				lp_model.addRow(row);
 			}
 		}
 	}
@@ -147,10 +138,6 @@ static void set_constraints_unb(SoPlex& lp_model, SparseMatrix *ma, bool max, bo
 * @return probability for unbounded reachability
 */
 Real compute_unbounded_reachability(SparseMatrix* ma, bool max) {
-	dbg_printf("before soplex\n");
-	SoPlex lp_model;
-	dbg_printf("after soplex\n");
-
 	bool *locks=(bool *)malloc(ma->n * sizeof(bool));
 
 	if(max) {
@@ -169,6 +156,7 @@ Real compute_unbounded_reachability(SparseMatrix* ma, bool max) {
 	printf("LP computation start.\n");
 
 	/* first step: build the lp model */
+	LP lp_model(max, 1e-4);
 	set_obj_function_unb(lp_model,ma,max,locks);
 	set_constraints_unb(lp_model,ma,max,locks);
 
@@ -178,12 +166,9 @@ Real compute_unbounded_reachability(SparseMatrix* ma, bool max) {
 
 	//cout << lp_model.rowVector(0) << endl;
 
-	lp_model.setDelta(1e-4);
-
 	/* solve the LP */
-	soplex::SPxSolver::Status stat;
 	dbg_printf("solve\n");
-	stat = lp_model.solve();
+	bool stat = lp_model.solve();
 
 	//print_lp_info(lp_model);
 
@@ -195,19 +180,16 @@ Real compute_unbounded_reachability(SparseMatrix* ma, bool max) {
 		obj=1;
 
 	/* show if optimal solution */
-	if( stat == soplex::SPxSolver::OPTIMAL ) {
+	if( stat ) {
 		printf("LP solved to optimality.\n\n");
 		//printf("Objective value is %lf.\n",lp_model.objValue());
-
-		soplex::DVector probs(lp_model.nCols());
-		lp_model.getPrimal(probs);
 
 		bool *initials = ma->initials;
 		unsigned long state_nr;
 		for (state_nr = 0; state_nr < ma->n; state_nr++) {
 			//cout << "s" << state_nr << " " << probs[state_nr] << endl;
 			if(initials[state_nr]){
-				Real tmp = probs[state_nr];
+				Real tmp = lp_model.getPrimal(state_nr);
 				dbg_printf("%li: prob %lf\n",state_nr, tmp);
 				if(max && tmp > obj)
 					obj=tmp;
@@ -216,7 +198,7 @@ Real compute_unbounded_reachability(SparseMatrix* ma, bool max) {
 			}
 		}
 
-	} else if ( stat == soplex::SPxSolver::INFEASIBLE) {
+	} else {
 		fprintf(stderr, "LP is infeasible.\n\n");
 	}
 
@@ -225,7 +207,7 @@ Real compute_unbounded_reachability(SparseMatrix* ma, bool max) {
 	return obj;
 }
 
-#endif // __SOPLEX__
+#endif // __LPSOLVER__
 
 /**
 * computes one step for Markovian states

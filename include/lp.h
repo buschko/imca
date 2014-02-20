@@ -58,21 +58,18 @@ public:
 		Real bound;
 	};
 public:
-	LPObjective(unsigned long nrCols);
-
-	virtual ~LPObjective() {};
+	LPObjective();
+	virtual ~LPObjective();
 
 	//bound = upper bound (lower = 0.0)
 	void setCol(unsigned long index, Real value, Real bound);
 
-	unsigned long getCols() { return m_nrCols; }
-	void setCols(unsigned long cols) { m_nrCols = cols; }
+	unsigned long getMaxCol() const { return m_maxCol; }
 
 	void addToModel(LPModel& model);
 private:
 	std::vector< Col > m_cols;
-
-	unsigned long m_nrCols;
+	unsigned long m_maxCol;
 };
 
 class LPConstraint {
@@ -86,7 +83,6 @@ public:
 	};
 
 	LPConstraint();
-
 	virtual ~LPConstraint();
 
 	void setValue(Real value);
@@ -95,9 +91,12 @@ public:
 	//index must be larger than of any previous call to setCol
 	void setCol(unsigned long index, Real value);
 
+	unsigned long getMaxCol() const { return m_maxCol; }
+
 	void addToModel(LPModel& model);
 private:
 	std::vector< Col > m_cols;
+	unsigned long m_maxCol;
 
 	Real m_value;
 	Type m_type;
@@ -106,14 +105,11 @@ private:
 // Wrapper for LP solvers, designed specifically for LRA, so reuseability low
 class LP {
 public:
-	// Last index of cols assumed to be the objective
-	// Rows only for constraints, objective will be generated
-	LP(unsigned long rows, unsigned long cols, bool max);
-
+	LP(bool max, Real delta=1e-6);
 	virtual ~LP();
 
 	LPObjective& getObj() { return m_objective; }
-	void setObj(LPObjective objective);
+	//void setObj(LPObjective objective);
 	void addRow(LPConstraint constraint);
 
 	void printModel();
@@ -126,8 +122,6 @@ private:
 	void buildModel();
 
 	LPModel m_model;
-	unsigned long m_rows;
-	unsigned long m_cols;
 
 	bool m_maximize;
 
