@@ -34,14 +34,16 @@ using soplex::Real;
 
 #elif __LPSOLVER__==_LPSOLVE_
 
+extern "C" {
 #include "lp_lib.h"
+}
 
 #endif
 
 #include <vector>
 #include <map>
 
-#if __LPSOLVER__==__SOPLEX__
+#if __LPSOLVER__==_SOPLEX_
 	typedef SoPlex LPModel;
 #elif __LPSOLVER__==_LPSOLVE_
 	typedef lprec* LPModel;
