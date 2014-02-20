@@ -37,7 +37,7 @@
 
 #include "sccs.h"
 #include "sccs2.h"
-#include "read_file.h"
+#include "lp.h"
 #include "debug.h"
 
 using std::pair;

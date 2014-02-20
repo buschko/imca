@@ -36,7 +36,7 @@
 #include <string>
 //#include <popt.h>
 
-#include "lp.h"
+#include "real.h"
 
 #ifndef __APPLE__
 #include <malloc.h>
@@ -652,13 +652,9 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
-#ifdef __SOPLEX__
 			printf("\nCompute maximal LRA, please wait.\n");
 			tmp=compute_long_run_average(ma,true);
 			printf("Maximal LRA: %.10g\n", tmp);
-#else
-			printf("LRA not supported without compiled LP solver support\n");
-#endif //__SOPLEX__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -672,13 +668,9 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
-#ifdef __SOPLEX__
 			printf("\nCompute minimal LRA, please wait.\n");
 			tmp=compute_long_run_average(ma,false);
 			printf("Minimal LRA: %.10g\n", tmp);
-#else
-			printf("LRA not supported without compiled LP solver support\n");
-#endif //__SOPLEX__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;

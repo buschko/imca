@@ -44,7 +44,6 @@ using std::pair;
 using std::ofstream;
 using std::ifstream;
 
-#ifdef __SOPLEX__
 /**
 * sets the objective function and bounds for goal states
 *
@@ -52,28 +51,20 @@ using std::ifstream;
 * @param ma the MA
 * @param max identifier for maximum/minimum
 */
-static void set_obj_function_lra(SoPlex& lp_model, SparseMatrix *ma, bool max, vector<bool> mec, bool *locks) {
-	unsigned long state_nr;
-	//bool *goals = ma->goals;
-	DSVector dummycol(0);
-	double inf = soplex::infinity;
-	
-	/* set objective function to max, resp. min */
-	if(max)
-		lp_model.changeSense(soplex::SPxLP::MINIMIZE);
-	else
-		lp_model.changeSense(soplex::SPxLP::MAXIMIZE);
-	
+static void set_obj_function_lra(LP& lp_model, SparseMatrix *ma, vector<bool> mec, bool *locks) {
+	LPObjective& objective = lp_model.getObj();
+
 	/* set objective and bounds resp. to goal states*/
-	for (state_nr = 0; state_nr < ma->n; state_nr++) {
-		//if(locks[state_nr] && mec[state_nr]){
-		//	lp_model.addCol(LPCol(0.0, dummycol, 0, 0));
-		//} else {
-			lp_model.addCol(LPCol(0.0, dummycol, inf, 0));
-		//}
+	for (unsigned long state_nr = 0; state_nr < ma->n; state_nr++) {
+		if(locks[state_nr] && mec[state_nr]){
+			objective.setCol(state_nr, 0.0, 0.0);
+		} else {
+			objective.setCol(state_nr, 0.0, infinity);
+		}
+
 		
 	}
-	lp_model.addCol(LPCol(1.0, dummycol, inf, 0));
+	objective.setCol(ma->n, 1.0, infinity);
 }
 
 /**
@@ -83,31 +74,24 @@ static void set_obj_function_lra(SoPlex& lp_model, SparseMatrix *ma, bool max, v
 * @param ma the MA
 * @param max identifier for maximum/minimum
 */
-static void set_obj_function_ssp(SoPlex& lp_model, SparseMatrix *ma, SparseMatrixMEC *mecs, bool max, 
+static void set_obj_function_ssp(LP& lp_model, SparseMatrix *ma, SparseMatrixMEC *mecs,
 				 vector<bool> mec, vector<Real> lra, bool *locks, map<unsigned long,unsigned long>& ssp_nr) {
 	unsigned long state_nr;
 	//bool *goals = ma->goals;
-	DSVector dummycol(0);
 	unsigned long count=0;
-	double inf = soplex::infinity;
-	
-	/* set objective function to max, resp. min */
-	if(max)
-		lp_model.changeSense(soplex::SPxLP::MINIMIZE);
-	else
-		lp_model.changeSense(soplex::SPxLP::MAXIMIZE);
-	
+	LPObjective& objective = lp_model.getObj();
+
 	/* set objective and bounds resp. to goal states*/
 	/*
 	for (state_nr = 0; state_nr < ma->n; state_nr++) {
 		if(mec[state_nr]){
-			//lp_model.addCol(LPCol(0.0, dummycol, lra[state_nr], lra[state_nr]));
+			//objective.setCol(count, 0.0, lra[state_nr]);//TODO: min value also lra value
 		} else if(!locks[state_nr]){
-			lp_model.addCol(LPCol(1.0, dummycol, infinity, 0));
+			objective.setCol(count, 1.0, infinity);
 			ssp_nr.insert(pair<unsigned long,unsigned long>(state_nr,count));
 			count++;
 		} else {
-			lp_model.addCol(LPCol(1.0, dummycol, 0, 0));
+			objective.setCol(count, 1.0, 0.0);
 			ssp_nr.insert(pair<unsigned long,unsigned long>(state_nr,count));
 			count++;
 		}
@@ -118,11 +102,11 @@ static void set_obj_function_ssp(SoPlex& lp_model, SparseMatrix *ma, SparseMatri
 		if(mec[state_nr]){
 			//lp_model.addCol(LPCol(0.0, dummycol, lra[state_nr], lra[state_nr]));
 		} else if(!locks[state_nr]){
-			lp_model.addCol(LPCol(1.0, dummycol, inf, 0));
+			objective.setCol(count, 1.0, infinity);
 			ssp_nr.insert(pair<unsigned long,unsigned long>(state_nr,count));
 			count++;
 		} else {
-			lp_model.addCol(LPCol(1.0, dummycol, 0, 0));
+			objective.setCol(count, 1.0, 0.0);
 			ssp_nr.insert(pair<unsigned long,unsigned long>(state_nr,count));
 			count++;
 		}
@@ -130,13 +114,13 @@ static void set_obj_function_ssp(SoPlex& lp_model, SparseMatrix *ma, SparseMatri
 	}
 	// add descision states
 	for(unsigned long mec_nr=0; mec_nr < mecs->n; mec_nr++) {
-		lp_model.addCol(LPCol(1.0, dummycol, inf, 0));
+		objective.setCol(count, 1.0, infinity);
 		ssp_nr.insert(pair<unsigned long,unsigned long>(ma->n+mec_nr+1,count));
 		count++;
 	}
 	// add MEC states
 	for(unsigned long mec_nr=0; mec_nr < mecs->n; mec_nr++) {
-		lp_model.addCol(LPCol(1.0, dummycol, inf, 0));
+		objective.setCol(count, 1.0, infinity);
 		ssp_nr.insert(pair<unsigned long,unsigned long>(ma->n+mec_nr+mecs->n+1,count));
 		count++;
 	}
@@ -149,7 +133,7 @@ static void set_obj_function_ssp(SoPlex& lp_model, SparseMatrix *ma, SparseMatri
 * @param ma the MA
 * @param max identifier for maximum/minimum
 */
-static void set_constraints_lra(SoPlex& lp_model, SparseMatrix *ma, bool max, vector<bool> mec, bool *locks) {
+static void set_constraints_lra(LP& lp_model, SparseMatrix *ma, bool max, vector<bool> mec, bool *locks) {
 	unsigned long i;
 	unsigned long state_nr;
 	unsigned long choice_nr;
@@ -164,12 +148,10 @@ static void set_constraints_lra(SoPlex& lp_model, SparseMatrix *ma, bool max, ve
 	unsigned long *cols = ma->cols;
 	Real prob;
 	Real rate;
-	LPRow::Type m=LPRow::LESS_EQUAL; // greater equal 0
+	LPConstraint::Type m=LPConstraint::LEQ; // greater equal 0
 	if(!max)
-		m=LPRow::GREATER_EQUAL; // less equal 0
-	
-	
-	//DSVector row(states+1);
+		m=LPConstraint::GEQ; // less equal 0
+
 	bool loop;
 	bool bad=false;
 	
@@ -178,7 +160,7 @@ static void set_constraints_lra(SoPlex& lp_model, SparseMatrix *ma, bool max, ve
 			unsigned long state_start = row_starts[state_nr];
 			unsigned long state_end = row_starts[state_nr + 1];
 			for (choice_nr = state_start; choice_nr < state_end; choice_nr++) {
-				DSVector row(states);
+				LPConstraint row;
 				loop=false;
 				/* Add up all outgoing rates of the distribution */
 				unsigned long i_start = choice_starts[choice_nr];
@@ -194,9 +176,9 @@ static void set_constraints_lra(SoPlex& lp_model, SparseMatrix *ma, bool max, ve
 						//printf("%s - %lf -> %s\n",(states_nr.find(state_nr)->second).c_str(),prob,(states_nr.find(cols[i])->second).c_str());
 						if(state_nr==cols[i]) {
 							loop=true;
-							row.add(state_nr,-1.0+prob);
+							row.setCol(state_nr,-1.0+prob);
 						} else {
-							row.add(cols[i],prob);
+							row.setCol(cols[i],prob);
 						}
 					}
 					else{
@@ -205,7 +187,7 @@ static void set_constraints_lra(SoPlex& lp_model, SparseMatrix *ma, bool max, ve
 				}
 				if(!bad) {
 					if(!loop)
-						row.add(state_nr,-1.0);
+						row.setCol(state_nr,-1.0);
 					rate=0;
 					unsigned long r_start = rate_starts[state_nr];
 					unsigned long r_end = rate_starts[state_nr + 1];
@@ -213,12 +195,14 @@ static void set_constraints_lra(SoPlex& lp_model, SparseMatrix *ma, bool max, ve
 						rate = -1/exit_rates[j];
 					}
 					if(rate < 0)
-						row.add(ma->n,rate);
+						row.setCol(ma->n,rate);
 					if(goals[state_nr]) {
-						lp_model.addRow(LPRow(row,m, rate));
+						row.setValue(rate);
 					} else {
-						lp_model.addRow(LPRow(row,m, 0));
+						row.setValue(0.0);
 					}
+					row.setType(m);
+					lp_model.addRow(row);
 				}
 //				row.~DSVector();
 				bad=false;
@@ -234,7 +218,7 @@ static void set_constraints_lra(SoPlex& lp_model, SparseMatrix *ma, bool max, ve
 * @param ma the MA
 * @param max identifier for maximum/minimum
 */
-static void set_constraints_ssp(SoPlex& lp_model, SparseMatrix *ma,SparseMatrixMEC *mecs, bool max, vector<bool> mec, bool *locks, vector<Real> lra, map<unsigned long,unsigned long> ssp_nr, vector<Real> mecNr,vector<Real> lra_mec) {
+static void set_constraints_ssp(LP& lp_model, SparseMatrix *ma,SparseMatrixMEC *mecs, bool max, vector<bool> mec, bool *locks, vector<Real> lra, map<unsigned long,unsigned long> ssp_nr, vector<Real> mecNr,vector<Real> lra_mec) {
 	unsigned long i;
 	unsigned long state_nr;
 	unsigned long choice_nr;
@@ -249,9 +233,9 @@ static void set_constraints_ssp(SoPlex& lp_model, SparseMatrix *ma,SparseMatrixM
 	Real prob;
 	Real rate;
 	Real goal;
-	int m=0; // greater equal 0
+	LPConstraint::Type m=LPConstraint::LEQ; // greater equal 0
 	if(!max)
-		m=2; // less equal 0
+		m=LPConstraint::GEQ; // less equal 0
 	
 	
 	//DSVector row(states+1);
@@ -316,7 +300,7 @@ static void set_constraints_ssp(SoPlex& lp_model, SparseMatrix *ma,SparseMatrixM
 			unsigned long state_start = row_starts[state_nr];
 			unsigned long state_end = row_starts[state_nr + 1];
 			for (choice_nr = state_start; choice_nr < state_end; choice_nr++) {
-				DSVector row(states);
+				LPConstraint row;
 				loop=false;
 				goal=0;
 				// Add up all outgoing rates of the distribution
@@ -335,32 +319,33 @@ static void set_constraints_ssp(SoPlex& lp_model, SparseMatrix *ma,SparseMatrixM
 					if(state_nr==cols[i]) {
 						loop=true;
 						//row.add(state_nr,-1.0+prob);
-						row.add(ssp_nr.find(state_nr)->second,-1.0+prob);
+						row.setCol(ssp_nr.find(state_nr)->second,-1.0+prob);
 					} else if(mec[cols[i]]){
 						//mec_lra[mecNr[mec[cols[i]]-1]] += prob*lra[cols[i]];
 						isMec[mecNr[cols[i]]-1]=true;
 						mec_prob[mecNr[cols[i]]-1] += prob;
 					} else {
 						//row.add(cols[i],prob);
-						row.add(ssp_nr.find(cols[i])->second,prob);
+						row.setCol(ssp_nr.find(cols[i])->second,prob);
 					}
 				}
 				for(unsigned long x=0; x<mecs->n; x++) {
 					if(isMec[x])
-						row.add(ssp_nr.find(ma->n+x+1)->second,mec_prob[x]);
+						row.setCol(ssp_nr.find(ma->n+x+1)->second,mec_prob[x]);
 				}
 				mec_prob=mec_prob_tmp;
 				isMec=isMec_tmp;
 				if(!loop)
 					//row.add(state_nr,-1.0);
-					row.add(ssp_nr.find(state_nr)->second,-1.0);
+					row.setCol(ssp_nr.find(state_nr)->second,-1.0);
 				if(goal == 0){
-					lp_model.addRow(LPRow(row,LPRow::Type(m), 0));
+					row.setValue(0.0);
 				} else {
 					goal *= -1;
-					lp_model.addRow(LPRow(row,LPRow::Type(m), goal));
+					row.setValue(goal);
 				}
-				row.~DSVector();
+				row.setType(m);
+				lp_model.addRow(row);
 			}
 		}
 	}
@@ -369,18 +354,20 @@ static void set_constraints_ssp(SoPlex& lp_model, SparseMatrix *ma,SparseMatrixM
 	mec_prob=mec_prob_tmp;
 	isMec=isMec_tmp;
 	for(unsigned long m_nr=0; m_nr<mecs->n; m_nr++) {
-		DSVector row(states);
-		row.add(ssp_nr.find(ma->n+m_nr+1)->second,-1.0);
-		row.add(ssp_nr.find(ma->n+m_nr+1+mecs->n)->second,1.0);
-		lp_model.addRow(LPRow(row,LPRow::Type(m), 0));
-		row.~DSVector();
+		LPConstraint row;
+		row.setCol(ssp_nr.find(ma->n+m_nr+1)->second,-1.0);
+		row.setCol(ssp_nr.find(ma->n+m_nr+1+mecs->n)->second,1.0);
+		row.setType(m);
+		row.setValue(0.0);
+		lp_model.addRow(row);
+
 		for (state_nr = 0; state_nr < ma->n; state_nr++) {
 			if(mecNr[state_nr]==m_nr+1){
 				unsigned long state_start = row_starts[state_nr];
 				unsigned long state_end = row_starts[state_nr + 1];
 				for (choice_nr = state_start; choice_nr < state_end; choice_nr++) {
-					DSVector row(states);
-					row.add(ssp_nr.find(ma->n+mecNr[state_nr])->second,-1.0);
+					LPConstraint row;
+					row.setCol(ssp_nr.find(ma->n+mecNr[state_nr])->second,-1.0);
 					/* Add up all outgoing rates of the distribution */
 					unsigned long i_start = choice_starts[choice_nr];
 					unsigned long i_end = choice_starts[choice_nr + 1];
@@ -403,14 +390,15 @@ static void set_constraints_ssp(SoPlex& lp_model, SparseMatrix *ma,SparseMatrixM
 					}
 					for(unsigned long x=0; x<mecs->n; x++) {
 						if(isMec[x])
-							row.add(ssp_nr.find(ma->n+x+1+mecs->n)->second,mec_prob[x]);
+							row.setCol(ssp_nr.find(ma->n+x+1+mecs->n)->second,mec_prob[x]);
 					}
 					mec_prob=mec_prob_tmp;
 					isMec=isMec_tmp;
 					if(bad) {
-						lp_model.addRow(LPRow(row,LPRow::Type(m), 0));
+						row.setType(m);
+						row.setValue(0.0);
+						lp_model.addRow(row);
 					}
-					row.~DSVector();
 					bad=false;
 				}
 			}
@@ -418,18 +406,18 @@ static void set_constraints_ssp(SoPlex& lp_model, SparseMatrix *ma,SparseMatrixM
 	}
 	// add LRA costs for MEC states
 	for(state_nr=0; state_nr<mecs->n; state_nr++) {
-		DSVector row(states);
-		row.add(ssp_nr.find(ma->n+state_nr+1+mecs->n)->second,-1.0);
+		LPConstraint row;
+		row.setCol(ssp_nr.find(ma->n+state_nr+1+mecs->n)->second,-1.0);
 		goal = lra_mec[state_nr];
 		goal *= -1;
-		lp_model.addRow(LPRow(row,LPRow::Type(m), goal));
-		row.~DSVector();
+		row.setType(m);
+		row.setValue(goal);
+		lp_model.addRow(row);
 	}
 	
 }
 
 Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC *mecs, vector<Real> lra_mec, bool max) {
-	SoPlex lp_model;
 	vector<bool> mec(ma->n,false);
 	vector<Real> lra(ma->n,0);
 	vector<Real> mecNr(ma->n,0);
@@ -475,17 +463,17 @@ Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC 
 	}
 	
 	//free(bad);
+	LP lp_model(0, ma->n, max);
 
 	/* first step: build the lp model */
 	dbg_printf("make obj fct\n");
-	set_obj_function_ssp(lp_model,ma,mecs,max,mec,lra,locks,ssp_nr);
+	set_obj_function_ssp(lp_model,ma,mecs,mec,lra,locks,ssp_nr);
 	dbg_printf("make constraints\n");
 	set_constraints_ssp(lp_model,ma,mecs,max,mec,locks,lra,ssp_nr,mecNr,lra_mec);
 
 	/* solve the LP */
-	soplex::SPxSolver::Status stat;
 	dbg_printf("solve model\n");
-	stat = lp_model.solve();
+	bool stat = lp_model.solve();
 	
 	/* find the max or min prob. for an initial state */
 	Real obj;
@@ -495,17 +483,15 @@ Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC 
 		obj=1;
 			
 	/* show if optimal solution */
-	if( stat == soplex::SPxSolver::OPTIMAL ) {
+	if( stat ) {
 		printf("LP solved to optimality.\n\n");
 		//printf("Objective value is %lf.\n",lp_model.objValue());
 		//printf("before\n");
-		soplex::DVector probs(lp_model.nCols());
-		lp_model.getPrimal(probs);
-		
+
 		for (state_nr = 0; state_nr < ma->n; state_nr++) {
 			if(initials[state_nr] && !mec[state_nr]){
 				//std::cout << ssp_nr.find(state_nr)->second << std::endl;
-				Real tmp = probs[ssp_nr.find(state_nr)->second];
+				Real tmp = lp_model.getPrimal(ssp_nr.find(state_nr)->second);
 				//std::cout << tmp << std::endl;
 				if(max && tmp > obj)
 					obj=tmp;
@@ -520,16 +506,13 @@ Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC 
 			}
 		}
 		//printf("after\n");
-	} else if ( stat == soplex::SPxSolver::INFEASIBLE) {
-		fprintf(stderr, "LP is infeasible.\n\n");
 	} else {
-		obj = 0;
+		fprintf(stderr, "LP is infeasible.\n\n");
 	}
-    
-    	free(locks);
-        free(bad);
-	free(tmpname);	
-	
+
+	free(locks);
+	free(bad);
+
 	return obj;
 }
 
@@ -578,10 +561,10 @@ Real compute_long_run_average(SparseMatrix *ma, bool max) {
 			mec[cols[state_nr]]=true;
 			//printf("%s\n",(ma->states_nr.find(cols[state_nr])->second).c_str());
 		}
-		SoPlex lp_model;
+		LP lp_model(0, ma->n+1, max);
 		/* first step: build the lp model */
 		dbg_printf("set obj\n");
-		set_obj_function_lra(lp_model,ma,max,mec,locks);
+		set_obj_function_lra(lp_model,ma,mec,locks);
 		dbg_printf("set const\n");
 		set_constraints_lra(lp_model,ma,max,mec,locks);
 		if(max){
@@ -597,13 +580,11 @@ Real compute_long_run_average(SparseMatrix *ma, bool max) {
 		}
 		dbg_printf("solve\n");
 		/* solve the LP */
-		soplex::SPxSolver::Status stat;
-		lp_model.setDelta(1e-6);
-		stat = lp_model.solve();
-		dbg_printf("LRA Mec %ld: %.10lg\n",mec_nr+1,lp_model.objValue());
-		printf("LRA Mec %ld: %.10lg\n",mec_nr+1,lp_model.objValue());
+		lp_model.solve();
+		dbg_printf("LRA Mec %ld: %.10lg\n",mec_nr+1,lp_model.getObjective());
+		printf("LRA Mec %ld: %.10lg\n",mec_nr+1,lp_model.getObjective());
 		//std::cout << long_run_average_value_iteration(ma,max) << std::cout;
-		lra_mec[mec_nr]=lp_model.objValue();
+		lra_mec[mec_nr]=lp_model.getObjective();
 
         /* DEBUG OUTPUT */
 		/*DVector probs(lp_model.nCols());
@@ -629,8 +610,6 @@ Real compute_long_run_average(SparseMatrix *ma, bool max) {
 
 	return lra;
 }
-
-#endif //__SOPLEX__
 
 /**
 * computes one step for Markovian states

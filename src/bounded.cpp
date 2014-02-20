@@ -25,7 +25,6 @@
 
 
 #include "bounded.h"
-#include "read_file.h"
 #include "debug.h"
 #include "sccs.h"
 #include <math.h>

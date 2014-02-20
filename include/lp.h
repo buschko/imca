@@ -39,6 +39,13 @@ using soplex::Real;
 #endif //__SOPLEX__
 
 class LPObjective {
+	friend class LP;
+public:
+	struct Col {
+		unsigned long index;
+		Real value;
+		Real bound;
+	};
 public:
 	LPObjective(unsigned long nrCols);
 
@@ -47,17 +54,20 @@ public:
 	//bound = upper bound (lower = 0.0)
 	void setCol(unsigned long index, Real value, Real bound);
 
-	unsigned long getCols() { return m_cols; }
+	unsigned long getCols() { return m_nrCols; }
+	void setCols(unsigned long cols) { m_nrCols = cols; }
 
-	void addToModel(LPModel model);
+	void addToModel(LPModel& model);
 private:
-	std::vector<unsigned long> m_indices;
-	std::vector< std::pair<Real,Real> > m_values;
+	std::vector< Col > m_cols;
 
-	unsigned long m_cols;
+	unsigned long m_nrCols;
 };
 
 class LPConstraint {
+	friend class LP;
+public:
+	typedef std::pair<unsigned long, Real> Col;
 public:
 	enum Type {
 		LEQ,
@@ -74,10 +84,9 @@ public:
 	//index must be larger than of any previous call to setCol
 	void setCol(unsigned long index, Real value);
 
-	void addToModel(LPModel model);
+	void addToModel(LPModel& model);
 private:
-	std::vector<unsigned long> m_indices;
-	std::vector<Real> m_values;
+	std::vector< Col > m_cols;
 
 	Real m_value;
 	Type m_type;
@@ -92,16 +101,19 @@ public:
 
 	virtual ~LP();
 
+	LPObjective& getObj() { return m_objective; }
 	void setObj(LPObjective objective);
 	void addRow(LPConstraint constraint);
 
-	void buildModel();
+	void printModel();
 
 	bool solve();
 
 	Real getObjective();
 	Real getPrimal(unsigned long col);
 private:
+	void buildModel();
+
 	LPModel m_model;
 	unsigned long m_rows;
 	unsigned long m_cols;

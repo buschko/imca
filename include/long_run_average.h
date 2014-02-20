@@ -33,7 +33,6 @@
 #include "sparse.h"
 #include "real.h"
 
-#ifdef __SOPLEX__
 /**
 * Computes long-run average for MA.
 *
@@ -42,6 +41,5 @@
 * @return long-run average
 */
 extern Real compute_long_run_average(SparseMatrix*, bool);
-#endif //__SOPLEX__
 
 #endif

@@ -19,6 +19,6 @@ extern const Real infinity;
 
 typedef double Real;
 // defined in lp.cpp
-const Real infinity;
+extern const Real infinity;
 
 #endif

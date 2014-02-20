@@ -35,7 +35,6 @@
 #include <iostream>
 
 #include "sccs.h"
-#include "read_file.h"
 
 //using namespace std;
 using std::vector;

@@ -35,7 +35,7 @@
 #include <iostream>
 
 #include "sccs.h"
-#include "read_file.h"
+#include "lp.h"
 
 using std::vector;
 
