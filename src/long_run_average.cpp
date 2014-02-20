@@ -566,17 +566,7 @@ Real compute_long_run_average(SparseMatrix *ma, bool max) {
 		set_obj_function_lra(lp_model,ma,mec,locks);
 		dbg_printf("set const\n");
 		set_constraints_lra(lp_model,ma,max,mec,locks);
-		if(max){
-			//lp_model.writeFile("filemax.lp", NULL, NULL, NULL);
-			//lp_model.clear();
-			// TODO: find out why LP model causes segfault in some cases (temorary BUGFIX: load model from file)
-			//lp_model.readFile("filemax.lp");
-		}else {
-			//lp_model.writeFile("filemin.lp", NULL, NULL, NULL);
-			//lp_model.clear();
-			// TODO: find out why LP model causes segfault in some cases (temorary BUGFIX: load model from file)
-			//lp_model.readFile("filemin.lp");
-		}
+
 		dbg_printf("solve\n");
 		/* solve the LP */
 		lp_model.solve();

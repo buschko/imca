@@ -257,8 +257,6 @@ bool LP::solve() {
 	//printModel();
 
 #if __LPSOLVER__==_SOPLEX_
-	m_model.setDelta(1e-6);
-
 	soplex::SPxSolver::Status solve_res =soplex::SPxSolver::UNKNOWN;
 
 	try {
