@@ -634,9 +634,8 @@ Real compute_stochastic_shortest_path_problem_lrr(SparseMatrix *ma, SparseMatrix
 	}
 
 	free(locks);
-        free(bad);
-	free(tmpname);	
-		
+	free(bad);
+
 	return obj;
 }
 

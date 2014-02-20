@@ -678,11 +678,7 @@ bool* compute_locks_strong(SparseMatrix *ma, bool* bad) {
 	}
 	
 	dbg_printf("\n");
-	
-<<<<<<< HEAD
-	//free(bad);
-=======
->>>>>>> Fix double free
+
 	free(bad_dist);
 	
 	return locks;
