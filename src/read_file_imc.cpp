@@ -26,6 +26,7 @@
 #include "read_file_imc.h"
 #include "read_file.h"
 
+#include <stdio.h>
 #include <map>
 #include <string>
 #include <vector>
@@ -648,9 +649,9 @@ SparseMatrix *read_IMC_SparseMatrix_file(const char *filename)
 		model = NULL;
 	}else{
 		//print_model(model);
-#ifdef __SOPLEX__
+#ifdef __LPSOLVER__
 		print_model_info(model);
-#endif //__SOPLEX__
+#endif //__LPSOLVER__
 	}
 	
 	//print_model(model);

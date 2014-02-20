@@ -40,7 +40,7 @@
 
 using namespace std;
 
-#ifdef __SOPLEX__
+#if __LPSOLVER__==_SOPLEX_
 /**
 * sets the objective function and bounds for goal states
 *

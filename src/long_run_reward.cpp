@@ -44,7 +44,7 @@ using std::pair;
 using std::ofstream;
 using std::ifstream;
 
-#ifdef __SOPLEX__
+#if __LPSOLVER__==_SOPLEX_
 /**
 * sets the objective function and bounds for goal states
 *
@@ -823,7 +823,7 @@ Real compute_long_run_reward(SparseMatrix *ma, bool max) {
 	return lra;
 }
 
-#endif //__SOPLEX__
+#endif //__LPSOLVER__
 
 /**
 * computes one step for Markovian states

@@ -33,7 +33,7 @@
 #include "sparse.h"
 #include "real.h"
 
-#ifdef __SOPLEX__
+#ifdef __LPSOLVER__
 /**
 * Computes long-run reward for MA.
 *
@@ -42,6 +42,6 @@
 * @return long-run reward
 */
 extern Real compute_long_run_reward(SparseMatrix*, bool);
-#endif //__SOPLEX__
+#endif //__LPSOLVER__
 
 #endif

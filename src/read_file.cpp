@@ -771,7 +771,7 @@ void print_model_info(SparseMatrix *ma)
 	printf("#Initials: %ld    #Goals: %ld    #Transitions: %ld\n", n_init, n_goal, n_trans);
 }
 
-#ifdef __SOPLEX__
+#if __LPSOLVER__==_SOPLEX_
 /**
 * print out onformation about SoPlex LP solve.
 *

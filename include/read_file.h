@@ -43,7 +43,7 @@ extern void print_model(SparseMatrix*);
 extern void print_model_info(SparseMatrix*);
 
 
-#ifdef __SOPLEX__
+#if __LPSOLVER__==_SOPLEX_
 /**
 * print out onformation about SoPlex LP solve.
 *

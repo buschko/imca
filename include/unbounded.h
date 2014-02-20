@@ -39,7 +39,7 @@
 * @param max identifier for min or max prb
 * @return probability for unbounded reachability
 */
-#ifdef __SOPLEX__
+#ifdef __LPSOLVER__
 extern Real compute_unbounded_reachability(SparseMatrix*, bool);
 #endif
 

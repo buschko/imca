@@ -3,7 +3,8 @@
  * Should be compatible, hence splitting in both solver types
  */
 
-#ifdef __SOPLEX__
+#ifdef __LPSOLVER__
+#if __LPSOLVER__==SOPLEX
 
 //#include "soplex.h"
 //using soplex::infinity;
@@ -22,3 +23,10 @@ typedef double Real;
 extern const Real infinity;
 
 #endif
+#else
+
+typedef double Real;
+// defined in lp.cpp
+extern const Real infinity;
+
+#endif //__LPSOLVER__

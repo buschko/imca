@@ -5,6 +5,10 @@
  *      Author: hbruintjes
  */
 
+#ifndef __LPSOLVER__
+#error "LPSOLVER must be specified for LP classes"
+#endif
+
 #include "lp.h"
 
 #include <algorithm>
@@ -39,7 +43,7 @@ void LPObjective::addToModel(LPModel& model) {
 	//sort the vectors
 	std::sort(m_cols.begin(), m_cols.end(), CmpObjCol());
 
-#ifdef __SOPLEX__
+#if __LPSOLVER__==SOPLEX
 	DSVector dummycol(0);
 	std::vector<Col>::const_iterator cols_it = m_cols.begin();
 	for(unsigned long i = 0; i < m_nrCols; i++) {
@@ -101,7 +105,7 @@ void LPConstraint::addToModel(LPModel& model) {
 	//sort the vectors
 	//std::sort(m_cols.begin(), m_cols.end(), CmpConstrCol());
 
-#ifdef __SOPLEX__
+#if __LPSOLVER__==SOPLEX
 	DSVector row(m_cols.size());
 	std::vector<Col>::const_iterator cols_it = m_cols.begin();
 	while(cols_it != m_cols.end()) {
@@ -139,7 +143,7 @@ void LPConstraint::addToModel(LPModel& model) {
 //TODO: max is for min or max lra, not LP solving, so it is inverted. Fix this in API
 LP::LP(unsigned long rows, unsigned long cols, bool max) :
 	m_rows(rows), m_cols(cols), m_maximize(max), m_result(0.0), m_objective(cols) {
-#ifdef __SOPLEX__
+#if __LPSOLVER__==SOPLEX
 	// Default constructor works
 	//m_model = SoPlex();
 	if (max) {
@@ -155,7 +159,7 @@ LP::LP(unsigned long rows, unsigned long cols, bool max) :
 }
 
 LP::~LP() {
-#ifdef __SOPLEX__
+#if __LPSOLVER__==SOPLEX
 	// Default destructor works
 	//delete m_model;
 #else
@@ -210,7 +214,7 @@ void LP::buildModel() {
 
 
 	// Build the constraints
-#ifdef __SOPLEX__
+#if __LPSOLVER__==SOPLEX
 #else
 	// Adjust row number estimate
 	resize_lp(m_model, m_constraints.size(), get_Ncolumns(m_model));
@@ -229,7 +233,7 @@ bool LP::solve() {
 
 	buildModel();
 
-#ifdef __SOPLEX__
+#if __LPSOLVER__==SOPLEX
 	m_model.setDelta(1e-6);
 
 	soplex::SPxSolver::Status solve_res =soplex::SPxSolver::UNKNOWN;

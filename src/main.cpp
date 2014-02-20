@@ -150,11 +150,13 @@ static void print_intro(void) {
 	printf("|                  Interactive Markov Chain Analyzer                |\n");
 	printf("|                        IMCA Version 1.6 beta                      |\n");
 	printf("|             Binary build date: %s @ %s             |\n", __DATE__, __TIME__);
-	#ifdef __SOPLEX__
+#ifdef __LPSOLVER__
+	#if __LPSOLVER__==_SOPLEX_
 	printf("|                using SoPlex \"http://soplex.zib.de/\"               |\n");
-	#else
+	#elif __LPSOLVER__==_LPSOLVE_
 	printf("|          using lp_solve \"http://lpsolve.sourceforge.net/\"         |\n");
 	#endif
+#endif
 	printf("|                                                                   |\n");
 	printf("|                  Copyright (C) RWTH Aachen, 2012.                 |\n");
 	printf("|          Copyright (C) University of Twente, 2013-2014.           |\n");
@@ -509,7 +511,7 @@ int main(int argc, char* argv[]) {
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
 			printf("\nCompute maximal unbounded reachability, please wait.\n");
-#ifdef __SOPLEX__
+#if __LPSOLVER__==_SOPLEX_
 			if(!is_val){
 				tmp = compute_unbounded_reachability(ma,true);	
 				printf("Maximal unbounded reachability: %.10g\n", tmp);
@@ -520,7 +522,7 @@ int main(int argc, char* argv[]) {
 #else
 			tmp=unbounded_value_iteration(ma,true);
 			printf("Maximal unbounded reachability: %.10g\n", tmp);
-#endif //__SOPLEX__
+#endif //__LPSOLVER__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -536,7 +538,7 @@ int main(int argc, char* argv[]) {
 			#endif
 			printf("\nCompute minimal unbounded reachability, please wait.\n");	
 
-#ifdef __SOPLEX__
+#if __LPSOLVER__==_SOPLEX_
 			if(!is_val){
 				tmp = compute_unbounded_reachability(ma,false);
 				printf("Minimal unbounded reachability: %.10g\n", tmp);
@@ -565,7 +567,7 @@ int main(int argc, char* argv[]) {
 			#endif
 			printf("\nCompute maximal expected time, please wait.\n");
 
-#ifdef __SOPLEX__
+#if __LPSOLVER__==_SOPLEX_
 			if(!is_val){
 				tmp = compute_expected_time(ma,true);
 				printf("Maximal expected time: %.10g\n", tmp);
@@ -576,7 +578,7 @@ int main(int argc, char* argv[]) {
 #else
 			tmp=expected_time_value_iteration(ma,true);
 			printf("Maximal expected time value iteration: %.10g\n", tmp);
-#endif //__SOPLEX__
+#endif //__LPSOLVER__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -591,7 +593,7 @@ int main(int argc, char* argv[]) {
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
 			printf("\nCompute minimal expected time, please wait.\n");
-#ifdef __SOPLEX__
+#if __LPSOLVER__==_SOPLEX_
 			if(!is_val) {
 				tmp = compute_expected_time(ma,false);
 				printf("Minimal expected time: %.10g\n\n", tmp);
@@ -602,7 +604,7 @@ int main(int argc, char* argv[]) {
 #else
 			tmp=expected_time_value_iteration(ma,false);
 			printf("Minimal expected time value iteration: %.10g\n", tmp);
-#endif //__SOPLEX__
+#endif //__LPSOLVER__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -704,13 +706,13 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
-#ifdef __SOPLEX__
+#if __LPSOLVER__==_SOPLEX_
 			printf("\nCompute maximal LRR, please wait.\n");
 			tmp=compute_long_run_reward(ma,true);
 			printf("Maximal LRR: %.10g\n", tmp);
 #else
 			printf("LRW not supported without compiled LP solver support\n");
-#endif //__SOPLEX__
+#endif //__LPSOLVER__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -724,13 +726,13 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
-#ifdef __SOPLEX__
+#if __LPSOLVER__==_SOPLEX_
 			printf("\nCompute minimal LRR, please wait.\n");
 			tmp=compute_long_run_reward(ma,false);
 			printf("Minimal LRR: %.10g\n", tmp);
 #else
 			printf("LRW not supported without compiled LP solver support\n");
-#endif //__SOPLEX__
+#endif //__LPSOLVER__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;

@@ -10,11 +10,20 @@
 #ifndef LP_H_
 #define LP_H_
 
+#define _SOPLEX_ 1
+#define _LPSOLVE_ 2
+
 #include "real.h"
 
 // choose between SoPlex and LP_solve
-#ifdef __SOPLEX__
+#ifdef __LPSOLVER__
 
+#if __LPSOLVER__!=_SOPLEX_ && __LPSOLVER__!=_LPSOLVE_
+#error "Only SOPLEX and LPSOLVE solvers supported"
+#endif
+
+
+#if __LPSOLVER__==_SOPLEX_
 #include "soplex.h"
 //using namespace soplex;
 using soplex::SoPlex;
@@ -23,7 +32,7 @@ using soplex::LPRow;
 using soplex::LPCol;
 using soplex::Real;
 
-#else
+#elif __LPSOLVER__==_LPSOLVE_
 
 #include "lp_lib.h"
 
@@ -32,11 +41,11 @@ using soplex::Real;
 #include <vector>
 #include <map>
 
-#ifdef __SOPLEX__
+#if __LPSOLVER__==__SOPLEX__
 	typedef SoPlex LPModel;
-#else
+#elif __LPSOLVER__==_LPSOLVE_
 	typedef lprec* LPModel;
-#endif //__SOPLEX__
+#endif //__LPSOLVER__==__SOPLEX__
 
 class LPObjective {
 	friend class LP;
@@ -127,5 +136,6 @@ private:
 	std::vector< LPConstraint > m_constraints;
 };
 
+#endif //__LPSOLVER__
 
 #endif /* LP_H_ */

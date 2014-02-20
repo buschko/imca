@@ -32,7 +32,7 @@
 #include "sparse.h"
 #include "real.h"
 
-#ifdef __SOPLEX__
+#ifdef __LPSOLVER__
 /**
 * Computes expected time for MA.
 *
@@ -41,7 +41,7 @@
 * @return expected time 
 */
 extern Real compute_expected_time(SparseMatrix*, bool);
-#endif //__SOPLEX__
+#endif //__LPSOLVER__
 
 extern Real expected_time_value_iteration(SparseMatrix*, bool);
 

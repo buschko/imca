@@ -39,7 +39,7 @@
 
 using std::vector;
 
-#ifdef __SOPLEX__
+#if __LPSOLVER__==_SOPLEX_
 /**
 * sets the objective function and bounds for goal states
 *
@@ -215,7 +215,7 @@ Real compute_expected_time(SparseMatrix* ma, bool max) {
 	return obj;
 }
 
-#endif //__SOPLEX__
+#endif //__LPSOLVER__
 
 /**
 * computes one step for Markovian states
