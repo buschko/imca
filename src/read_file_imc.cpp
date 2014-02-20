@@ -477,7 +477,7 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 				if (sscanf(s, "%s%s%s", src, dst, act) != 3)
 					*error = true;
 			} else {
-				int tmp=states.find(src)->second;
+				unsigned long tmp=states.find(src)->second;
 				/* probabilistic transitions are choosen before markovian transitions */
 				if(isPS[tmp])
 					bad=true;

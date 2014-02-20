@@ -53,16 +53,19 @@ class LPObjective {
 	friend class LP;
 public:
 	struct Col {
+		Col(unsigned long index_, Real value_, Real upperbound_, Real lowerbound_) :
+			index(index_), value(value_), upperbound(upperbound_), lowerbound(lowerbound_) {}
 		unsigned long index;
 		Real value;
-		Real bound;
+		Real upperbound;
+		Real lowerbound;
 	};
 public:
 	LPObjective();
 	virtual ~LPObjective();
 
 	//bound = upper bound (lower = 0.0)
-	void setCol(unsigned long index, Real value, Real bound);
+	void setCol(unsigned long index, Real value, Real upperbound, Real lowerbound=0.0);
 
 	unsigned long getMaxCol() const { return m_maxCol; }
 

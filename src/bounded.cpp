@@ -420,7 +420,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 		SparseMatrix* discrete_ma; // discretized model induced from the original ma
 
 		steps = (unsigned long) ceil((tb - ta) / tau); // calculating the number of steps for interval tb down to ta
-		current_tau = (tb - ta) / steps;               // recalculate tau based on the number of steps
+		current_tau = (tb - ta) / (Real)steps;               // recalculate tau based on the number of steps
 
 
 		// discretize model with respect to the current value of tau 'current_tau'
@@ -485,7 +485,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 		SparseMatrix_free(discrete_ma);
 
 		steps = (unsigned long) ceil( (ta + current_tau) / tau); // calculating the number of steps for interval [0,a]
-		current_tau = (ta + current_tau) / steps;                // recalculate tau based on the number of steps
+		current_tau = (ta + current_tau) / (Real)steps;                // recalculate tau based on the number of steps
 
 		// discretize model with respect to the current value of tau 'current_tau'
 		dbg_printf("discretize model for interval [0,%g] ... \n", ta);
@@ -552,11 +552,11 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 		//print_model(discrete_ma);
 
 		// value iteration
-		unsigned long steps_for_interval = round(tb/tau);
+		unsigned long steps_for_interval = (unsigned long)lround(tb/tau);
 		std::cout << "iterations: " << steps_for_interval<< std::endl;
 		std::cout << "step duration: " << tau <<std::endl;
-		unsigned long interval_step = round(interval/tau);
-		unsigned long interval_start_point = round(interval_start/tau);
+		unsigned long interval_step = (unsigned long)lround(interval/tau);
+		unsigned long interval_start_point = (unsigned long)lround(interval_start/tau);
 		unsigned long counter=0;
 		Real tmp_step = interval;
 		Real tmp_interval=interval_start;
@@ -597,10 +597,10 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 					}
 				}
 				
-				Real tmp = i*tau - tmp_interval;
-				tmp = i*tau - tmp;
+				Real tmp = (Real)i*tau - tmp_interval;
+				tmp = (Real)i*tau - tmp;
 				
-				printf("tb=%.5g Maximal time-bounded reachability probability: %.10g  (Real tb=%.5g)\n", tmp,prob,i*tau);
+				printf("tb=%.5g Maximal time-bounded reachability probability: %.10g  (Real tb=%.5g)\n", tmp,prob,(Real)i*tau);
 				
 				tmp_interval += tmp_step;
 				counter=0;
@@ -620,7 +620,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 	else
 		prob=1;
 	bool *initials = ma->initials;
-	printf("vector(%d) [",num_states);
+	printf("vector(%lu) [",num_states);
 	for (unsigned long state_nr = 0; state_nr < num_states; state_nr++) {
 		//std::cout << (ma->states_nr.find(state_nr)->second).c_str() << ": " << u[state_nr] << std::endl;
 		printf(" %lf,",u[state_nr]);

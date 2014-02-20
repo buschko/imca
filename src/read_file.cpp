@@ -545,7 +545,7 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 	//Real r=0;
 	
 	Real tmp = 0;
-	unsigned int old_index;
+	unsigned long old_index;
 
 	if (!*error) {
 		Real *non_zeros = ma->non_zeros;
@@ -706,9 +706,9 @@ void print_model(SparseMatrix *ma, bool mrm)
 			unsigned long i_start = choice_starts[choice_nr];
 			unsigned long i_end = choice_starts[choice_nr + 1];
 			dbg_printf("choice_starts: %li choice_ends: %li\n",i_start,i_end);
-			printf("choice %d\n",tau);
+			printf("choice %lu\n",tau);
 			if(mrm){
-				printf("reward: %lg\n",rewards[choice_nr]);
+				printf("reward: %g\n",rewards[choice_nr]);
 			}
 			tau++;
 			for (i = i_start; i < i_end; i++) {
@@ -719,7 +719,7 @@ void print_model(SparseMatrix *ma, bool mrm)
 				for (unsigned long j = r_start; j < r_end; j++) {
 					prob /= exit_rates[j];
 				}
-				printf("%s - %lg -> %s\n",(states_nr.find(state_nr)->second).c_str(),prob,(states_nr.find(cols[i])->second).c_str());
+				printf("%s - %g -> %s\n",(states_nr.find(state_nr)->second).c_str(),prob,(states_nr.find(cols[i])->second).c_str());
 			}
 		}
 		tau=1;

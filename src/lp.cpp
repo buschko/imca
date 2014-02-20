@@ -38,12 +38,12 @@ LPObjective::~LPObjective() {
 }
 
 //bound = upper bound (lower = 0.0)
-void LPObjective::setCol(unsigned long index, Real value, Real bound) {
+void LPObjective::setCol(unsigned long index, Real value, Real upperbound, Real lowerbound) {
 	if ((index+1) > m_maxCol)
 		m_maxCol = index+1;
 	if (value == 0.0)
 		return;
-	m_cols.push_back({index, value, bound});
+	m_cols.push_back(Col(index, value, upperbound, lowerbound));
 }
 
 void LPObjective::addToModel(LPModel& model) {
@@ -69,16 +69,17 @@ void LPObjective::addToModel(LPModel& model) {
 	unsigned int index = 0;
 	while(cols_it != m_cols.end()) {
 		row[index] = (*cols_it).value;
-		colno[index] = (*cols_it).index + 1;
+		colno[index] = (int)(*cols_it).index + 1;
 		++cols_it;
 		index++;
 	}
 
-	set_obj_fnex(model, m_cols.size(), row, colno);
+	set_obj_fnex(model, (int)m_cols.size(), row, colno);
 
 	cols_it = m_cols.begin();
 	while(cols_it != m_cols.end()) {
-		set_upbo(model, (*cols_it).index + 1, (*cols_it).bound);
+		set_upbo(model, (int)(*cols_it).index + 1, (*cols_it).upperbound);
+		set_lowbo(model, (int)(*cols_it).index + 1, (*cols_it).lowerbound);
 		++cols_it;
 	}
 
@@ -89,9 +90,9 @@ void LPObjective::addToModel(LPModel& model) {
 
 
 LPConstraint::LPConstraint() :
+	m_maxCol(0),
 	m_value(0.0),
-	m_type(GEQ),
-	m_maxCol(0)
+	m_type(GEQ)
 {
 
 }
@@ -141,7 +142,7 @@ void LPConstraint::addToModel(LPModel& model) {
 	unsigned int index = 0;
 	while(cols_it != m_cols.end()) {
 		row[index] = (*cols_it).second;
-		colno[index] = (*cols_it).first + 1;
+		colno[index] = (int)(*cols_it).first + 1;
 		++cols_it;
 		index++;
 	}
@@ -170,6 +171,7 @@ LP::LP(bool max, Real delta) :
 	m_model = make_lp(0, 0);
 	set_add_rowmode(m_model, TRUE);
 	set_sense(m_model, max?FALSE:TRUE);
+	set_epsd(m_model, delta);
 #endif
 }
 
@@ -216,7 +218,7 @@ void LP::printModel() {
 }
 
 void LP::buildModel() {
-	unsigned int cols = m_objective.getMaxCol();
+	unsigned long cols = m_objective.getMaxCol();
 	std::vector< LPConstraint >::iterator constraint_it = m_constraints.begin();
 	while(constraint_it != m_constraints.end()) {
 		const unsigned long& max = (*constraint_it).getMaxCol();
@@ -224,14 +226,14 @@ void LP::buildModel() {
 			cols = max;
 		++constraint_it;
 	}
-	unsigned int rows = m_constraints.size();
+	unsigned long rows = m_constraints.size();
 
 	// Clear the model
 #if __LPSOLVER__==_SOPLEX_
 	m_model.clear();
 #elif __LPSOLVER__==_LPSOLVE_
 	delete_lp(m_model);
-	m_model = make_lp(rows, cols);
+	m_model = make_lp((int)rows, (int)cols);
 	set_sense(m_model, m_maximize?FALSE:TRUE);
 
 	//TODO: below setting rowmode triggers a bug in solving method
@@ -295,7 +297,7 @@ bool LP::solve() {
 		m_result = get_objective(m_model);
 		Real* primals = new Real[1 + lprows + lpcols];
 		get_primal_solution(m_model, primals);
-		for(unsigned long i = 1 + lprows; i < 1 + lprows + lpcols; i++) {
+		for(int i = 1 + lprows; i < 1 + lprows + lpcols; i++) {
 			m_primals.push_back(primals[i]);
 		}
 		delete [] primals;

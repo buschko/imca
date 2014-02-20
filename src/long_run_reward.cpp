@@ -85,7 +85,7 @@ static void set_obj_function_ssp_lrr(LP& lp_model, SparseMatrix *ma, SparseMatri
 	/*
 	for (state_nr = 0; state_nr < ma->n; state_nr++) {
 		if(mec[state_nr]){
-			//objective.setCol(count, 0.0, lra[state_nr]);//TODO: min value also lra value
+			//objective.setCol(count, 0.0, lra[state_nr], lra[state_nr]);
 		} else if(!locks[state_nr]){
 			objective.setCol(count, 1.0, infinity);
 			ssp_nr.insert(pair<unsigned long,unsigned long>(state_nr,count));
@@ -336,7 +336,7 @@ static void set_constraints_lrr_ratio(LP& lp_model, SparseMatrix *ma, bool max, 
 * @param ma the MA
 * @param max identifier for maximum/minimum
 */
-static void set_constraints_ssp_lrr(LP& lp_model, SparseMatrix *ma,SparseMatrixMEC *mecs, bool max, vector<bool> mec, bool *locks, vector<Real> lra, map<unsigned long,unsigned long> ssp_nr, vector<Real> mecNr,vector<Real> lra_mec) {
+static void set_constraints_ssp_lrr(LP& lp_model, SparseMatrix *ma,SparseMatrixMEC *mecs, bool max, vector<bool> mec, bool *locks, vector<Real> lra, map<unsigned long,unsigned long> ssp_nr, vector<unsigned long> mecNr,vector<Real> lra_mec) {
 	unsigned long i;
 	unsigned long state_nr;
 	unsigned long choice_nr;
@@ -544,7 +544,7 @@ string getEnvVarLrr( std::string const & key )
 Real compute_stochastic_shortest_path_problem_lrr(SparseMatrix *ma, SparseMatrixMEC *mecs, vector<Real> lra_mec, bool max) {
 	vector<bool> mec(ma->n,false);
 	vector<Real> lra(ma->n,0);
-	vector<Real> mecNr(ma->n,0);
+	vector<unsigned long> mecNr(ma->n,0);
 	map<unsigned long,unsigned long> ssp_nr;
 	
 	unsigned long *row_starts = (unsigned long *) mecs->row_counts;

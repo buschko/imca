@@ -56,8 +56,7 @@ static void set_obj_function_unb(LP& lp_model, SparseMatrix *ma, bool max, bool 
 	for (unsigned long state_nr = 0; state_nr < ma->n; state_nr++) {
 		if(!locks[state_nr]) {
 			if(goals[state_nr])
-				//TODO lower AND upper 1.0
-				objective.setCol(state_nr, 0.0, 1.0);
+				objective.setCol(state_nr, 0.0, 1.0, 1.0);
 			else
 				objective.setCol(state_nr, infinity, 0.0);
 		} else {

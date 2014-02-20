@@ -60,8 +60,7 @@ static void set_obj_function_ext(LP& lp_model, SparseMatrix *ma, bool max, bool 
 			else
 				objective.setCol(state_nr, 1.0, infinity);
 		} else {
-			//TODO: lowerbound also infinity
-			objective.setCol(state_nr, 0.0, infinity);
+			objective.setCol(state_nr, 0.0, infinity, infinity);
 		}
 	}
 }

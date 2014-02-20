@@ -198,9 +198,9 @@ static bool isValidExtension(const char * filename, char * extension, int * ext_
 	const char *p;
 	int length;
 
-	length = strlen(filename);
+	length = (int)strlen(filename);
 	p = strrchr(filename,'.');     /* The last occurance of '.' in the file name */
-	*ext_length = length - (p - filename); /* including '.', excluding '\0' */
+	*ext_length = length - (int)(p - filename); /* including '.', excluding '\0' */
 	/*TODO: change function */
 	if( length >= MIN_FILE_NAME_LENGTH && ( *ext_length >= MIN_FILE_EXT_LENGTH) && ( *ext_length <= MAX_FILE_EXT_LENGTH)) {
 		/* Get the extension */
@@ -850,10 +850,10 @@ int main(int argc, char* argv[]) {
 		for(unsigned long mec_nr=0; mec_nr < mecs->n; mec_nr++) {
 			unsigned long mec_start = row_starts[mec_nr];
 			unsigned long mec_end = row_starts[mec_nr + 1];
-			printf("MEC #%d: %d States\n",mec_nr+1,mec_end-mec_start);
+			printf("MEC #%lu: %lu States\n",mec_nr+1,mec_end-mec_start);
 			if(is_max_present){
 				printf("{");
-				for (int state_nr = mec_start; state_nr < mec_end-1; state_nr++) {
+				for (unsigned long state_nr = mec_start; state_nr < mec_end-1; state_nr++) {
 					printf("%s,",(states_nr.find(cols[state_nr])->second).c_str());
 				}
 				printf("%s}\n",(states_nr.find(cols[mec_end-1])->second).c_str());
