@@ -136,6 +136,7 @@ private:
 	LPModel m_model;
 
 	bool m_maximize;
+	Real m_delta;
 
 	Real m_result;
 	std::vector< Real > m_primals;

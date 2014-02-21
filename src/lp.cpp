@@ -177,14 +177,14 @@ void LPConstraint::addToModel(LPModel& model) {
 	delete [] row;
 	delete [] colno;
 #elif __LPSOLVER__==_GLPK_
-	Real* row = new Real[m_cols.size()];
-	int* colno = new int[m_cols.size()];
+	Real* row = new Real[m_cols.size()+1];
+	int* colno = new int[m_cols.size()+1];
 
 	std::vector<Col>::const_iterator cols_it = m_cols.begin();
 	unsigned int index = 0;
 	while(cols_it != m_cols.end()) {
-		row[index] = (*cols_it).second;
-		colno[index] = (int)(*cols_it).first + 1;
+		row[index+1] = (*cols_it).second;
+		colno[index+1] = (int)(*cols_it).first + 1;
 		++cols_it;
 		index++;
 	}
@@ -192,7 +192,7 @@ void LPConstraint::addToModel(LPModel& model) {
 	//TODO: inefficient row adding, because index otherwise unknown
 	int rowindex = glp_get_num_rows(model);
 	glp_add_rows(model, 1);
-	glp_set_mat_row(model, rowindex, m_cols.size(), colno, row);
+	glp_set_mat_row(model, rowindex, (int)m_cols.size(), colno, row);
 
 	if (m_type == GEQ) {
 		glp_set_row_bnds(model, rowindex, GLP_LO, m_value, m_value);
@@ -208,7 +208,7 @@ void LPConstraint::addToModel(LPModel& model) {
 
 //TODO: max is for min or max lra, not LP solving, so it is inverted. Fix this in API
 LP::LP(bool max, Real delta) :
-	m_maximize(max), m_result(0.0), m_objective() {
+	m_maximize(max), m_delta(delta), m_result(0.0), m_objective() {
 #if __LPSOLVER__==_SOPLEX_
 	// Default constructor works
 	//m_model = SoPlex();
@@ -242,8 +242,6 @@ void LP::addRow(LPConstraint constraint) {
 }
 
 void LP::printModel() {
-	buildModel();
-
 	if (m_maximize) {
 		printf("Minimize ");
 	} else {
@@ -288,6 +286,7 @@ void LP::buildModel() {
 	} else {
 		m_model.changeSense(soplex::SPxLP::MAXIMIZE);
 	}
+	m_model.setDelta(delta);
 #elif __LPSOLVER__==_LPSOLVE_
 	delete_lp(m_model);
 	m_model = make_lp((int)m_constraints.size(), (int)cols);
@@ -295,6 +294,8 @@ void LP::buildModel() {
 
 	//TODO: below setting rowmode triggers a bug in solving method
 	//set_add_rowmode(m_model, TRUE);
+
+	//TODO: set delta
 #elif __LPSOLVER__==_GLPK_
 	glp_delete_prob(m_model);
 	m_model = glp_create_prob();
@@ -368,6 +369,28 @@ bool LP::solve() {
 	}
 
 	return (solve_res == OPTIMAL);
+#elif __LPSOLVER__==_GLPK_
+	glp_smcp parms;
+	glp_init_smcp(&parms);
+	//parms.meth = GLP_DUAL;
+	parms.msg_lev = GLP_MSG_ERR;
+
+	//TODO: parameters for tolerances need to take delta into account
+	int solve_res = glp_simplex(m_model, &parms);
+
+	// requery col counts
+	int lpcols = glp_get_num_cols(m_model);
+
+	if (solve_res == 0) {
+		m_result = glp_get_obj_val(m_model);
+
+		for(int i = 0; i < lpcols; i++) {
+			Real prim = glp_get_col_prim(m_model, i+1);
+			m_primals.push_back(prim);
+		}
+	}
+
+	return (solve_res == 0);
 #endif
 }
 
