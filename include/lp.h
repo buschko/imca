@@ -69,7 +69,7 @@ public:
 
 	unsigned long getMaxCol() const { return m_maxCol; }
 
-	void addToModel(LPModel& model);
+	void addToModel(LPModel& model, unsigned long maxCol = 0);
 private:
 	std::vector< Col > m_cols;
 	unsigned long m_maxCol;

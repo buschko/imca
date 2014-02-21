@@ -37,28 +37,27 @@ LPObjective::LPObjective() :
 LPObjective::~LPObjective() {
 }
 
-//bound = upper bound (lower = 0.0)
 void LPObjective::setCol(unsigned long index, Real value, Real upperbound, Real lowerbound) {
 	if ((index+1) > m_maxCol)
 		m_maxCol = index+1;
-	if (value == 0.0)
-		return;
 	m_cols.push_back(Col(index, value, upperbound, lowerbound));
 }
 
-void LPObjective::addToModel(LPModel& model) {
+void LPObjective::addToModel(LPModel& model, unsigned long maxCol) {
 	//sort the vectors
 	std::sort(m_cols.begin(), m_cols.end(), CmpObjCol());
 
 #if __LPSOLVER__==_SOPLEX_
 	DSVector dummycol(0);
 	std::vector<Col>::const_iterator cols_it = m_cols.begin();
-	for(unsigned long i = 0; i < m_nrCols; i++) {
+	if (maxCol == 0) maxCol = m_maxCol;
+
+	for(unsigned long i = 0; i < maxCol; i++) {
 		if ((*cols_it).index == i) {
-			model.addCol(LPCol((*cols_it).value, dummycol, (*cols_it).bound, 0));
+			model.addCol(LPCol((*cols_it).value, dummycol, (*cols_it).upperbound, (*cols_it).lowerbound));
 			++cols_it;
 		} else {
-			model.addCol(LPCol(0.0, dummycol, 0, 0));
+			model.addCol(LPCol(0.0, dummycol, 0.0, 0.0));
 		}
 	}
 #elif __LPSOLVER__==_LPSOLVE_
@@ -226,14 +225,18 @@ void LP::buildModel() {
 			cols = max;
 		++constraint_it;
 	}
-	unsigned long rows = m_constraints.size();
 
 	// Clear the model
 #if __LPSOLVER__==_SOPLEX_
 	m_model.clear();
+	if (m_maximize) {
+		m_model.changeSense(soplex::SPxLP::MINIMIZE);
+	} else {
+		m_model.changeSense(soplex::SPxLP::MAXIMIZE);
+	}
 #elif __LPSOLVER__==_LPSOLVE_
 	delete_lp(m_model);
-	m_model = make_lp((int)rows, (int)cols);
+	m_model = make_lp((int)m_constraints.size(), (int)cols);
 	set_sense(m_model, m_maximize?FALSE:TRUE);
 
 	//TODO: below setting rowmode triggers a bug in solving method
@@ -241,7 +244,7 @@ void LP::buildModel() {
 #endif
 
 	// Build the objective
-	m_objective.addToModel(m_model);
+	m_objective.addToModel(m_model, cols);
 
 	// Build the constraints
 	constraint_it = m_constraints.begin();
@@ -259,7 +262,7 @@ bool LP::solve() {
 	//printModel();
 
 #if __LPSOLVER__==_SOPLEX_
-	soplex::SPxSolver::Status solve_res =soplex::SPxSolver::UNKNOWN;
+	soplex::SPxSolver::Status solve_res =soplex::SPxSolver::ERROR;
 
 	try {
 		solve_res = m_model.solve();
@@ -270,9 +273,10 @@ bool LP::solve() {
 
 	if (solve_res == soplex::SPxSolver::OPTIMAL) {
 		m_result = m_model.objValue();
-		soplex::DVector primals(m_cols);
+		int cols = m_model.nCols();
+		soplex::DVector primals(cols);
 		m_model.getPrimal(primals);
-		for(unsigned long i = 0; i < m_cols; i++) {
+		for(int i = 0; i < cols; i++) {
 			m_primals.push_back(primals[i]);
 		}
 	}

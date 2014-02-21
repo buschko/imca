@@ -623,7 +623,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 	printf("vector(%lu) [",num_states);
 	for (unsigned long state_nr = 0; state_nr < num_states; state_nr++) {
 		//std::cout << (ma->states_nr.find(state_nr)->second).c_str() << ": " << u[state_nr] << std::endl;
-		printf(" %lf,",u[state_nr]);
+		printf(" %f,",u[state_nr]);
 		if(initials[state_nr]){
 			if(max){
 				if(prob<u[state_nr])
