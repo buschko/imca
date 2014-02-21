@@ -27,6 +27,8 @@
 #include "read_file.h"
 
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include <map>
 #include <string>
 #include <vector>

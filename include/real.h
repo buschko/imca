@@ -5,6 +5,7 @@
 
 #define _SOPLEX_ 1
 #define _LPSOLVE_ 2
+#define _GLPK_ 3
 
 #ifdef __LPSOLVER__
 #if __LPSOLVER__==_SOPLEX_
@@ -23,6 +24,13 @@ extern const Real infinity;
 
 typedef double Real;
 // defined in lp.cpp
+extern const Real infinity;
+
+#elif __LPSOLVER__==_GLPK_
+
+// GLPK works with doubles
+typedef double Real;
+// GLPK needs infinity specified explicitly
 extern const Real infinity;
 
 #endif

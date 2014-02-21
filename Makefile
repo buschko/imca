@@ -54,20 +54,61 @@ HOSTNAME	:=	$(shell uname -n | tr '[:upper:]' '[:lower:]')
 UNAME := $(shell uname)
 
 #-----------------------------------------------------------------------------
-# Soplex Libaries -- path to Soplex library has to be adjusted (only if option 
-#                    SOPLEX=true is active ) --
+# Base path for Libaries -- change this according to local install
 #-----------------------------------------------------------------------------
-SOPLEXSRC	= /Users/guckd/lib/soplex-1.7.0
-SOPLEXLIB	= $(SOPLEXSRC)/lib/libsoplex.a
-SOPLEXINCLUDE	= $(SOPLEXSRC)/src
-SOPLEXLINK	= $(SOPLEXSRC)/lib/libsoplex.a
-SOPLEX		= true
-SOPLEXVAR	= __SOPLEX__
+LIBPATH		= /libs
 
 #-----------------------------------------------------------------------------
-# lp_solve Libaries -- path to lp_solve library has to be adjusted --
+# Soplex Libaries -- path to Soplex library has to be adjusted
 #-----------------------------------------------------------------------------
-LPSOLVEINCLUDE	= /opt/local/include/lpsolve
+SOPLEXPATH	= $(LIBPATH)/soplex-1.7.1
+SOPLEXSRCDIR	= $(SOPLEXPATH)/src/
+SOPLEXLIBDIR	= $(SOPLEXPATH)/lib/
+SOPLEXLIB	= soplex z
+
+#-----------------------------------------------------------------------------
+# lp_solve Libaries -- path to lp_solve library has to be adjusted
+#-----------------------------------------------------------------------------
+LPSOLVEPATH	= $(LIBPATH)/lp_solve_5.5
+LPSOLVESRCDIR	= $(LPSOLVEPATH)
+LPSOLVELIBDIR	= $(LPSOLVEPATH)/Release
+LPSOLVELIB	= lpsolve55 dl
+
+#-----------------------------------------------------------------------------
+# GLPK Libaries -- path to GLPK library has to be adjusted
+#-----------------------------------------------------------------------------
+GLPKPATH	= $(LIBPATH)/glpk-4.53
+GLPKSRCDIR	= $(GLPKPATH)/src/
+GLPKLIBDIR	= $(GLPKPATH)/src/.libs
+GLPKLIB		= glpk
+
+# set to true to enable lp solver support, otherwise false
+USELP		= true
+# 1 SOPLEX
+# 2 LPSOLVE
+# 3 GLPK
+LPSOLVER	= 1
+
+ifeq ($(LPSOLVER), 1)
+LPPATH		= $(SOPLEXPATH)
+LPINCLUDE	= $(SOPLEXSRCDIR)
+LPLIBDIR	= $(SOPLEXLIBDIR)
+LPLIB		= $(SOPLEXLIB)
+else
+ifeq ($(LPSOLVER), 2)
+LPPATH		= $(LPSOLVEPATH)
+LPINCLUDE	= $(LPSOLVESRCDIR)
+LPLIBDIR	= $(LPSOLVELIBDIR)
+LPLIB		= $(LPSOLVELIB)
+else
+ifeq ($(LPSOLVER), 3)
+LPPATH		= $(SOPLEXPATH)
+LPINCLUDE	= $(GLPKSRCDIR)
+LPLIBDIR	= $(GLPKLIBDIR)
+LPLIB		= $(GLPKLIB)
+endif
+endif
+endif
 
 #-----------------------------------------------------------------------------
 # Options
@@ -106,6 +147,9 @@ BINDIR		=	bin
 LIBDIR		=	lib
 INCLUDEDIR	=	include
 LIBOBJ		=	read_file.o read_file_imc.o  sparse.o unbounded.o expected_time.o expected_reward.o bounded_reward.o sccs.o sccs2.o long_run_average.o debug.o bounded.o long_run_reward.o
+ifeq ($(USELP),true)
+LIBOBJ		+=	lp.o
+endif
 BINOBJ		=	main.o
 
 NAME		=	imca
@@ -135,33 +179,25 @@ FLAGS		=	-g -Wall -D NDEBUG
 else
 FLAGS		=	-O2
 endif
-ifeq ($(SOPLEX),true)
-CPPFLAGS	=	-I $(INCLUDEDIR) -I $(SOPLEXINCLUDE) $(ZLIB) $(GMPLIB) $(TIMELIB)
+ifeq ($(USELP),true)
+CPPFLAGS	=	-I $(INCLUDEDIR) -I $(LPINCLUDE) 
 else
-CPPFLAGS	=	-I $(INCLUDEDIR) $(ZLIB) $(GMPLIB) $(TIMELIB) -I $(LPSOLVEINCLUDE) /opt/local/lib/liblpsolve55.dylib /opt/local/lib/liblpsolve55.a
+CPPFLAGS	=	-I $(INCLUDEDIR)
 endif
 CXXFLAGS	=	
 BINOFLAGS	=	
 LIBOFLAGS	=	
-ifeq ($(SOPLEX),true)
-LDFLAGS		+=	-I $(INCLUDEDIR) -I $(SOPLEXINCLUDE) $(SOPLEXLIB) $(ZLIB) $(GMPLIB) $(TIMELIB) 
-else
-LDFLAGS		+=	-I $(INCLUDEDIR) $(ZLIB) $(GMPLIB) $(TIMELIB) -I $(LPSOLVEINCLUDE) /opt/local/lib/liblpsolve55.dylib /opt/local/lib/liblpsolve55.a
+ifeq ($(USELP),true)
+LDFLAGS		+=	-L$(LPLIBDIR) $(addprefix -l,$(LPLIB)) 
 endif
 ARFLAGS		=	cr
 DFLAGS		=	-MM
 VFLAGS		=	--tool=memcheck --leak-check=yes --show-reachable=yes #--gen-suppressions=yes
 
-ifeq ($(SOPLEX),true)
-INCLUDES	=	-I $(INCLUDEDIR) -I $(SOPLEXINCLUDE) 
-else
-INCLUDES	=	-I $(INCLUDEDIR) -I $(LPSOLVEINCLUDE)
-endif
-
 LN_s		=	ln -s
 
-ifeq ($(SOPLEX),true)
-FLAGS		+=	-D$(SOPLEXVAR)
+ifeq ($(USELP),true)
+FLAGS		+=	-D__LPSOLVER__=$(LPSOLVER)
 endif
 
 

@@ -155,6 +155,8 @@ static void print_intro(void) {
 	printf("|                using SoPlex \"http://soplex.zib.de/\"               |\n");
 	#elif __LPSOLVER__==_LPSOLVE_
 	printf("|          using lp_solve \"http://lpsolve.sourceforge.net/\"         |\n");
+	#elif __LPSOLVER__==_GLPK_
+	printf("|           using GLPK \"http://www.gnu.org/software/glpk/\"          |\n");
 	#endif
 #endif
 	printf("|                                                                   |\n");
