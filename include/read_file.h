@@ -30,11 +30,7 @@
 #define READ_FILE_H
 
 #include "sparse.h"
-
-#ifdef __SOPLEX__
-#include "soplex.h"
-using namespace soplex;
-#endif
+#include "lp.h"
 
 #define MAX_LINE_LENGTH 1024
 #define MARKOV_ACTION "!"
@@ -47,7 +43,7 @@ extern void print_model(SparseMatrix*);
 extern void print_model_info(SparseMatrix*);
 
 
-#ifdef __SOPLEX__
+#if __LPSOLVER__==_SOPLEX_
 /**
 * print out onformation about SoPlex LP solve.
 *

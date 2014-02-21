@@ -36,17 +36,7 @@
 #include <string>
 //#include <popt.h>
 
-
-// choose between SoPlex and LP_solve
-#ifdef __SOPLEX__
-#include "soplex.h"
-#else
-// have to include gmp for REAL arithmetic
-#include "gmp.h"
-#include <math.h>
-// define location in Makefile
-#include "/opt/local/include/lpsolve/lp_lib.h"
-#endif
+#include "real.h"
 
 #ifndef __APPLE__
 #include <malloc.h>
@@ -160,11 +150,13 @@ static void print_intro(void) {
 	printf("|                  Interactive Markov Chain Analyzer                |\n");
 	printf("|                        IMCA Version 1.6 beta                      |\n");
 	printf("|             Binary build date: %s @ %s             |\n", __DATE__, __TIME__);
-	#ifdef __SOPLEX__
+#ifdef __LPSOLVER__
+	#if __LPSOLVER__==_SOPLEX_
 	printf("|                using SoPlex \"http://soplex.zib.de/\"               |\n");
-	#else
+	#elif __LPSOLVER__==_LPSOLVE_
 	printf("|          using lp_solve \"http://lpsolve.sourceforge.net/\"         |\n");
 	#endif
+#endif
 	printf("|                                                                   |\n");
 	printf("|                  Copyright (C) RWTH Aachen, 2012.                 |\n");
 	printf("|          Copyright (C) University of Twente, 2013-2014.           |\n");
@@ -206,9 +198,9 @@ static bool isValidExtension(const char * filename, char * extension, int * ext_
 	const char *p;
 	int length;
 
-	length = strlen(filename);
+	length = (int)strlen(filename);
 	p = strrchr(filename,'.');     /* The last occurance of '.' in the file name */
-	*ext_length = length - (p - filename); /* including '.', excluding '\0' */
+	*ext_length = length - (int)(p - filename); /* including '.', excluding '\0' */
 	/*TODO: change function */
 	if( length >= MIN_FILE_NAME_LENGTH && ( *ext_length >= MIN_FILE_EXT_LENGTH) && ( *ext_length <= MAX_FILE_EXT_LENGTH)) {
 		/* Get the extension */
@@ -519,6 +511,7 @@ int main(int argc, char* argv[]) {
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
 			printf("\nCompute maximal unbounded reachability, please wait.\n");
+#if __LPSOLVER__
 			if(!is_val){
 				tmp = compute_unbounded_reachability(ma,true);	
 				printf("Maximal unbounded reachability: %.10g\n", tmp);
@@ -526,6 +519,10 @@ int main(int argc, char* argv[]) {
 				tmp=unbounded_value_iteration(ma,true);
 				printf("Maximal unbounded reachability: %.10g\n", tmp);
 			}
+#else
+			tmp=unbounded_value_iteration(ma,true);
+			printf("Maximal unbounded reachability: %.10g\n", tmp);
+#endif //__LPSOLVER__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -540,6 +537,8 @@ int main(int argc, char* argv[]) {
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
 			printf("\nCompute minimal unbounded reachability, please wait.\n");	
+
+#if __LPSOLVER__
 			if(!is_val){
 				tmp = compute_unbounded_reachability(ma,false);
 				printf("Minimal unbounded reachability: %.10g\n", tmp);
@@ -547,6 +546,10 @@ int main(int argc, char* argv[]) {
 				tmp=unbounded_value_iteration(ma,false);
 				printf("Minimal unbounded reachability: %.10g\n", tmp);
 			}
+#else
+			tmp=unbounded_value_iteration(ma,false);
+			printf("Minimal unbounded reachability: %.10g\n", tmp);
+#endif //__LPSOLVER__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -563,6 +566,8 @@ int main(int argc, char* argv[]) {
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
 			printf("\nCompute maximal expected time, please wait.\n");
+
+#if __LPSOLVER__
 			if(!is_val){
 				tmp = compute_expected_time(ma,true);
 				printf("Maximal expected time: %.10g\n", tmp);
@@ -570,6 +575,10 @@ int main(int argc, char* argv[]) {
 				tmp=expected_time_value_iteration(ma,true);
 				printf("Maximal expected time value iteration: %.10g\n", tmp);
 			}
+#else
+			tmp=expected_time_value_iteration(ma,true);
+			printf("Maximal expected time value iteration: %.10g\n", tmp);
+#endif //__LPSOLVER__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -584,6 +593,7 @@ int main(int argc, char* argv[]) {
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
 			printf("\nCompute minimal expected time, please wait.\n");
+#if __LPSOLVER__
 			if(!is_val) {
 				tmp = compute_expected_time(ma,false);
 				printf("Minimal expected time: %.10g\n\n", tmp);
@@ -591,6 +601,10 @@ int main(int argc, char* argv[]) {
 				tmp=expected_time_value_iteration(ma,false);
 				printf("Minimal expected time value iteration: %.10g\n", tmp);
 			}
+#else
+			tmp=expected_time_value_iteration(ma,false);
+			printf("Minimal expected time value iteration: %.10g\n", tmp);
+#endif //__LPSOLVER__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -692,9 +706,13 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
+#if __LPSOLVER__
 			printf("\nCompute maximal LRR, please wait.\n");
 			tmp=compute_long_run_reward(ma,true);
 			printf("Maximal LRR: %.10g\n", tmp);
+#else
+			printf("LRW not supported without compiled LP solver support\n");
+#endif //__LPSOLVER__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -708,9 +726,13 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
+#if __LPSOLVER__
 			printf("\nCompute minimal LRR, please wait.\n");
 			tmp=compute_long_run_reward(ma,false);
 			printf("Minimal LRR: %.10g\n", tmp);
+#else
+			printf("LRW not supported without compiled LP solver support\n");
+#endif //__LPSOLVER__
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
@@ -828,10 +850,10 @@ int main(int argc, char* argv[]) {
 		for(unsigned long mec_nr=0; mec_nr < mecs->n; mec_nr++) {
 			unsigned long mec_start = row_starts[mec_nr];
 			unsigned long mec_end = row_starts[mec_nr + 1];
-			printf("MEC #%d: %d States\n",mec_nr+1,mec_end-mec_start);
+			printf("MEC #%lu: %lu States\n",mec_nr+1,mec_end-mec_start);
 			if(is_max_present){
 				printf("{");
-				for (int state_nr = mec_start; state_nr < mec_end-1; state_nr++) {
+				for (unsigned long state_nr = mec_start; state_nr < mec_end-1; state_nr++) {
 					printf("%s,",(states_nr.find(cols[state_nr])->second).c_str());
 				}
 				printf("%s}\n",(states_nr.find(cols[mec_end-1])->second).c_str());

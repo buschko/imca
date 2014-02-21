@@ -30,12 +30,7 @@
 #define EXPECTED_REWARD_H
 
 #include "sparse.h"
-
-#ifdef __SOPLEX__
-#include "soplex.h"
-#endif
-
-using namespace soplex;
+#include "real.h"
 
 /**
 * Computes expected reward for MA with rewards.

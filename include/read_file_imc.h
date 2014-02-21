@@ -31,17 +31,11 @@
 
 #include "sparse.h"
 
-#ifdef __SOPLEX__
-#include "soplex.h"
-#endif
-
 #define MAX_LINE_LENGTH 1024
 #define MARKOV_ACTION "!"
 #define INITIALS "#INITIALS"
 #define GOALS "#GOALS"
 #define TRANSITIONS "#TRANSITIONS"
-
-using namespace soplex;
 
 /**
 * Reads MA file @a filename.

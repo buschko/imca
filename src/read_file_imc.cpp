@@ -27,13 +27,14 @@
 #include "read_file.h"
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
 #include <map>
 #include <string>
+#include <vector>
 
-using namespace std;
+using std::map;
+using std::pair;
+using std::vector;
+using std::string;
 
 /**
 * Read number of states and create a hash table for state names.
@@ -476,7 +477,7 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 				if (sscanf(s, "%s%s%s", src, dst, act) != 3)
 					*error = true;
 			} else {
-				int tmp=states.find(src)->second;
+				unsigned long tmp=states.find(src)->second;
 				/* probabilistic transitions are choosen before markovian transitions */
 				if(isPS[tmp])
 					bad=true;
@@ -648,7 +649,9 @@ SparseMatrix *read_IMC_SparseMatrix_file(const char *filename)
 		model = NULL;
 	}else{
 		//print_model(model);
+#ifdef __LPSOLVER__
 		print_model_info(model);
+#endif //__LPSOLVER__
 	}
 	
 	//print_model(model);

@@ -31,12 +31,7 @@
 #include "sparse.h"
 #include <vector>
 
-#ifdef __SOPLEX__
-#include "soplex.h"
-#endif
-
-using namespace soplex;
-
+using std::vector;
 
 /**
  * Compute MECs

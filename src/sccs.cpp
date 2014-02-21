@@ -24,19 +24,12 @@
 */
 
 #include "sccs.h"
-#include "sccs2.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <map>
-#include <string>
-#include <vector>
 
 #include "debug.h"
 
-using namespace std;
+#include <vector>
+
+using std::vector;
 
 /**
  * test if element is in vector
@@ -562,10 +555,9 @@ bool* compute_locks_strong(SparseMatrix *ma) {
 			bad[i]=true;
 	}
 
-	bool *tmp=compute_locks_strong(ma, bad);
+	bool *locks = compute_locks_strong(ma, bad);
 	free(bad);
-
-	return tmp;
+	return locks;
 }
 
 /**
@@ -686,8 +678,7 @@ bool* compute_locks_strong(SparseMatrix *ma, bool* bad) {
 	}
 	
 	dbg_printf("\n");
-	
-	//free(bad);
+
 	free(bad_dist);
 	
 	return locks;
@@ -708,11 +699,10 @@ bool* compute_locks_weak(SparseMatrix *ma) {
 		if(goals[i])
 			bad[i]=true;
 	}
-	
-	bool* tmp=compute_locks_weak(ma, bad);
-	free(bad);
 
-	return tmp;
+	bool *locks = compute_locks_weak(ma, bad);
+	free(bad);
+	return locks;
 }
 
 /**

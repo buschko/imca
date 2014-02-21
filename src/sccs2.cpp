@@ -31,23 +31,8 @@
 */
 
 #include "sccs2.h"
-#include "sccs.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <map>
-#include <string>
-#include <vector>
-#include <ctime>
-#include <time.h>
-#include <stack>
-#include <pthread.h>
 
 #include "debug.h"
-
-using namespace std;
 
 /**
  * test if element is in vector
@@ -337,7 +322,7 @@ void attractor_remove(SparseMatrix *ma, bool* u0_states, bool* bad_states, bool*
     
     if(remove_scc){
         //initial set is the SCC
-        for(int i = 0; i < ma->n; i++){
+        for(unsigned long i = 0; i < ma->n; i++){
             if(scc_states[i] == scc_nr){
                 attractor_set[i] = true;
             }else{
@@ -345,7 +330,7 @@ void attractor_remove(SparseMatrix *ma, bool* u0_states, bool* bad_states, bool*
             }
         }
     }else{
-        for(int i = 0; i < ma->n; i++){
+        for(unsigned long i = 0; i < ma->n; i++){
                 attractor_set[i] = u0_states[i];           
         }
     }
@@ -526,7 +511,7 @@ SparseMatrixMEC* mEC_decomposition_previous_algorithm(SparseMatrix *ma){
                     printf("%lu",scc_states[j]);
                 }*/
                 
-                for(int j = 0; j < ma->n; j++){
+                for(unsigned long j = 0; j < ma->n; j++){
                     if(scc_states[j]==z){
                         mec_states[j] = mec_nr;
                     }
@@ -603,7 +588,7 @@ SparseMatrixMEC* mEC_decomposition_previous_algorithm(SparseMatrix *ma){
     unsigned long scc_index=0;
     unsigned long scc_size=0;
     unsigned long tmp=0;
-    for(int idx=0; idx<mec->n; idx++) {
+    for(unsigned long idx=0; idx<mec->n; idx++) {
             unsigned long i=0;
             for(it=mec_states.begin(); it != mec_states.end(); it++)
             {
@@ -722,7 +707,7 @@ SparseMatrixMEC* mEC_decomposition_previous_algorithm_without_attractor(SparseMa
                 //Store MEC C, 
                 
                 
-                for(int j = 0; j < ma->n; j++){
+                for(unsigned long j = 0; j < ma->n; j++){
                     if(scc_states[j]==z){
                         mec_states[j] = mec_nr;
                     }
@@ -795,7 +780,7 @@ SparseMatrixMEC* mEC_decomposition_previous_algorithm_without_attractor(SparseMa
     unsigned long scc_index=0;
     unsigned long scc_size=0;
     unsigned long tmp=0;
-    for(int idx=0; idx<mec->n; idx++) {
+    for(unsigned long idx=0; idx<mec->n; idx++) {
             unsigned long i=0;
             for(it=mec_states.begin(); it != mec_states.end(); it++)
             {

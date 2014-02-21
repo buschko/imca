@@ -32,18 +32,15 @@
 #include <map>
 #include <string>
 #include <vector>
-
-#ifdef __SOPLEX__
-#include "soplex.h"
-#endif
+#include <iostream>
 
 #include "sccs.h"
-#include "read_file.h"
+#include "lp.h"
 #include "debug.h"
 
 using namespace std;
-using namespace soplex;
 
+#if __LPSOLVER__
 /**
 * sets the objective function and bounds for goal states
 *
@@ -51,27 +48,19 @@ using namespace soplex;
 * @param ma the MA
 * @param max identifier for maximum/minimum
 */
-static void set_obj_function_unb(SoPlex& lp_model, SparseMatrix *ma, bool max, bool *locks) {
-	unsigned long state_nr;
+static void set_obj_function_unb(LP& lp_model, SparseMatrix *ma, bool max, bool *locks) {
 	bool *goals = ma->goals;
-	DSVector dummycol(0);
-	double inf = soplex::infinity;
-	
-	/* set objective function to max, resp. min */
-	if(max)
-		lp_model.changeSense(SPxLP::MINIMIZE);
-	else
-		lp_model.changeSense(SPxLP::MAXIMIZE);
-	
+	LPObjective& objective = lp_model.getObj();
+
 	/* set objective and bounds resp. to goal states*/
-	for (state_nr = 0; state_nr < ma->n; state_nr++) {
+	for (unsigned long state_nr = 0; state_nr < ma->n; state_nr++) {
 		if(!locks[state_nr]) {
 			if(goals[state_nr])
-				lp_model.addCol(LPCol(1.0, dummycol, 1.0, 1.0));
+				objective.setCol(state_nr, 0.0, 1.0, 1.0);
 			else
-				lp_model.addCol(LPCol(1.0, dummycol, inf, 0));
+				objective.setCol(state_nr, infinity, 0.0);
 		} else {
-			lp_model.addCol(LPCol(0.0, dummycol, 0, 0));
+			objective.setCol(state_nr, 0.0, 0.0);
 		}
 	}
 }
@@ -83,7 +72,7 @@ static void set_obj_function_unb(SoPlex& lp_model, SparseMatrix *ma, bool max, b
 * @param ma the MA
 * @param max identifier for maximum/minimum
 */
-static void set_constraints_unb(SoPlex& lp_model, SparseMatrix *ma, bool max, bool *locks) {
+static void set_constraints_unb(LP& lp_model, SparseMatrix *ma, bool max, bool *locks) {
 	unsigned long i;
 	unsigned long state_nr;
 	unsigned long choice_nr;
@@ -97,21 +86,18 @@ static void set_constraints_unb(SoPlex& lp_model, SparseMatrix *ma, bool max, bo
 	Real *exit_rates = ma->exit_rates;
 	unsigned long *cols = ma->cols;
 	Real prob;
-	
-	int m=0; // greater equal 0
+	LPConstraint::Type m=LPConstraint::LEQ; // greater equal 0
 	if(!max)
-		m=2; // less equal 0
-	
-	
-	DSVector row(states);
+		m=LPConstraint::GEQ; // less equal 0
+
 	bool loop;
-	
+
 	for (state_nr = 0; state_nr < ma->n; state_nr++) {
 		if(!goals[state_nr]  && !locks[state_nr]) {
 			unsigned long state_start = row_starts[state_nr];
 			unsigned long state_end = row_starts[state_nr + 1];
 			for (choice_nr = state_start; choice_nr < state_end; choice_nr++) {
-				DSVector row(states);
+				LPConstraint row;
 				loop=false;
 				/* Add up all outgoing rates of the distribution */
 				unsigned long i_start = choice_starts[choice_nr];
@@ -126,21 +112,97 @@ static void set_constraints_unb(SoPlex& lp_model, SparseMatrix *ma, bool max, bo
 					//printf("%s - %lf -> %s\n",(states_nr.find(state_nr)->second).c_str(),prob,(states_nr.find(cols[i])->second).c_str());
 					if(state_nr==cols[i]) {
 						loop=true;
-						row.add(state_nr,-1.0+prob);
+						row.setCol(state_nr,-1.0+prob);
 					} else {
-						row.add(cols[i],prob);
+						row.setCol(cols[i],prob);
 					}
 				}
 				if(!loop)
-					row.add(state_nr,-1);
-				lp_model.addRow(LPRow(row,LPRow::Type(m), 0));
-				row.~DSVector();
+					row.setCol(state_nr,-1);
+				row.setValue(0.0);
+				row.setType(m);
+				lp_model.addRow(row);
 			}
 		}
 	}
 	
 	
 }
+
+/**
+* Computes unbounded reachability for MA.
+*
+* @param ma file to read MA from
+* @param max identifier for min or max prb
+* @return probability for unbounded reachability
+*/
+Real compute_unbounded_reachability(SparseMatrix* ma, bool max) {
+	bool *locks=(bool *)malloc(ma->n * sizeof(bool));
+
+	if(max) {
+		locks=compute_locks_strong(ma);
+	} else {
+		locks=compute_locks_strong(ma);
+	}
+	/*
+	for(unsigned long i=0; i<ma->n; i++) {
+		locks[i]=false;
+	}*/
+
+
+	dbg_printf("LP computation start.\n");
+
+	printf("LP computation start.\n");
+
+	/* first step: build the lp model */
+	LP lp_model(max, 1e-4);
+	set_obj_function_unb(lp_model,ma,max,locks);
+	set_constraints_unb(lp_model,ma,max,locks);
+
+	//cout << lp_model.rowVector(0) << endl;
+
+	/* solve the LP */
+	dbg_printf("solve\n");
+	bool stat = lp_model.solve();
+
+	//print_lp_info(lp_model);
+
+	/* find the max or min prob. for an initial state */
+	Real obj;
+	if(max)
+		obj=0;
+	else
+		obj=1;
+
+	/* show if optimal solution */
+	if( stat ) {
+		printf("LP solved to optimality.\n\n");
+		//printf("Objective value is %lf.\n",lp_model.objValue());
+
+		bool *initials = ma->initials;
+		unsigned long state_nr;
+		for (state_nr = 0; state_nr < ma->n; state_nr++) {
+			//cout << "s" << state_nr << " " << probs[state_nr] << endl;
+			if(initials[state_nr]){
+				Real tmp = lp_model.getPrimal(state_nr);
+				dbg_printf("%li: prob %lf\n",state_nr, tmp);
+				if(max && tmp > obj)
+					obj=tmp;
+				else if(!max && tmp < obj)
+					obj = tmp;
+			}
+		}
+
+	} else {
+		fprintf(stderr, "LP is infeasible.\n\n");
+	}
+
+	free(locks);
+
+	return obj;
+}
+
+#endif // __LPSOLVER__
 
 /**
 * computes one step for Markovian states
@@ -271,17 +333,17 @@ void compute_ub_probabilistic_vector(SparseMatrix* ma, vector<Real>& v, vector<R
 
 /**
  * Computes the expected time reachability using a value iteration algorithm
- * Fixpoint is reached if afer 100 iteration steps, the distance is lower 
+ * Fixpoint is reached if afer 100 iteration steps, the distance is lower
  * than epsilon=10^-6
  *
  * @return expected time vector
  */
 Real unbounded_value_iteration(SparseMatrix* ma, bool max) {
-	/* 
+	/*
 	 * Define value iteration likewise to time-bounded reachability
 	 * with expected time property
 	 */
-	
+
 	unsigned long num_states = ma->n;
 	vector<Real> v(num_states,0); // Markovian vector
 	vector<Real> u(num_states,0); // Probabilistic vector
@@ -293,7 +355,7 @@ Real unbounded_value_iteration(SparseMatrix* ma, bool max) {
 			v[state_nr]=1;
 		}
 	}
-	
+
 	bool *locks=(bool *)malloc(ma->n * sizeof(bool));
 	/*
 	if(max) {
@@ -301,15 +363,15 @@ Real unbounded_value_iteration(SparseMatrix* ma, bool max) {
 	} else {
 		locks=compute_locks_strong(ma);
 	}*/
-	
+
 	for(unsigned long i=0; i<ma->n; i++) {
 		locks[i]=false;
 	}
-	
+
 	cout << "start value iteration" << endl;
-	
+
 	bool done=false;
-	
+
 	while(!done){
 		tmp=u;
 		//done=true;
@@ -341,92 +403,6 @@ Real unbounded_value_iteration(SparseMatrix* ma, bool max) {
 		}
 	}
 
-	 
-	return obj;
-}
-
-/**
-* Computes unbounded reachability for MA.
-*
-* @param ma file to read MA from
-* @param max identifier for min or max prb
-* @return probability for unbounded reachability
-*/
-Real compute_unbounded_reachability(SparseMatrix* ma, bool max) {
-	dbg_printf("before soplex\n");
-	SoPlex lp_model;
-	dbg_printf("after soplex\n");
-	
-	bool *locks=(bool *)malloc(ma->n * sizeof(bool));
-	
-	if(max) {
-		locks=compute_locks_strong(ma);
-	} else {
-		locks=compute_locks_strong(ma);
-	}
-	/*
-	for(unsigned long i=0; i<ma->n; i++) {
-		locks[i]=false;
-	}*/
-
-	
-	dbg_printf("LP computation start.\n");
-	
-	printf("LP computation start.\n");
-	
-	/* first step: build the lp model */
-	set_obj_function_unb(lp_model,ma,max,locks);
-	set_constraints_unb(lp_model,ma,max,locks);
-	
-	//lp_model.writeFile("file.lp", NULL, NULL, NULL);
-	// TODO: (temorary BUGFIX: load model from file)
-	//lp_model.readFile("file.lp");
-	
-	//cout << lp_model.rowVector(0) << endl;
-	
-	lp_model.setDelta(1e-4);
-	
-	/* solve the LP */
-	SPxSolver::Status stat;
-	dbg_printf("solve\n");
-	stat = lp_model.solve();
-	
-	//print_lp_info(lp_model);
-	
-	/* find the max or min prob. for an initial state */
-	Real obj;
-	if(max)
-		obj=0;
-	else
-		obj=1;
-			
-	/* show if optimal solution */
-	if( stat == SPxSolver::OPTIMAL ) {
-		printf("LP solved to optimality.\n\n");
-		//printf("Objective value is %lf.\n",lp_model.objValue());
-		
-		DVector probs(lp_model.nCols());
-		lp_model.getPrimal(probs);
-		
-		bool *initials = ma->initials;
-		unsigned long state_nr;
-		for (state_nr = 0; state_nr < ma->n; state_nr++) {
-			//cout << "s" << state_nr << " " << probs[state_nr] << endl;
-			if(initials[state_nr]){
-				Real tmp = probs[state_nr];
-				dbg_printf("%li: prob %lf\n",state_nr, tmp);
-				if(max && tmp > obj)
-					obj=tmp;
-				else if(!max && tmp < obj)
-					obj = tmp;
-			}
-		}
-		
-	} else if ( stat == SPxSolver::INFEASIBLE) {
-		fprintf(stderr, "LP is infeasible.\n\n");
-	}
-	
-	free(locks);
 
 	return obj;
 }

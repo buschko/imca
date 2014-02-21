@@ -25,17 +25,16 @@
 
 #include "read_file.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
 #include <map>
-#include <string>
 #include <vector>
+#include <iostream>
 
 #include "debug.h"
 
-using namespace std;
+using std::map;
+using std::pair;
+using std::vector;
+using std::string;
 
 /**
 * Read number of states and create a hash table for state names.
@@ -189,8 +188,8 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 			sscanf(s, "%s%s", star, state);
 			ret=tmp.insert(pair<string,unsigned long>(state,state_nr));
 			if(ret.second == true){
-				cout << "Deadlock: " << state << "    State nr = " << state_nr << endl;
-				//cout << "";
+				std::cout << "Deadlock: " << state << "    State nr = " << state_nr << std::endl;
+				//std::cout << "";
 				deadlock=true;
 				tmp_nr.insert(pair<unsigned long,string>(state_nr,state));
 				(*deadlocks).push_back(state_nr);
@@ -546,7 +545,7 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 	//Real r=0;
 	
 	Real tmp = 0;
-	unsigned int old_index;
+	unsigned long old_index;
 
 	if (!*error) {
 		Real *non_zeros = ma->non_zeros;
@@ -707,9 +706,9 @@ void print_model(SparseMatrix *ma, bool mrm)
 			unsigned long i_start = choice_starts[choice_nr];
 			unsigned long i_end = choice_starts[choice_nr + 1];
 			dbg_printf("choice_starts: %li choice_ends: %li\n",i_start,i_end);
-			printf("choice %d\n",tau);
+			printf("choice %lu\n",tau);
 			if(mrm){
-				printf("reward: %lg\n",rewards[choice_nr]);
+				printf("reward: %g\n",rewards[choice_nr]);
 			}
 			tau++;
 			for (i = i_start; i < i_end; i++) {
@@ -720,7 +719,7 @@ void print_model(SparseMatrix *ma, bool mrm)
 				for (unsigned long j = r_start; j < r_end; j++) {
 					prob /= exit_rates[j];
 				}
-				printf("%s - %lg -> %s\n",(states_nr.find(state_nr)->second).c_str(),prob,(states_nr.find(cols[i])->second).c_str());
+				printf("%s - %g -> %s\n",(states_nr.find(state_nr)->second).c_str(),prob,(states_nr.find(cols[i])->second).c_str());
 			}
 		}
 		tau=1;
@@ -772,7 +771,7 @@ void print_model_info(SparseMatrix *ma)
 	printf("#Initials: %ld    #Goals: %ld    #Transitions: %ld\n", n_init, n_goal, n_trans);
 }
 
-#ifdef __SOPLEX__
+#if __LPSOLVER__==_SOPLEX_
 /**
 * print out onformation about SoPlex LP solve.
 *
@@ -782,13 +781,13 @@ void print_lp_info(SoPlex lp_model) {
 	printf("\n");
 	printf("SoPlex parameters:\n");
 	printf("Delta          = %g\n",lp_model.delta());
-	printf("Epsilon Zero   = %g\n", Param::epsilon());  
-	printf("Epsilon Factor = %g\n", Param::epsilonFactorization());
-	printf("Epsilon Update = %g\n", Param::epsilonUpdate());
+	printf("Epsilon Zero   = %g\n", soplex::Param::epsilon());
+	printf("Epsilon Factor = %g\n", soplex::Param::epsilonFactorization());
+	printf("Epsilon Update = %g\n", soplex::Param::epsilonUpdate());
 	printf("\n");
-	printf("algorithm      = %s\n", (lp_model.type() == SPxSolver::ENTER ? "Entering" : "Leaving"));
-	printf("representation = %s\n", (lp_model.rep() == SPxSolver::ROW ? "Row" : "Column"));
-	printf("piercing       = %s\n", (lp_model.pricing() == SPxSolver::FULL ? "Full" : "Partial"));
+	printf("algorithm      = %s\n", (lp_model.type() == soplex::SPxSolver::ENTER ? "Entering" : "Leaving"));
+	printf("representation = %s\n", (lp_model.rep() == soplex::SPxSolver::ROW ? "Row" : "Column"));
+	printf("piercing       = %s\n", (lp_model.pricing() == soplex::SPxSolver::FULL ? "Full" : "Partial"));
 	printf("\n");
 	printf("SoPlex LP solve information:\n");
 	printf("Factorizations : %d\n",lp_model.getFactorCount());

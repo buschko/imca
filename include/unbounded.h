@@ -30,12 +30,7 @@
 #define UNBOUNDED_H
 
 #include "sparse.h"
-
-#ifdef __SOPLEX__
-#include "soplex.h"
-#endif
-
-using namespace soplex;
+#include "real.h"
 
 /**
 * Computes unbounded reachability for MA.
@@ -44,7 +39,9 @@ using namespace soplex;
 * @param max identifier for min or max prb
 * @return probability for unbounded reachability
 */
+#ifdef __LPSOLVER__
 extern Real compute_unbounded_reachability(SparseMatrix*, bool);
+#endif
 
 extern Real unbounded_value_iteration(SparseMatrix*, bool);
 

@@ -32,16 +32,12 @@
 #include <map>
 #include <string>
 #include <vector>
-
-#ifdef __SOPLEX__
-#include "soplex.h"
-#endif
+#include <iostream>
 
 #include "sccs.h"
-#include "read_file.h"
 
-using namespace std;
-using namespace soplex;
+//using namespace std;
+using std::vector;
 
 /**
 * computes one step for Markovian states
@@ -211,7 +207,7 @@ Real expected_reward_value_iteration(SparseMatrix* ma, bool max) {
 		locks[i]=false;
 	}
 	
-	cout << "start value iteration" << endl;
+	std::cout << "start value iteration" << std::endl;
 	
 	bool done=false;
 	
