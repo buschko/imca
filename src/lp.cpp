@@ -286,7 +286,7 @@ void LP::buildModel() {
 	} else {
 		m_model.changeSense(soplex::SPxLP::MAXIMIZE);
 	}
-	m_model.setDelta(delta);
+	m_model.setDelta(m_delta);
 #elif __LPSOLVER__==_LPSOLVE_
 	delete_lp(m_model);
 	m_model = make_lp((int)m_constraints.size(), (int)cols);
