@@ -12,14 +12,15 @@
 
 #define _SOPLEX_ 1
 #define _LPSOLVE_ 2
+#define _GLPK_ 3
 
 #include "real.h"
 
 // choose between SoPlex and LP_solve
 #ifdef __LPSOLVER__
 
-#if __LPSOLVER__!=_SOPLEX_ && __LPSOLVER__!=_LPSOLVE_
-#error "Only SOPLEX and LPSOLVE solvers supported"
+#if __LPSOLVER__!=_SOPLEX_ && __LPSOLVER__!=_LPSOLVE_ && __LPSOLVER__!=_GLPK_
+#error "Only SOPLEX, LPSOLVE and GLPK solvers supported"
 #endif
 
 
@@ -38,6 +39,12 @@ extern "C" {
 #include "lp_lib.h"
 }
 
+#elif __LPSOLVER__==_GLPK_
+
+extern "C" {
+#include "glpk.h"
+}
+
 #endif
 
 #include <vector>
@@ -47,6 +54,8 @@ extern "C" {
 	typedef SoPlex LPModel;
 #elif __LPSOLVER__==_LPSOLVE_
 	typedef lprec* LPModel;
+#elif __LPSOLVER__==_GLPK_
+	typedef glp_prob* LPModel;
 #endif //__LPSOLVER__==__SOPLEX__
 
 class LPObjective {

@@ -13,8 +13,9 @@
 
 #include <algorithm>
 #include <assert.h>
+#include <stdio.h>
 
-// Definme the actual Real infinity here
+// Define the actual Real infinity here
 const Real infinity = 1e100;
 
 struct CmpObjCol {
@@ -84,6 +85,31 @@ void LPObjective::addToModel(LPModel& model, unsigned long maxCol) {
 
 	delete [] row;
 	delete [] colno;
+#elif __LPSOLVER__==_GLPK_
+	std::vector<Col>::const_iterator cols_it = m_cols.begin();
+	while(cols_it != m_cols.end()) {
+		glp_set_obj_coef(model, (int)(*cols_it).index + 1, (*cols_it).value);
+
+		int type = GLP_FR;
+		if ((*cols_it).lowerbound == -infinity) {
+			if ((*cols_it).upperbound == infinity) {
+				type = GLP_FR;
+			} else {
+				type = GLP_UP;
+			}
+		} else {
+			if ((*cols_it).upperbound == infinity) {
+				type = GLP_LO;
+			} else if ((*cols_it).upperbound == (*cols_it).lowerbound) {
+				type = GLP_FX;
+			} else {
+				type = GLP_DB;
+			}
+		}
+		glp_set_col_bnds(model, (int)(*cols_it).index + 1, type, (*cols_it).lowerbound, (*cols_it).upperbound);
+
+		++cols_it;
+	}
 #endif
 }
 
@@ -150,6 +176,32 @@ void LPConstraint::addToModel(LPModel& model) {
 
 	delete [] row;
 	delete [] colno;
+#elif __LPSOLVER__==_GLPK_
+	Real* row = new Real[m_cols.size()];
+	int* colno = new int[m_cols.size()];
+
+	std::vector<Col>::const_iterator cols_it = m_cols.begin();
+	unsigned int index = 0;
+	while(cols_it != m_cols.end()) {
+		row[index] = (*cols_it).second;
+		colno[index] = (int)(*cols_it).first + 1;
+		++cols_it;
+		index++;
+	}
+
+	//TODO: inefficient row adding, because index otherwise unknown
+	int rowindex = glp_get_num_rows(model);
+	glp_add_rows(model, 1);
+	glp_set_mat_row(model, rowindex, m_cols.size(), colno, row);
+
+	if (m_type == GEQ) {
+		glp_set_row_bnds(model, rowindex, GLP_LO, m_value, m_value);
+	} else {
+		glp_set_row_bnds(model, rowindex, GLP_UP, m_value, m_value);
+	}
+
+	delete [] row;
+	delete [] colno;
 #endif
 }
 
@@ -168,9 +220,11 @@ LP::LP(bool max, Real delta) :
 	m_model.setDelta(delta);
 #elif __LPSOLVER__==_LPSOLVE_
 	m_model = make_lp(0, 0);
-	set_add_rowmode(m_model, TRUE);
+	//set_add_rowmode(m_model, TRUE);
 	set_sense(m_model, max?FALSE:TRUE);
 	set_epsd(m_model, delta);
+#elif __LPSOLVER__==_GLPK_
+	m_model = glp_create_prob();
 #endif
 }
 
@@ -241,6 +295,12 @@ void LP::buildModel() {
 
 	//TODO: below setting rowmode triggers a bug in solving method
 	//set_add_rowmode(m_model, TRUE);
+#elif __LPSOLVER__==_GLPK_
+	glp_delete_prob(m_model);
+	m_model = glp_create_prob();
+	glp_add_rows(m_model, (int)m_constraints.size());
+	glp_add_cols(m_model, (int)cols);
+	glp_set_obj_dir(m_model, m_maximize?GLP_MIN:GLP_MAX);
 #endif
 
 	// Build the objective
