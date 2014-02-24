@@ -600,7 +600,7 @@ Real compute_time_bounded_reachability(SparseMatrix* ma, bool max, Real epsilon,
 				Real tmp = (Real)i*tau - tmp_interval;
 				tmp = (Real)i*tau - tmp;
 				
-				printf("tb=%.5g Maximal time-bounded reachability probability: %.10g  (Real tb=%.5g)\n", tmp,prob,(Real)i*tau);
+				printf("tb=%.5g %s time-bounded reachability probability: %.10g  (Real tb=%.5g)\n", tmp,max ? "Maximal" : "Minimal", prob,i*tau);
 				
 				tmp_interval += tmp_step;
 				counter=0;
