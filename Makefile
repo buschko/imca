@@ -27,7 +27,7 @@
 #
 #-----------------------------------------------------------------------------
 
-VERSION		:=	1.5.beta
+VERSION		:=	1.6.beta
 
 #-----------------------------------------------------------------------------
 # Architecture
@@ -57,7 +57,7 @@ UNAME := $(shell uname)
 # Soplex Libaries -- path to Soplex library has to be adjusted (only if option 
 #                    SOPLEX=true is active ) --
 #-----------------------------------------------------------------------------
-SOPLEXSRC	= /Users/guckd/lib/soplex-1.7.0
+SOPLEXSRC	= /Users/guckd/lib/soplex-1.7.2
 SOPLEXLIB	= $(SOPLEXSRC)/lib/libsoplex.a
 SOPLEXINCLUDE	= $(SOPLEXSRC)/src
 SOPLEXLINK	= $(SOPLEXSRC)/lib/libsoplex.a
