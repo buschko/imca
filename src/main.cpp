@@ -786,7 +786,7 @@ int main(int argc, char* argv[]) {
 			if(interval==tb)
 				printf("Minimal time-bounded reachability probability: %.10g\n", tmp);
 			else
-				printf("tb=%.5g Maximal time-bounded reachability probability: %.10g\n", tb,tmp);
+				printf("tb=%.5g Minimal time-bounded reachability probability: %.10g\n", tb,tmp);
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
 			end = 1e9*tp.tv_sec + tp.tv_nsec;
