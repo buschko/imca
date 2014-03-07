@@ -1100,6 +1100,7 @@ Real compute_long_run_reward(SparseMatrix *ma, bool max) {
 		/* solve the LP */
 		SPxSolver::Status stat;
 		lp_model.setDelta(1e-6);
+        //lp_model.writeFile("file.lp", NULL, NULL, NULL);
 		stat = lp_model.solve();
 		dbg_printf("LRR Mec %ld: %.10lg\n",mec_nr+1,lp_model.objValue());
 		printf("LRR Mec %ld: %.10lg\n",mec_nr+1,lp_model.objValue());
