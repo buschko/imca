@@ -220,14 +220,13 @@ static void set_constraints_lrr(SoPlex& lp_model, SparseMatrix *ma, bool max, ve
 					for (unsigned long j = r_start; j < r_end; j++) {
 						exit_rate = exit_rates[j];
 					}
-					if(exit_rate > 0 && reward < 0){
+					if(exit_rate > 0 && reward != 0){
 						reward /= exit_rate;
-					} else if(exit_rate > 0 && reward != 0) {
-						reward = -1/exit_rate;
+                        //cout << reward << endl;
+					//} else if(exit_rate > 0) {
+					//	reward = -1/exit_rate;
 					}
-					if (reward < 0 && exit_rate == 0){
-						//row.add(ma->n,reward);
-                    } else if(exit_rate != 0){
+                    if(exit_rate != 0){
                         row.add(ma->n,(-1/exit_rate));
                     }
 					// write condition
