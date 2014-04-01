@@ -583,17 +583,18 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 				if(!bad)
 				{
 					Real rate;
+                    Real denominator=1;
 					char star[MAX_LINE_LENGTH];
-					sscanf(s, "%s%s%lf", star, dst, &rate);
+					sscanf(s, "%s%s%lf/%lf", star, dst, &rate, &denominator);
 					to=states.find(dst)->second;
 					if(to != last_to) {
-						non_zeros[nz_index] = rate;
+						non_zeros[nz_index] = rate/denominator;
 						cols[nz_index] = to;
 						old_index = nz_index;
 						nz_index++;
 						choice_size++;
 					}else if(to == last_to) {
-						non_zeros[old_index] += rate;
+						non_zeros[old_index] += rate/denominator;
 					}
 					last_to = to;
 				}
@@ -603,8 +604,9 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 				// if mrm we also read in the reward
 				if(mrm){
 					Real reward=0;
-					sscanf(s, "%s%s%lf", src, act, &reward);
-					rewards[reward_index] = reward;
+                    Real denominator=1;
+					sscanf(s, "%s%s%lf/%lf", src, act, &reward, &denominator);
+					rewards[reward_index] = reward/denominator;
                     //r += reward;
 					reward_index++;
 				}else {
