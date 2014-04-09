@@ -42,14 +42,14 @@ using namespace soplex;
 #define GOALS "#GOALS"
 #define TRANSITIONS "#TRANSITIONS"
 
-extern void print_model(SparseMatrix*);
+extern void print_model(SparseMatrix*,bool);
 
 extern void print_model_info(SparseMatrix*);
 
 
 #ifdef __SOPLEX__
 /**
-* print out onformation about SoPlex LP solve.
+* print out information about SoPlex LP solve.
 *
 * @param lp_model the LP
 */

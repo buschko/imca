@@ -534,6 +534,7 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 	unsigned long choice_size = 0;
 	unsigned long nz_index = 0;
 	unsigned long reward_index = 0;
+	Real max_markovian_reward = 0.0;
 	char src[MAX_LINE_LENGTH];
 	unsigned long from;
 	unsigned long last_from = 0;
@@ -619,6 +620,10 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 				else
 					bad=false;
 				if(!bad) {
+					// Set maximum Markovian reward
+					if( strncmp(act,MARKOV_ACTION, 2) == 0 && max_markovian_reward < rewards[reward_index - 1] )
+						max_markovian_reward = rewards[reward_index - 1];
+
 					if (from == last_from) {
 						row_starts[from + 1]++;
 					} else {
@@ -676,7 +681,8 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 		}
 	}
     if(mrm){
-        //ma->reward=r;
+        ma -> max_markovian_reward=max_markovian_reward;  // Set maximum Markovian reward (reward of Markovian states)
+        std::cout<<"Maximum Reward: "<<max_markovian_reward<<std::endl;
     }
 	
 }

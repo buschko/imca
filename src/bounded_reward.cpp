@@ -42,7 +42,8 @@ Real compute_error_bound_reward(SparseMatrix* ma, Real epsilon, Real tb) {
 	Real tau;
 	// TODO: add lambda to read in function
 	Real lambda=ma->max_exit_rate;
-	tau = (2*epsilon)/(tb*lambda*lambda);
+	Real rho = ma -> max_markovian_reward;
+	tau = (2*epsilon)/(tb*lambda*(rho+1));
 	return tau;
 }
 
@@ -94,7 +95,7 @@ SparseMatrix* discretize_model_reward(SparseMatrix* ma, Real tau) {
 				Real estau = -(exit_rate * tau);
 				Real exp_estau = exp(estau);
 				Real exp_estau_com = Real(1)-exp_estau;
-				rewards[choice_nr]=exp(-ma->rewards[choice_nr]*tau);
+				rewards[choice_nr] = ma->rewards[choice_nr] / exit_rate * exp_estau_com; // Reward of each step for Markovian state s is: Rew(s)/E(s)*(1-exp(-E(s)*tau))
 				bool loop=false;
 				for (unsigned long i = i_start; i < i_end; i++) {
 					Real prob = ma->non_zeros[i]/exit_rate;
@@ -116,6 +117,8 @@ SparseMatrix* discretize_model_reward(SparseMatrix* ma, Real tau) {
 			}
 		}else {
 			for (unsigned long choice_nr = state_start; choice_nr < state_end; choice_nr++) {
+				// Write the reward into discrete model
+				rewards[choice_nr] = ma->rewards[choice_nr];
 				// Add up all outgoing rates of the distribution
 				unsigned long i_start = choice_starts[choice_nr];
 				unsigned long i_end = choice_starts[choice_nr + 1];
@@ -149,17 +152,16 @@ void compute_markovian_vector_with_reward(SparseMatrix* ma, vector<Real>& v, con
 		unsigned long state_start = row_starts[state_nr];
 		unsigned long state_end = row_starts[state_nr + 1];
 		// Look at Markovian states
-		if(goals[state_nr] && is_MA_made_absorbing){
-			v[state_nr]=1;
-		}else{
+//		if(goals[state_nr] && is_MA_made_absorbing){
+//			v[state_nr]=1;
+//		}else{
 			if(!ma->isPS[state_nr])
 			{
 				for (unsigned long choice_nr = state_start; choice_nr < state_end; choice_nr++) {
 					// Add up all outgoing rates of the distribution
 					unsigned long i_start = choice_starts[choice_nr];
 					unsigned long i_end = choice_starts[choice_nr + 1];
-					v[state_nr]=0;
-					v[state_nr] += rewards[choice_nr];
+					v[state_nr] = rewards[choice_nr];
 					for (unsigned long i = i_start; i < i_end; i++) {
 						v[state_nr] +=  non_zeros[i] * u[cols[i]];
 					}
@@ -167,7 +169,7 @@ void compute_markovian_vector_with_reward(SparseMatrix* ma, vector<Real>& v, con
 			}else {
 					v[state_nr] = u[state_nr];
 			}
-		}
+//		}
 	}
 }
 
@@ -198,9 +200,11 @@ void compute_probabilistic_vector_with_reward(SparseMatrix* ma, vector<Real>& v,
 			u[s_idx] = v[s_idx];
 
 	}
+	//long int bestChoice=0;
+
 	// main loop
 	bool done = false;
-	// done will set to true inside the while loop when we reach fixed point
+	// done will set to true inside the while loop when we are close enough to the fixed point
 	while (! done) {
 		done = true;
 
@@ -214,12 +218,11 @@ void compute_probabilistic_vector_with_reward(SparseMatrix* ma, vector<Real>& v,
 					u[s_idx] = 0.0;
 				else
 					u[s_idx] = 1.0;
-
 				// find the max/min prob. to reach Markovians and store it to tmp
 				for (unsigned long choice_nr = state_start; choice_nr < state_end; choice_nr++) {
 					Real tmp = 0;
 					// add reward
-					tmp += rewards[choice_nr];
+					//tmp += rewards[choice_nr];
 					// Add up all outgoing rates of the distribution
 					unsigned long i_start = choice_starts[choice_nr];
 					unsigned long i_end = choice_starts[choice_nr + 1];
@@ -227,8 +230,10 @@ void compute_probabilistic_vector_with_reward(SparseMatrix* ma, vector<Real>& v,
 						tmp += non_zeros[i] * v[cols[i]];
 					}
 					if( max ) {
-						if(tmp > u[s_idx] )
+						if(tmp > u[s_idx] ){
+//							bestChoice=choice_nr;
 							u[s_idx] = tmp;
+						}
 					}
 					else {
 						if(tmp < u[s_idx] )
@@ -240,7 +245,6 @@ void compute_probabilistic_vector_with_reward(SparseMatrix* ma, vector<Real>& v,
 
 			}
 		}
-
 		// write back u to v, only for interactive elements
 		for (unsigned long s_idx = 0; s_idx < statecount; s_idx++) {
 			if ( ma -> isPS[s_idx] && (!is_MA_made_absorbing || (is_MA_made_absorbing && !ma -> goals[s_idx])) ){
@@ -248,6 +252,7 @@ void compute_probabilistic_vector_with_reward(SparseMatrix* ma, vector<Real>& v,
 			}
 		}
 
+		//std::cout<<bestChoice<<std::endl;
 
 	}
 
@@ -256,7 +261,7 @@ void compute_probabilistic_vector_with_reward(SparseMatrix* ma, vector<Real>& v,
 }
 
 /**
-* computes time-bounded reachability
+* computes accumulated gained between time @param ta to @param tb
 *
 * @param ma the MA
 * @param max maximum/minimum
@@ -264,11 +269,11 @@ void compute_probabilistic_vector_with_reward(SparseMatrix* ma, vector<Real>& v,
 * @param tb the given time bound
 * @param is_imc indicates if MA is an IMC
 */
-Real compute_time_bounded_reward_reachability(SparseMatrix* ma, bool max, Real epsilon, Real ta, Real tb, bool is_imc, Real interval,Real interval_start) {
+Real compute_time_bounded_accumulated_reward(SparseMatrix* ma, bool max, Real epsilon, Real ta, Real tb, bool is_imc, Real interval,Real interval_start) {
 
 	// Check whether the given time interval is zero
 	if( ta > tb ) {
-		printf("WARNING: The given interval is empty (upper bound < lower bound.) The reachability probability is 0.\n");
+		printf("WARNING: The given interval is empty (upper bound < lower bound.) The accumulated reward within an empty interval is ZERO.\n");
 		return 0.0;
 	}
 
@@ -276,17 +281,21 @@ Real compute_time_bounded_reward_reachability(SparseMatrix* ma, bool max, Real e
 	vector<Real> v(num_states,0); // Markovian vector
 	vector<Real> u(num_states,0); // Probabilistic vector
 	// initialize goal states
+	/*
 	bool *goals = ma->goals;
 	for (unsigned long state_nr = 0; state_nr < num_states; state_nr++) {
 		if(goals[state_nr]){
 			v[state_nr]=1;
 		}
 	}
+	*/
 	// in case MA is an IMC: precomputation of paths for interactive states
 	vector< vector<unsigned long> > reach;
 	
 	cout << "start value iteration" << endl;
 	if( ta > 0 ) {
+
+		std::cout<<"***** WARNING *****\nThis computation mode is under development and might give you wrong answer.\n\n";
 		//TODO one unique function that tell you what should be tau1 and what tau2
 		// compute the upper bound of discretization step
 		Real tau = compute_error_bound_reward(ma, epsilon,tb);
@@ -409,14 +418,18 @@ Real compute_time_bounded_reward_reachability(SparseMatrix* ma, bool max, Real e
 	} else { // if a == 0
 		// compute discretisation step
 		Real tau = compute_error_bound_reward(ma, epsilon,tb);
-		// discretize model for the fi
+		unsigned long steps_for_interval = round(tb/tau);
+		// update tau
+		tau = tb / steps_for_interval;
+		// discretize model with respect to the given epsilon
 		dbg_printf("discretize model\n");
 		SparseMatrix* discrete_ma = discretize_model_reward(ma,tau);
+		print_model(discrete_ma,true);
+		std::cout<<"Exit Rate: "<<ma -> max_exit_rate <<"Reward: "<<ma -> max_markovian_reward;
 		dbg_printf("model discretized\n");
 		//print_model(discrete_ma);
 
 		// value iteration
-		unsigned long steps_for_interval = round(tb/tau);
 		cout << "iterations: " << steps_for_interval<< endl;
 		cout << "step duration: " << tau <<endl;
 		unsigned long interval_step = round(interval/tau);
@@ -427,9 +440,9 @@ Real compute_time_bounded_reward_reachability(SparseMatrix* ma, bool max, Real e
 		cout << "interval step: " << interval_step <<endl;
 		cout << "interval start: " << interval_start_point << endl;
 		
-		
-		for(unsigned long i=0; i <= steps_for_interval; i++){
-			// compute v for Markovian states: from b dwon to a, we make discrete model absorbing
+		// Note: we start the computation from step one, since in contrast to time bounded reachability, the initial vector here is zero.
+		for(unsigned long i=1; i <= steps_for_interval; i++){
+			// compute v for Markovian states for the current step; we make discrete model absorbing. After this step v contains the updated reward value
 			compute_markovian_vector_with_reward(discrete_ma,v,u, true);
 			// compute u for Probabilistic states
 			compute_probabilistic_vector_with_reward(discrete_ma,v,u,max, true);
@@ -459,7 +472,7 @@ Real compute_time_bounded_reward_reachability(SparseMatrix* ma, bool max, Real e
 				Real tmp = i*tau - tmp_interval;
 				tmp = i*tau - tmp;
 				
-				printf("tb=%.5g Maximal time-bounded reachability probability: %.10g  (Real tb=%.5g)\n", tmp,prob,i*tau);
+				printf("tb=%.5g Maximal time-bounded accumulated reward: %.10g  (Real tb=%.5g)\n", tmp,prob,i*tau);
 				
 				tmp_interval += tmp_step;
 				counter=0;
