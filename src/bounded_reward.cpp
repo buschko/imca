@@ -43,7 +43,10 @@ Real compute_error_bound_reward(SparseMatrix* ma, Real epsilon, Real tb) {
 	// TODO: add lambda to read in function
 	Real lambda=ma->max_exit_rate;
 	Real rho = ma -> max_markovian_reward;
-	tau = (2*epsilon)/(tb*lambda*(rho+1));
+	if (lambda != 0.0 )
+		tau = (2*epsilon)/(tb*lambda*(rho+1));
+	else
+		tau = tb; // if lambda = 0, we have only states with self loop or deadlock states
 	return tau;
 }
 
@@ -95,7 +98,7 @@ SparseMatrix* discretize_model_reward(SparseMatrix* ma, Real tau) {
 				Real estau = -(exit_rate * tau);
 				Real exp_estau = exp(estau);
 				Real exp_estau_com = Real(1)-exp_estau;
-				rewards[choice_nr] = ma->rewards[choice_nr] / exit_rate * exp_estau_com; // Reward of each step for Markovian state s is: Rew(s)/E(s)*(1-exp(-E(s)*tau))
+				rewards[choice_nr] = exit_rate == 0.0 ? tau * ma->rewards[choice_nr] : ma->rewards[choice_nr] / exit_rate * exp_estau_com; // Reward of each step for Markovian state s is: Rew(s)/E(s)*(1-exp(-E(s)*tau))
 				bool loop=false;
 				for (unsigned long i = i_start; i < i_end; i++) {
 					Real prob = ma->non_zeros[i]/exit_rate;

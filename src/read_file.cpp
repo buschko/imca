@@ -346,7 +346,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 	char dst[MAX_LINE_LENGTH];
 	char act[MAX_LINE_LENGTH];
 	char star[MAX_LINE_LENGTH];
-	Real exit_rate=0;
+	Real exit_rate=0.0;
 	Real max_exit_rate=0;
 	Real prob;
     Real reward;
@@ -427,7 +427,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 						is_ms=true;
 					}	
 					
-					/* probabilistic transitions are choosen before markovian transitions */
+					/* probabilistic transitions are chosen before Markovian transitions */
 					if((isPS[from] && !is_ms) || (!isPS[from] && is_ms)){
 						num_choice++;
 					}
@@ -437,9 +437,12 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 			}
 			//++(*line_no);
 		} else {
-			/* probabilistic transitions are choosen before markovian transitions */
+			/* probabilistic transitions are chosen before Markovian transitions */
 			Real rate;
-			sscanf(s, "%s%s%lf", star, dst, &rate);
+			if ( 3 != sscanf(s, "%s%s%lf", star, dst, &rate) ) {
+				fprintf(stderr, "ERROR at line %d, expected something like '* <dst_state> <rate/prob>'.\n", *line_no);
+				*error = true;
+			}
 			to = states.find(dst)->second;
 			if(((isPS[from] && !is_ms) || (!isPS[from] && is_ms)) && to != last_to) {
 				num_non_zeros++;
@@ -460,6 +463,8 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 	if(deadlocks.size() == 0) {
 		/* probabilistic transitions are choosen before markovian transitions */
 		if((is_ms)) {
+			if(max_exit_rate<exit_rate)
+				max_exit_rate=exit_rate;
 			exit_rates[exit_index] = exit_rate;
 			for (; from+0 < model->n; from++) {
 				rate_starts[from+1] = rate_starts[from+0];
