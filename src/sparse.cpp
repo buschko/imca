@@ -105,8 +105,9 @@ SparseMatrix *SparseMatrixDiscrete_new(SparseMatrix *ma)
 	model->n = num_states;
 	model->ms_n = num_ms;
 	model->choices_n = num_choices;
-	//model->states = ma->states;
-	//model->states_nr = ma->states_nr;
+	// Copy maps
+	model->states = ma->states;
+	model->states_nr = ma->states_nr;
 	model->initials = initials;
 	model->goals = goals;
 	model->isPS = isPS;

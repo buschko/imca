@@ -67,6 +67,7 @@ struct SparseMatrix
 	Real *exit_rates;			/* exit rates for Markovian states */
 	Real *rewards;			/* rewards for Markovian states and probabilistic transitions */
 	Real max_exit_rate;			/* max exit rate */
+	Real max_markovian_reward;      /* max Markovian reward  */
 	unsigned long *cols;			/* successors */
 	unsigned char *row_counts;		/* pointer to state */
 	unsigned char *rate_counts;		/* pointer to exit rates */

@@ -781,8 +781,8 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
-			printf("\nCompute maximal time-bounded reward reachability inside interval [%g,%g] with precision %g, please wait.\n", ta, tb, epsilon);
-			tmp=compute_time_bounded_reward_reachability(ma,true,epsilon,ta,tb,is_imc,interval,interval_start);
+			printf("\nCompute maximal time-bounded accumulated reward inside interval [%g,%g] with precision %g, please wait.\n", ta, tb, epsilon);
+			tmp=compute_time_bounded_accumulated_reward(ma,true,epsilon,ta,tb,is_imc,interval,interval_start);
 			if(interval==tb)
 				printf("Maximal time-bounded reward reachability probability: %.10g\n", tmp);
 			else
@@ -800,8 +800,8 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
-			printf("\nCompute minimal time-bounded reward reachability inside interval [%g,%g] with precision %g, please wait.\n", ta, tb, epsilon);
-			tmp=compute_time_bounded_reward_reachability(ma,false,epsilon,ta,tb,is_imc,interval,interval_start);
+			printf("\nCompute minimal time-bounded accumulated reward inside interval [%g,%g] with precision %g, please wait.\n", ta, tb, epsilon);
+			tmp=compute_time_bounded_accumulated_reward(ma,false,epsilon,ta,tb,is_imc,interval,interval_start);
 			if(interval==tb)
 				printf("Minimal time-bounded reward reachability probability: %.10g\n", tmp);
 			else

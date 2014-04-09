@@ -35,6 +35,6 @@
 
 using namespace soplex;
 
-extern Real compute_time_bounded_reward_reachability(SparseMatrix* ma, bool max, Real epsilon, Real ta, Real tb, bool is_imc, Real interval,Real interval_start);
+extern Real compute_time_bounded_accumulated_reward(SparseMatrix* ma, bool max, Real epsilon, Real ta, Real tb, bool is_imc, Real interval,Real interval_start);
 
 #endif
