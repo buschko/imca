@@ -184,7 +184,7 @@ static void print_usage(void) {
 	printf("Usage: imca <model file> <min/max> <computation> <options>\n");
 	printf("	<model file>	- could be one of {.ma}\n");
 	printf("	<min/max>	- could be '-min' or '-max' or both\n");
-	printf("	<computation>	- could be one or more of {-ub, -et, -lra, -tb, -er, -lrr}\n");
+	printf("	<computation>	- could be one or more of {-ub, -et, -lra, -tb, -er, -lrr, -tr}\n");
 	printf("	<options>	- time- and error-bound for tb (default epsilon=1e-6)  \n");
 	printf("                          '-T' for upper bound '-F' for lower bound \n");
 	printf("                          '-e' for error bound '-i' for interval output\n");

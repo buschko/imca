@@ -297,7 +297,7 @@ void compute_probabilistic_vector_with_reward(SparseMatrix* ma, vector<Real>& v,
 				if (max)
 					u[s_idx] = 0.0;
 				else
-					u[s_idx] = 1.0;
+					u[s_idx] = infinity;//1.0;
 				// find the max/min prob. to reach Markovians and store it to tmp
 				for (unsigned long choice_nr = state_start; choice_nr < state_end; choice_nr++) {
 					Real tmp = 0;
@@ -535,7 +535,7 @@ Real compute_time_bounded_accumulated_reward(SparseMatrix* ma, bool max, Real ep
 				if(max)
 					prob=0;
 				else
-					prob=1;
+					prob=infinity;
 				bool *initials = ma->initials;
 				for (unsigned long state_nr = 0; state_nr < num_states; state_nr++) {
 					//cout << (ma->states_nr.find(state_nr)->second).c_str() << ": " << u[state_nr] << endl;
@@ -570,7 +570,7 @@ Real compute_time_bounded_accumulated_reward(SparseMatrix* ma, bool max, Real ep
 	if(max)
 		prob=0;
 	else
-		prob=1;
+		prob=infinity;
 	bool *initials = ma->initials;
 	for (unsigned long state_nr = 0; state_nr < num_states; state_nr++) {
 		//cout << (ma->states_nr.find(state_nr)->second).c_str() << ": " << u[state_nr] << endl;
