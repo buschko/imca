@@ -31,6 +31,78 @@
 #include <math.h>
 #include <vector>
 
+
+
+/**
+* computes the maximum action reward that can be gained via
+* probabilistic transitions from probabilistic states. This
+* value is simply computed by running value iteration on the
+* model while ignoring state rewards, which basically means
+* that we treat the MA as MDP with only action rewards.
+*
+*@return the maximum action reward can be gained by taking only probabilistic transitions
+*/
+Real compute_max_action_reward(SparseMatrix* ma){
+
+	const Real precision = 1e-10;
+	unsigned long statecount = ma-> n;
+	unsigned long *row_starts = (unsigned long *) ma->row_counts;
+	unsigned long *choice_starts = (unsigned long *) ma->choice_counts;
+	unsigned long *cols = ma->cols;
+	Real* non_zeros = ma->non_zeros;
+	Real* rewards = ma->rewards;
+
+	// the vector carrying the rewards
+	vector<Real> u(statecount,0.0);
+
+	// main loop
+	bool done = false;
+	// done will set to true inside the while loop when we are close enough to the fixed point
+	while (! done) {
+		done = true;
+
+		// do one step of fixed point, it is applied on interactive states
+		for (unsigned long s_idx = 0; s_idx < statecount; s_idx++) {
+			unsigned long state_start = row_starts[s_idx];
+			unsigned long state_end = row_starts[s_idx + 1];
+			if ( ma -> isPS[s_idx] /* && !ma -> goals[s_idx] */ ){  // do processing only if the state is probabilistic
+				Real maxReward = 0.0;
+				// find the max/min prob. to reach Markovians and store it to tmp
+				for (unsigned long choice_nr = state_start; choice_nr < state_end; choice_nr++) {
+					Real tmp = 0;
+					// add reward
+					tmp += rewards[choice_nr];
+					// Add up all outgoing rates of the distribution
+					unsigned long i_start = choice_starts[choice_nr];
+					unsigned long i_end = choice_starts[choice_nr + 1];
+					for (unsigned long i = i_start; i < i_end; i++) {
+						tmp += non_zeros[i] * u[cols[i]];
+					}
+					if(tmp > maxReward ){
+						maxReward = tmp;
+					}
+				}
+				if( fabs(u[s_idx] - maxReward) >= precision )
+					done = false;
+				u[s_idx] = maxReward;
+			}
+		}
+
+	}
+
+	// Find the maximum action reward among all states
+	Real maxActionReward = 0.0;
+	for (unsigned long s_idx = 0; s_idx < statecount; s_idx++) {
+		if ( u[s_idx] > maxActionReward ){
+			maxActionReward = u[s_idx];
+		}
+	}
+
+	return maxActionReward;
+
+}
+
+
 /**
 * sets the error bound for given epsilon and tb
 *
@@ -42,9 +114,14 @@ Real compute_error_bound_reward(SparseMatrix* ma, Real epsilon, Real tb) {
 	Real tau;
 	// TODO: add lambda to read in function
 	Real lambda=ma->max_exit_rate;
-	Real rho = ma -> max_markovian_reward;
-	if (lambda != 0.0 )
-		tau = (2*epsilon)/(tb*lambda*(rho+1));
+	Real rho_s = ma -> max_markovian_reward;     // Maximum state reward
+	Real rho_a = compute_max_action_reward(ma);  // Maximum action reward
+	dbg_printf("[*] Maximum Exit Rate: %g\n[*] Maximum State Reward: %g\n[*] Maximum Action Reward: %g\n", lambda, rho_s, rho_a);
+
+	if (lambda != 0.0 ) {
+		Real tbLambda = tb * lambda;
+		tau = (4.0*epsilon)/(tbLambda * (rho_s+ rho_a * lambda) * (2.0 + tbLambda));
+	}
 	else
 		tau = tb; // if lambda = 0, we have only states with self loop or deadlock states
 	return tau;
@@ -225,7 +302,7 @@ void compute_probabilistic_vector_with_reward(SparseMatrix* ma, vector<Real>& v,
 				for (unsigned long choice_nr = state_start; choice_nr < state_end; choice_nr++) {
 					Real tmp = 0;
 					// add reward
-					//tmp += rewards[choice_nr];
+					tmp += rewards[choice_nr];
 					// Add up all outgoing rates of the distribution
 					unsigned long i_start = choice_starts[choice_nr];
 					unsigned long i_end = choice_starts[choice_nr + 1];
@@ -420,15 +497,16 @@ Real compute_time_bounded_accumulated_reward(SparseMatrix* ma, bool max, Real ep
 
 	} else { // if a == 0
 		// compute discretisation step
+		dbg_printf("Computing a safe step size...\n[*] Interval: [%g,%g]\n[*] Precision: %g\n", ta, tb, epsilon);
 		Real tau = compute_error_bound_reward(ma, epsilon,tb);
 		unsigned long steps_for_interval = round(tb/tau);
 		// update tau
 		tau = tb / steps_for_interval;
+		dbg_printf("[*] Step Size: %f\n[*] Number of Iterations: %d\n\n", tau, steps_for_interval);
 		// discretize model with respect to the given epsilon
 		dbg_printf("discretize model\n");
 		SparseMatrix* discrete_ma = discretize_model_reward(ma,tau);
 		print_model(discrete_ma,true);
-		std::cout<<"Exit Rate: "<<ma -> max_exit_rate <<"Reward: "<<ma -> max_markovian_reward;
 		dbg_printf("model discretized\n");
 		//print_model(discrete_ma);
 
