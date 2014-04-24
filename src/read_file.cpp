@@ -400,7 +400,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 				last_to = -1;
 				/* test consistency of ma file */
 				if (from < last_from) {
-					fprintf(stderr, "Line %ld: State transitions must be given in continous order for one state.\n", *line_no);
+					fprintf(stderr, "Line %ld: State transitions must be given in continuous order for one state.\n", *line_no);
 					*error = true;
 				} else {	
 					/* if Markovian state, store exit rate */
@@ -676,6 +676,11 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 					choice_starts[choice_index] =
 					choice_starts[choice_index - 1] + choice_size;
 				}
+				if( mrm ) {
+					// Set zero reward for deadlock states
+					rewards[reward_index] = 0.0;
+					reward_index++;
+				}
 				choice_index++;
 			}
 			
@@ -687,7 +692,7 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 	}
     if(mrm){
         ma -> max_markovian_reward=max_markovian_reward;  // Set maximum Markovian reward (reward of Markovian states)
-        std::cout<<"Maximum Reward: "<<max_markovian_reward<<std::endl;
+        std::cout<<"Maximum State Reward: "<<max_markovian_reward<<std::endl;
     }
 	
 }
@@ -720,7 +725,7 @@ void print_model(SparseMatrix *ma, bool mrm)
 			unsigned long i_start = choice_starts[choice_nr];
 			unsigned long i_end = choice_starts[choice_nr + 1];
 			dbg_printf("choice_starts: %li choice_ends: %li\n",i_start,i_end);
-			printf("choice %d\n",tau);
+			printf("choice %lu\n",tau);
 			if(mrm){
 				printf("reward: %lg\n",rewards[choice_nr]);
 			}
