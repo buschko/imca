@@ -132,7 +132,7 @@ void compute_probabilistic_reward_vector(SparseMatrix* ma, vector<Real>& v, vect
 			unsigned long state_end = row_starts[s_idx + 1];
 			if ( ma -> isPS[s_idx] && !ma -> goals[s_idx] && !locks[s_idx]){  // do processing only if the state is interactive
 				if (max)
-					u[s_idx] = 0.0;
+					u[s_idx] = -1*(infinity);
 				else
 					u[s_idx] = infinity;
 
@@ -229,7 +229,7 @@ Real expected_reward_value_iteration(SparseMatrix* ma, bool max) {
 	// find prob. for initial state and return
 	Real obj;
 	if(max)
-		obj=0;
+		obj=(-1)*infinity;
 	else
 		obj=infinity;
 	bool *initials = ma->initials;

@@ -184,7 +184,7 @@ static void print_usage(void) {
 	printf("Usage: imca <model file> <min/max> <computation> <options>\n");
 	printf("	<model file>	- could be one of {.ma}\n");
 	printf("	<min/max>	- could be '-min' or '-max' or both\n");
-	printf("	<computation>	- could be one or more of {-ub, -et, -lra, -tb, -er, -lrr}\n");
+	printf("	<computation>	- could be one or more of {-ub, -et, -lra, -tb, -er, -lrr, -tr}\n");
 	printf("	<options>	- time- and error-bound for tb (default epsilon=1e-6)  \n");
 	printf("                          '-T' for upper bound '-F' for lower bound \n");
 	printf("                          '-e' for error bound '-i' for interval output\n");
@@ -781,8 +781,8 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
-			printf("\nCompute maximal time-bounded reward reachability inside interval [%g,%g] with precision %g, please wait.\n", ta, tb, epsilon);
-			tmp=compute_time_bounded_reward_reachability(ma,true,epsilon,ta,tb,is_imc,interval,interval_start);
+			printf("\nCompute maximal time-bounded accumulated reward inside interval [%g,%g] with precision %g, please wait.\n", ta, tb, epsilon);
+			tmp=compute_time_bounded_accumulated_reward(ma,true,epsilon,ta,tb,is_imc,interval,interval_start);
 			if(interval==tb)
 				printf("Maximal time-bounded reward reachability probability: %.10g\n", tmp);
 			else
@@ -800,8 +800,8 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
-			printf("\nCompute minimal time-bounded reward reachability inside interval [%g,%g] with precision %g, please wait.\n", ta, tb, epsilon);
-			tmp=compute_time_bounded_reward_reachability(ma,false,epsilon,ta,tb,is_imc,interval,interval_start);
+			printf("\nCompute minimal time-bounded accumulated reward inside interval [%g,%g] with precision %g, please wait.\n", ta, tb, epsilon);
+			tmp=compute_time_bounded_accumulated_reward(ma,false,epsilon,ta,tb,is_imc,interval,interval_start);
 			if(interval==tb)
 				printf("Minimal time-bounded reward reachability probability: %.10g\n", tmp);
 			else

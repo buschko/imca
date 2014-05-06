@@ -1,8 +1,8 @@
 *******************************************************************************
-          README: Interactive Markov Chain Analyzer 1.5 beta (IMCA)
+          README: Interactive Markov Chain Analyzer 1.6 beta (IMCA)
 *******************************************************************************
 
-IMCA 1.5 beta is a command-line tool for analyzing unbounded reachability 
+IMCA 1.6 beta is a command-line tool for analyzing unbounded reachability 
 probabilities, expected-time, and long-run averages. We support analyzing of 
 Interactive Markov Chains and Markov Automata. This version do not provide all 
 functionalities from prior Versions including a GUI, as well as a Scheduler 

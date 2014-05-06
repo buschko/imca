@@ -1,0 +1,18 @@
+#INITIALS
+s0
+#GOALS
+#TRANSITIONS
+s0 ! 0
+* s1 1.0
+s1 tau 0
+* s2 1.0
+s1 tau 0
+* s4 1.0
+s2 ! 4
+* s3 2.0
+s3 ! 0
+* s3 0.5
+s4 ! 3
+* s5 1.0
+s5 ! 0
+* s5 0.5

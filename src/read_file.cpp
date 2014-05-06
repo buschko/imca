@@ -346,7 +346,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 	char dst[MAX_LINE_LENGTH];
 	char act[MAX_LINE_LENGTH];
 	char star[MAX_LINE_LENGTH];
-	Real exit_rate=0;
+	Real exit_rate=0.0;
 	Real max_exit_rate=0;
 	Real prob;
     Real reward;
@@ -400,7 +400,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 				last_to = -1;
 				/* test consistency of ma file */
 				if (from < last_from) {
-					fprintf(stderr, "Line %ld: State transitions must be given in continous order for one state.\n", *line_no);
+					fprintf(stderr, "Line %ld: State transitions must be given in continuous order for one state.\n", *line_no);
 					*error = true;
 				} else {	
 					/* if Markovian state, store exit rate */
@@ -427,7 +427,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 						is_ms=true;
 					}	
 					
-					/* probabilistic transitions are choosen before markovian transitions */
+					/* probabilistic transitions are chosen before Markovian transitions */
 					if((isPS[from] && !is_ms) || (!isPS[from] && is_ms)){
 						num_choice++;
 					}
@@ -437,9 +437,12 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 			}
 			//++(*line_no);
 		} else {
-			/* probabilistic transitions are choosen before markovian transitions */
+			/* probabilistic transitions are chosen before Markovian transitions */
 			Real rate;
-			sscanf(s, "%s%s%lf", star, dst, &rate);
+			if ( 3 != sscanf(s, "%s%s%lf", star, dst, &rate) ) {
+				fprintf(stderr, "ERROR at line %d, expected something like '* <dst_state> <rate/prob>'.\n", *line_no);
+				*error = true;
+			}
 			to = states.find(dst)->second;
 			if(((isPS[from] && !is_ms) || (!isPS[from] && is_ms)) && to != last_to) {
 				num_non_zeros++;
@@ -460,6 +463,8 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 	if(deadlocks.size() == 0) {
 		/* probabilistic transitions are choosen before markovian transitions */
 		if((is_ms)) {
+			if(max_exit_rate<exit_rate)
+				max_exit_rate=exit_rate;
 			exit_rates[exit_index] = exit_rate;
 			for (; from+0 < model->n; from++) {
 				rate_starts[from+1] = rate_starts[from+0];
@@ -534,6 +539,7 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 	unsigned long choice_size = 0;
 	unsigned long nz_index = 0;
 	unsigned long reward_index = 0;
+	Real max_markovian_reward = 0.0;
 	char src[MAX_LINE_LENGTH];
 	unsigned long from;
 	unsigned long last_from = 0;
@@ -583,17 +589,18 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 				if(!bad)
 				{
 					Real rate;
+                    Real denominator=1;
 					char star[MAX_LINE_LENGTH];
-					sscanf(s, "%s%s%lf", star, dst, &rate);
+					sscanf(s, "%s%s%lf/%lf", star, dst, &rate, &denominator);
 					to=states.find(dst)->second;
 					if(to != last_to) {
-						non_zeros[nz_index] = rate;
+						non_zeros[nz_index] = rate/denominator;
 						cols[nz_index] = to;
 						old_index = nz_index;
 						nz_index++;
 						choice_size++;
 					}else if(to == last_to) {
-						non_zeros[old_index] += rate;
+						non_zeros[old_index] += rate/denominator;
 					}
 					last_to = to;
 				}
@@ -603,8 +610,9 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 				// if mrm we also read in the reward
 				if(mrm){
 					Real reward=0;
-					sscanf(s, "%s%s%lf", src, act, &reward);
-					rewards[reward_index] = reward;
+                    Real denominator=1;
+					sscanf(s, "%s%s%lf/%lf", src, act, &reward, &denominator);
+					rewards[reward_index] = reward/denominator;
                     //r += reward;
 					reward_index++;
 				}else {
@@ -617,6 +625,10 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 				else
 					bad=false;
 				if(!bad) {
+					// Set maximum Markovian reward
+					if( strncmp(act,MARKOV_ACTION, 2) == 0 && max_markovian_reward < rewards[reward_index - 1] )
+						max_markovian_reward = rewards[reward_index - 1];
+
 					if (from == last_from) {
 						row_starts[from + 1]++;
 					} else {
@@ -664,6 +676,11 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 					choice_starts[choice_index] =
 					choice_starts[choice_index - 1] + choice_size;
 				}
+				if( mrm ) {
+					// Set zero reward for deadlock states
+					rewards[reward_index] = 0.0;
+					reward_index++;
+				}
 				choice_index++;
 			}
 			
@@ -674,7 +691,8 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 		}
 	}
     if(mrm){
-        //ma->reward=r;
+        ma -> max_markovian_reward=max_markovian_reward;  // Set maximum Markovian reward (reward of Markovian states)
+        std::cout<<"Maximum State Reward: "<<max_markovian_reward<<std::endl;
     }
 	
 }
@@ -707,7 +725,7 @@ void print_model(SparseMatrix *ma, bool mrm)
 			unsigned long i_start = choice_starts[choice_nr];
 			unsigned long i_end = choice_starts[choice_nr + 1];
 			dbg_printf("choice_starts: %li choice_ends: %li\n",i_start,i_end);
-			printf("choice %d\n",tau);
+			printf("choice %lu\n",tau);
 			if(mrm){
 				printf("reward: %lg\n",rewards[choice_nr]);
 			}
