@@ -404,7 +404,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 					*error = true;
 				} else {	
 					/* if Markovian state, store exit rate */
-					if(is_ms) {
+					if(is_ms & !isPS[from]) {
 						if(max_exit_rate<exit_rate)
 							max_exit_rate=exit_rate;
 						exit_rates[exit_index] = exit_rate;
@@ -422,7 +422,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 						
 					is_ms=false;
 					exit_rate=0;
-					if(strcmp(act,MARKOV_ACTION) == 0 && !isPS[from])
+					if(strcmp(act,MARKOV_ACTION) == 0)
 					{
 						is_ms=true;
 					}	
@@ -446,7 +446,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 			to = states.find(dst)->second;
 			if(((isPS[from] && !is_ms) || (!isPS[from] && is_ms)) && to != last_to) {
 				num_non_zeros++;
-				if(is_ms){
+				if(is_ms & !isPS[from]){
 					//Real rate;
 					//char star[MAX_LINE_LENGTH];
 					//sscanf(s, "%s%s%lf", star, dst, &rate);
@@ -458,7 +458,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 		++(*line_no);
 	}
 	
-	//printf("nz %ld  nc %ld\n",num_non_zeros,num_choice);
+	//dbg_printf("nz %ld  nc %ld\n",num_non_zeros,num_choice);
 	
 	if(deadlocks.size() == 0) {
 		/* probabilistic transitions are choosen before markovian transitions */
@@ -505,7 +505,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 		}
 	}
 	
-	//printf("nz %ld  nc %ld\n",num_non_zeros,num_choice);
+	dbg_printf("nz %ld  nc %ld\n",num_non_zeros,num_choice);
 	
 	/* now allocate the memory needed */
 	if (!*error) {
@@ -729,6 +729,10 @@ void print_model(SparseMatrix *ma, bool mrm)
 			if(mrm){
 				printf("reward: %lg\n",rewards[choice_nr]);
 			}
+            if(ma->isPS[state_nr])
+            {
+                printf("Action: tau_%d\n",tau);
+            }
 			tau++;
 			for (i = i_start; i < i_end; i++) {
 				prob=non_zeros[i];
