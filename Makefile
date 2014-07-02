@@ -57,7 +57,7 @@ UNAME := $(shell uname)
 # Soplex Libaries -- path to Soplex library has to be adjusted (only if option 
 #                    SOPLEX=true is active ) --
 #-----------------------------------------------------------------------------
-SOPLEXSRC	= ~/lib/soplex-1.7.0#/Users/guckd/lib/soplex-1.7.2
+SOPLEXSRC	= ~/lib/soplex-1.7.2#/Users/guckd/lib/soplex-1.7.2
 SOPLEXLIB	= $(SOPLEXSRC)/lib/libsoplex.a
 SOPLEXINCLUDE	= $(SOPLEXSRC)/src
 SOPLEXLINK	= $(SOPLEXSRC)/lib/libsoplex.a
@@ -72,7 +72,7 @@ LPSOLVEINCLUDE	= /opt/local/include/lpsolve
 #-----------------------------------------------------------------------------
 # Options
 #-----------------------------------------------------------------------------
-DEBUG		=	true
+DEBUG		=	false
 VERBOSE		=	false
 SHARED		=	false
 OPT		=	opt
