@@ -193,7 +193,7 @@ static void set_constraints_lra(SoPlex& lp_model, SparseMatrix *ma, bool max, ve
 							prob /= exit_rates[j];
 							rate = -1/exit_rates[j];
 						}
-						//printf("%s - %lf -> %s\n",(states_nr.find(state_nr)->second).c_str(),prob,(states_nr.find(cols[i])->second).c_str());
+						//dbg_printf("%s - %lf -> %s\n",(states_nr.find(state_nr)->second).c_str(),prob,(states_nr.find(cols[i])->second).c_str());
 						if(state_nr==cols[i]) {
 							loop=true;
 							row.add(state_nr,-1.0+prob);

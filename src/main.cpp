@@ -2,7 +2,7 @@
 * IMCA is a analyzing tool for unbounded reachability probabilities, expected-
 * time, and long-run averages for Interactive Markov Chains and Markov Automata.
 * Copyright (C) RWTH Aachen, 2012
-*				UTwente, 2013
+*				UTwente, 2013, 2014
 * 	Author: Dennis Guck
 *
 * This program is free software: you can redistribute it and/or modify
