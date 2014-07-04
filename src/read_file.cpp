@@ -61,7 +61,7 @@ static void read_states(unsigned long *line_no, bool *error, FILE *p, const char
 	if (!*error) {
 		if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 		{
-			fprintf(stderr, "Reading line %ld of file \"%s\" failed.\n",*line_no, filename);
+			fprintf(stderr, COLOR_RED "Reading line %ld of file \"%s\" failed.\n" COLOR_END,*line_no, filename);
 			*error = true;
 		}
 		++(*line_no);
@@ -69,7 +69,7 @@ static void read_states(unsigned long *line_no, bool *error, FILE *p, const char
 		while(strcmp(state,TRANSITIONS) != 0 && !*error) {
 			if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 			{
-				fprintf(stderr, "Reading line %ld of file \"%s\" failed.\n",*line_no, filename);
+				fprintf(stderr, COLOR_RED "Reading line %ld of file \"%s\" failed.\n" COLOR_END,*line_no, filename);
 				*error = true;
 			}
 			sscanf(s, "%s", state);
@@ -122,7 +122,7 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 	/* go to Transitions */
 	if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 		{
-			fprintf(stderr, "Reading line %ld of file \"%s\" failed.\n",*line_no, filename);
+			fprintf(stderr, COLOR_RED "Reading line %ld of file \"%s\" failed.\n" COLOR_END,*line_no, filename);
 			*error = true;
 		}
 		++(*line_no);
@@ -134,7 +134,7 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 			++(*line_no);
 			if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 			{
-				fprintf(stderr, "Reading line %ld of file \"%s\" failed.\n",*line_no, filename);
+				fprintf(stderr, COLOR_RED "Reading line %ld of file \"%s\" failed.\n" COLOR_END,*line_no, filename);
 				*error = true;
 			}
 			sscanf(s, "%s", state);
@@ -150,7 +150,7 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 				} 
 				if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 				{
-					fprintf(stderr, "Reading line %ld of file \"%s\" failed.\n",*line_no, filename);
+					fprintf(stderr, COLOR_RED "Reading line %ld of file \"%s\" failed.\n" COLOR_END,*line_no, filename);
 					*error = true;
 				}
 				sscanf(s, "%s", state);
@@ -158,7 +158,7 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 			}
 			if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 			{
-				fprintf(stderr, "Reading line %ld of file \"%s\" failed.\n",*line_no, filename);
+				fprintf(stderr, COLOR_RED "Reading line %ld of file \"%s\" failed.\n" COLOR_END,*line_no, filename);
 				*error = true;
 			}
 			sscanf(s, "%s", state);
@@ -173,7 +173,7 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 				} 
 				if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 				{
-					fprintf(stderr, "Reading line %ld of file \"%s\" failed.\n",*line_no, filename);
+					fprintf(stderr, COLOR_RED "Reading line %ld of file \"%s\" failed.\n" COLOR_END,*line_no, filename);
 					*error = true;
 				}
 				sscanf(s, "%s", state);
@@ -235,19 +235,19 @@ static void init_states(unsigned long *line_no, bool *error, FILE *p, const char
 		/* store initials and goals */
 		if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 		{
-			fprintf(stderr, "Reading line %ld of file \"%s\" failed.\n",*line_no, filename);
+			fprintf(stderr, COLOR_RED "Reading line %ld of file \"%s\" failed.\n" COLOR_END,*line_no, filename);
 			*error = true;
 		}
 		++(*line_no);
 		sscanf(s, "%s", src);
 		if(strcmp(src,INITIALS) != 0 && !*error) {
-			fprintf(stderr,"No declaration of initial states.\n");
+			fprintf(stderr,COLOR_RED "No declaration of initial states.\n" COLOR_END);
 			*error = true;
 		} else {
 			++(*line_no);
 			if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 			{
-				fprintf(stderr, "Reading line %ld of file \"%s\" failed.\n",*line_no, filename);
+				fprintf(stderr, COLOR_RED "Reading line %ld of file \"%s\" failed.\n" COLOR_END,*line_no, filename);
 				*error = true;
 			}
 			sscanf(s, "%s", src);
@@ -257,7 +257,7 @@ static void init_states(unsigned long *line_no, bool *error, FILE *p, const char
 				initials[from]=true;
 				if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 				{
-					fprintf(stderr, "Reading line %ld of file \"%s\" failed.\n",*line_no, filename);
+					fprintf(stderr, COLOR_RED "Reading line %ld of file \"%s\" failed.\n" COLOR_END,*line_no, filename);
 					*error = true;
 				}
 				sscanf(s, "%s", src);
@@ -265,7 +265,7 @@ static void init_states(unsigned long *line_no, bool *error, FILE *p, const char
 			}
 			if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 			{
-				fprintf(stderr, "Reading line %ld of file \"%s\" failed.\n",*line_no, filename);
+				fprintf(stderr, COLOR_RED "Reading line %ld of file \"%s\" failed.\n" COLOR_END,*line_no, filename);
 				*error = true;
 			}
 			sscanf(s, "%s", src);
@@ -274,7 +274,7 @@ static void init_states(unsigned long *line_no, bool *error, FILE *p, const char
 				goals[from]=true;
 				if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 				{
-					fprintf(stderr, "Reading line %ld of file \"%s\" failed.\n",*line_no, filename);
+					fprintf(stderr, COLOR_RED "Reading line %ld of file \"%s\" failed.\n" COLOR_END,*line_no, filename);
 					*error = true;
 				}
 				sscanf(s, "%s", src);
@@ -291,12 +291,12 @@ static void init_states(unsigned long *line_no, bool *error, FILE *p, const char
 				from=states.find(src)->second;
 				/* test consistency of ma file */
 				if (from < last_from) {
-					fprintf(stderr, "Line %ld: State transitions must be given in continuous order for one state.\n", *line_no);
+					fprintf(stderr, COLOR_RED "Line %ld: State transitions must be given in continuous order for one state.\n" COLOR_END, *line_no);
 					*error = true;
 				} else if(from==last_from && !first){
 					if(strcmp(act,MARKOV_ACTION) == 0 && !isPS[from]) {
 						*error = true;
-						fprintf(stderr, "Line %ld: Markovian state transitions of one state should not be divided.\n", (*line_no));
+						fprintf(stderr, COLOR_RED "Line %ld: Markovian state transitions of one state should not be divided.\n" COLOR_END, (*line_no));
 					} else {
 						isPS[from]=true;
 					}				
@@ -367,7 +367,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 	if (!*error) {
 		if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 		{
-			fprintf(stderr, "Reading line %ld of file \"%s\" failed.\n",*line_no, filename);
+			fprintf(stderr, COLOR_RED "Reading line %ld of file \"%s\" failed.\n" COLOR_END,*line_no, filename);
 			*error = true;
 		}
 		++(*line_no);
@@ -375,7 +375,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 		while(strcmp(src,TRANSITIONS) != 0 && !*error) {
 			if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 			{
-				fprintf(stderr, "Reading line %ld of file \"%s\" failed.\n",*line_no, filename);
+				fprintf(stderr, COLOR_RED "Reading line %ld of file \"%s\" failed.\n" COLOR_END,*line_no, filename);
 				*error = true;
 			}
 			sscanf(s, "%s", src);
@@ -400,7 +400,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 				last_to = -1;
 				/* test consistency of ma file */
 				if (from < last_from) {
-					fprintf(stderr, "Line %ld: State transitions must be given in continuous order for one state.\n", *line_no);
+					fprintf(stderr, COLOR_RED "Line %ld: State transitions must be given in continuous order for one state.\n" COLOR_END, *line_no);
 					*error = true;
 				} else {	
 					/* if Markovian state, store exit rate */
@@ -440,9 +440,10 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 			/* probabilistic transitions are chosen before Markovian transitions */
 			Real rate;
 			if ( 3 != sscanf(s, "%s%s%lf", star, dst, &rate) ) {
-				fprintf(stderr, "ERROR at line %d, expected something like '* <dst_state> <rate/prob>'.\n", *line_no);
+				fprintf(stderr, COLOR_RED "ERROR at line %d, expected something like '* <dst_state> <rate/prob>'.\n" COLOR_END, *line_no);
 				*error = true;
 			}
+            dbg_printf("%s %s\n",src,act);
 			to = states.find(dst)->second;
 			if(((isPS[from] && !is_ms) || (!isPS[from] && is_ms)) && to != last_to) {
 				num_non_zeros++;
@@ -567,7 +568,7 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 		if (!*error) {
 			if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 			{
-				fprintf(stderr, "Reading line %ld of file \"%s\" failed.\n",*line_no, filename);
+				fprintf(stderr, COLOR_RED "Reading line %ld of file \"%s\" failed.\n" COLOR_END,*line_no, filename);
 				*error = true;
 			}
 			++(*line_no);
@@ -575,7 +576,7 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 			while(strcmp(src,TRANSITIONS) != 0 && !*error) {
 				if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 				{
-					fprintf(stderr, "Reading line %ld of file \"%s\" failed.\n",*line_no, filename);
+					fprintf(stderr, COLOR_RED "Reading line %ld of file \"%s\" failed.\n" COLOR_END,*line_no, filename);
 					*error = true;
 				}
 				sscanf(s, "%s", src);
@@ -841,7 +842,7 @@ SparseMatrix *read_MA_SparseMatrix_file(const char *filename, bool mrm)
     states_nr.clear();
 	
 	if (filename == NULL) {
-		fprintf(stderr, "Called with filename == NULL\n");
+		fprintf(stderr, COLOR_RED "Called with filename == NULL\n" COLOR_END);
 		error = true;
 	}
 	//cout << "first pass" << endl;
@@ -849,7 +850,7 @@ SparseMatrix *read_MA_SparseMatrix_file(const char *filename, bool mrm)
 	if (!error) {
 		p = fopen(filename, "r");
 		if (p == NULL) {
-			fprintf(stderr, "Could not open file \"%s\"\n", filename);
+			fprintf(stderr, COLOR_RED "Could not open file \"%s\"\n" COLOR_END, filename);
 			error = true;
 		}
 	}

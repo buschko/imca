@@ -97,6 +97,11 @@ double begin, end;
 #define TIME_POINTS_STR "-Tp"
 #define MEC_STR "-mec"
 
+// Coloured output
+#define COLOR_RED "\x1b[31m" // Color Start
+#define COLOR_YELLOW "\x1b[33m" // Color Start
+#define COLOR_END "\x1b[0m\n" // To flush out prev settings
+
 // Boolean macros for option checking
 #define IS_LOWER_BOUND(str) (strncmp(str,"--from", 7) == 0 || strncmp(str, "-F", 3 ) == 0)
 #define IS_UPPER_BOUND(str) (strncmp(str,"--to", 5) == 0 || strncmp(str, "-T", 3 ) == 0)
@@ -225,31 +230,31 @@ static bool isValidExtension(const char * filename, char * extension, int * ext_
 */
 static void checkComputation(){
 	if(!is_ma_present && !is_mrm_present) {
-		printf("ERROR: No model type was set.\n");
+		printf(COLOR_RED "ERROR: No model type was set.\n" COLOR_END);
 		print_usage();
 		exit(EXIT_FAILURE);
       
 	}
 	if(!is_expected_time_present && !is_unbound_present && !is_lra_present && !is_time_bounded_present && !is_expected_reward_present && !is_time_reward_present && !is_mec && !is_lrr_present){
-		printf("ERROR: No computation type was set.\n");
+		printf(COLOR_RED "ERROR: No computation type was set.\n" COLOR_END);
 		print_usage();
 		exit(EXIT_FAILURE);
 	}
 	if( !is_max_present && !is_min_present ){
-		printf("ERROR: No settings for maximum\\minimum computation.\n");
+		printf(COLOR_RED "ERROR: No settings for maximum\\minimum computation.\n" COLOR_END);
 		print_usage();
 		exit(EXIT_FAILURE);
 	}
 	if( (is_time_bounded_present || is_time_reward_present) && !is_lower_bound_present && !is_upper_bound_present) {
-		printf("ERROR: To compute time bounded reachability, for time interval an upper bound (with '--to' or '-T') and optionally a lower bound (with '--from' or '-F' and default value of 0) are required.\n");
+		printf(COLOR_RED "ERROR: To compute time bounded reachability, for time interval an upper bound (with '--to' or '-T') and optionally a lower bound (with '--from' or '-F' and default value of 0) are required.\n" COLOR_END);
 		print_usage();
 		exit(EXIT_FAILURE);
 	}
 	if( (is_time_bounded_present || is_time_reward_present) && !is_lower_bound_present && is_upper_bound_present) {
-		printf("WARNING: No lower bound for time interval specified. The default value is %f.\n",ta);
+		printf(COLOR_YELLOW "WARNING: No lower bound for time interval specified. The default value is %.0f.\n" COLOR_END,ta);
 	}
 	if( (is_time_bounded_present || is_time_reward_present) && !is_error_bound_present ) {
-		printf("WARNING: No error bound specified. The default value is %f.\n", epsilon);
+		printf(COLOR_YELLOW "WARNING: No error bound specified. The default value is %f.\n" COLOR_END, epsilon);
 	}
 }
 
@@ -270,64 +275,64 @@ static void parseParams(int argc, char *argv[]) {
                     is_mrm_present = true;
 					ma_file = argv[i];
 				}else{
-					printf("WARNING: A model has already noticed before, skipping the '%s' file.\n", argv[i]);
+					printf(COLOR_YELLOW "WARNING: A model has already noticed before, skipping the '%s' file.\n" COLOR_END, argv[i]);
 				}
 			} else if( strcmp(extension, MRM_FILE_EXT) == 0 ){
 				if( !is_ma_present && !is_mrm_present ){
 					is_mrm_present = true;
 					ma_file = argv[i];
 				}else{
-					printf("WARNING: A model has already noticed before, skipping the '%s' file.\n", argv[i]);
+					printf(COLOR_YELLOW "WARNING: A model has already noticed before, skipping the '%s' file.\n" COLOR_END, argv[i]);
 				}
 			} 
 		}  else if( strcmp(argv[i], UNBOUND_STR) == 0 ){
 			if( !is_unbound_present ){
 				is_unbound_present = true;
 			}else{
-				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
+				printf(COLOR_YELLOW "WARNING: The option has been noticed before, skipping '%s'.\n" COLOR_END, argv[i]);
 			}
 		} else if( strcmp(argv[i], EXP_TIME_STR) == 0 ){
 			if( !is_expected_time_present ){
 				is_expected_time_present = true;
 			}else{
-				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
+				printf(COLOR_YELLOW "WARNING: The option has been noticed before, skipping '%s'.\n" COLOR_END, argv[i]);
 			}
 		} else if( strcmp(argv[i], EXP_REWARD_STR) == 0 ){
 			if( !is_expected_reward_present ){
 				is_expected_reward_present = true;
 			}else{
-				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
+				printf(COLOR_YELLOW "WARNING: The option has been noticed before, skipping '%s'.\n" COLOR_END, argv[i]);
 			}
 		} else if( strcmp(argv[i], LONG_RUN_REWARD_STR) == 0 ){
 			if( !is_lrr_present ){
 				is_lrr_present = true;
 			}else{
-				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
+				printf(COLOR_YELLOW "WARNING: The option has been noticed before, skipping '%s'.\n" COLOR_END, argv[i]);
 			}
 		} else if( strcmp(argv[i], LONG_RUN_AVERAGE_STR) == 0 ){
 			if( !is_lra_present ){
 				is_lra_present = true;
 			}else{
-				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
+				printf(COLOR_YELLOW "WARNING: The option has been noticed before, skipping '%s'.\n" COLOR_END, argv[i]);
 			}
 		} else if( strcmp(argv[i], TIME_BOUNDED_STR) == 0 ){
 			if( !is_time_bounded_present ){
 				is_time_bounded_present = true;
 			}else{
-				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
+				printf(COLOR_YELLOW "WARNING: The option has been noticed before, skipping '%s'.\n" COLOR_END, argv[i]);
 			}
 		} else if( strcmp(argv[i], TIME_REWARD_STR) == 0 ){
 			if( !is_time_reward_present ){
 				is_time_reward_present = true;
 			}else{
-				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
+				printf(COLOR_YELLOW "WARNING: The option has been noticed before, skipping '%s'.\n" COLOR_END, argv[i]);
 			}
 		}else if( IS_LOWER_BOUND(argv[i]) ){
 			if( is_lower_bound_present ) {
-				printf("ERROR: '%s' is repeated.\n", argv[i]);
+				printf(COLOR_RED "ERROR: '%s' is repeated.\n" COLOR_END, argv[i]);
 				exit(EXIT_FAILURE);
 			} else if(i+1 >= argc ) {
-				printf("ERROR: No lower bound for time interval specified.\n");
+				printf(COLOR_RED "ERROR: No lower bound for time interval specified.\n" COLOR_END);
 				exit(EXIT_FAILURE);
 			} else {
 				char *toEnd;
@@ -337,16 +342,16 @@ static void parseParams(int argc, char *argv[]) {
 					i++;
 				}
 				else {
-					printf("ERROR: The specified lower bound ('%s') is invalid. After '%s' must be a real value greater than or equal to zero.\n", argv[i+1], argv[i]);
+					printf(COLOR_RED "ERROR: The specified lower bound ('%s') is invalid. After '%s' must be a real value greater than or equal to zero.\n" COLOR_END, argv[i+1], argv[i]);
 					exit(EXIT_FAILURE);
 				}
 			}
 		}else if( IS_UPPER_BOUND(argv[i]) ){
 			if( is_upper_bound_present ) {
-				printf("ERROR: '%s' is repeated.\n", argv[i]);
+				printf(COLOR_RED "ERROR: '%s' is repeated.\n" COLOR_END, argv[i]);
 				exit(EXIT_FAILURE);
 			} else if(i+1 >= argc ) {
-				printf("ERROR: No upper bound for time interval specified.\n");
+				printf(COLOR_RED "ERROR: No upper bound for time interval specified.\n" COLOR_END);
 				exit(EXIT_FAILURE);
 			} else {
 				char *toEnd;
@@ -356,16 +361,16 @@ static void parseParams(int argc, char *argv[]) {
 					i++;
 				}
 				else {
-					printf("ERROR: The specified upper bound ('%s') is invalid. After '%s' must be a real value greater than zero.\n", argv[i+1], argv[i]);
+					printf(COLOR_RED "ERROR: The specified upper bound ('%s') is invalid. After '%s' must be a real value greater than zero.\n" COLOR_END, argv[i+1], argv[i]);
 					exit(EXIT_FAILURE);
 				}
 			}
 		}else if( IS_ERROR_BOUND(argv[i]) ){
 			if( is_error_bound_present ) {
-				printf("ERROR: '%s' is repeated.\n", argv[i]);
+				printf(COLOR_RED "ERROR: '%s' is repeated.\n" COLOR_END, argv[i]);
 				exit(EXIT_FAILURE);
 			} else if(i+1 >= argc ) {
-				printf("ERROR: No error bound specified.\n");
+				printf(COLOR_RED "ERROR: No error bound specified.\n" COLOR_END);
 				exit(EXIT_FAILURE);
 			} else {
 				char *toEnd;
@@ -373,18 +378,21 @@ static void parseParams(int argc, char *argv[]) {
 				if( *toEnd == '\0' && epsilon > 0 ) {
 					is_error_bound_present = true;
 					i++;
+                    if(epsilon > 1){
+                        printf(COLOR_YELLOW "WARNING: The specified error bound is >1, you may obtain unexpected results!" COLOR_END);
+                    }
 				}
 				else {
-					printf("ERROR: The specified upper bound ('%s') is invalid. After '%s' must be a real value greater than zero.\n", argv[i+1], argv[i]);
+					printf(COLOR_RED "ERROR: The specified upper bound ('%s') is invalid. After '%s' must be a real value greater than zero.\n" COLOR_END, argv[i+1], argv[i]);
 					exit(EXIT_FAILURE);
 				}
 			}
 		}else if( strcmp(argv[i], INTERVAL_STR) == 0  ){
 			if( is_interval_present ) {
-				printf("ERROR: '%s' is repeated.\n", argv[i]);
+				printf(COLOR_RED "ERROR: '%s' is repeated.\n" COLOR_END, argv[i]);
 				exit(EXIT_FAILURE);
 			} else if(i+1 >= argc ) {
-				printf("ERROR: No interval step specified.\n");
+				printf(COLOR_RED "ERROR: No interval step specified.\n" COLOR_END);
 				exit(EXIT_FAILURE);
 			} else {
 				char *toEnd;
@@ -394,16 +402,16 @@ static void parseParams(int argc, char *argv[]) {
 					i++;
 				}
 				else {
-					printf("ERROR: The specified interval step ('%s') is invalid. After '%s' must be a real value greater than zero.\n", argv[i+1], argv[i]);
+					printf(COLOR_RED "ERROR: The specified interval step ('%s') is invalid. After '%s' must be a real value greater than zero.\n" COLOR_END, argv[i+1], argv[i]);
 					exit(EXIT_FAILURE);
 				}
 			}
 		}else if( strcmp(argv[i], INTERVAL_START_STR) == 0  ){
 			if( is_interval_start_present ) {
-				printf("ERROR: '%s' is repeated.\n", argv[i]);
+				printf(COLOR_RED "ERROR: '%s' is repeated.\n" COLOR_END, argv[i]);
 				exit(EXIT_FAILURE);
 			} else if(i+1 >= argc ) {
-				printf("ERROR: No interval start specified.\n");
+				printf(COLOR_RED "ERROR: No interval start specified.\n" COLOR_END);
 				exit(EXIT_FAILURE);
 			} else {
 				char *toEnd;
@@ -413,7 +421,7 @@ static void parseParams(int argc, char *argv[]) {
 					i++;
 				}
 				else {
-					printf("ERROR: The specified interval step ('%s') is invalid. After '%s' must be a real value greater equal than zero.\n", argv[i+1], argv[i]);
+					printf(COLOR_RED "ERROR: The specified interval step ('%s') is invalid. After '%s' must be a real value greater equal than zero.\n" COLOR_END, argv[i+1], argv[i]);
 					exit(EXIT_FAILURE);
 				}
 			}
@@ -421,31 +429,31 @@ static void parseParams(int argc, char *argv[]) {
 			if( !is_min_present ){
 				is_min_present = true;
 			}else{
-				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
+				printf(COLOR_YELLOW "WARNING: The option has been noticed before, skipping '%s'.\n" COLOR_END, argv[i]);
 			}
 		} else if( strcmp(argv[i], MAX_MODE_STR) == 0 ){
 			if( !is_max_present ){
 				is_max_present = true;
 			}else{
-				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
+				printf(COLOR_YELLOW "WARNING: The option has been noticed before, skipping '%s'.\n" COLOR_END, argv[i]);
 			}
 		}else if( strcmp(argv[i], IMC_STR) == 0 ){
 			if( !is_imc ){
 				is_imc = true;
 			}else{
-				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
+				printf(COLOR_YELLOW "WARNING: The option has been noticed before, skipping '%s'.\n" COLOR_END, argv[i]);
 			}
 		}else if( strcmp(argv[i], VAL_STR) == 0 ){
 			if( !is_val ){
 				is_val = true;
 			}else{
-				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
+				printf(COLOR_YELLOW "WARNING: The option has been noticed before, skipping '%s'.\n" COLOR_END, argv[i]);
 			}
 		}else if( strcmp(argv[i], MEC_STR) == 0 ){
 			if( !is_mec ){
 				is_mec = true;
 			}else{
-				printf("WARNING: The option has been noticed before, skipping '%s'.\n", argv[i]);
+				printf(COLOR_YELLOW "WARNING: The option has been noticed before, skipping '%s'.\n" COLOR_END, argv[i]);
 			}
 		}
 	}
@@ -461,7 +469,7 @@ static void loadMA(const char *filename) {
 		printf("Loading the '%s' file, please wait.\n", filename);
 		ma = read_MA_SparseMatrix_file(filename,is_mrm_present);
 		if(ma == NULL){
-			printf("ERROR: The '%s' file '%s' was not found or is incorrect!\n",MA_FILE_EXT, filename);
+			printf(COLOR_RED "ERROR: The '%s' file '%s' was not found or is incorrect!\n" COLOR_END,MA_FILE_EXT, filename);
 			exit(EXIT_FAILURE);
 		}
 	}
