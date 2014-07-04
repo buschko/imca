@@ -506,7 +506,7 @@ Real compute_time_bounded_accumulated_reward(SparseMatrix* ma, bool max, Real ep
 		// discretize model with respect to the given epsilon
 		dbg_printf("discretize model\n");
 		SparseMatrix* discrete_ma = discretize_model_reward(ma,tau);
-		print_model(discrete_ma,true);
+		//print_model(discrete_ma,true);
 		dbg_printf("model discretized\n");
 		//print_model(discrete_ma);
 
