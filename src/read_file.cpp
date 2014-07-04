@@ -404,7 +404,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 					*error = true;
 				} else {	
 					/* if Markovian state, store exit rate */
-					if(is_ms & !isPS[from]) {
+                    if(is_ms & !isPS[last_from]) {
 						if(max_exit_rate<exit_rate)
 							max_exit_rate=exit_rate;
 						exit_rates[exit_index] = exit_rate;
