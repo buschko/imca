@@ -378,8 +378,8 @@ static void parseParams(int argc, char *argv[]) {
 				if( *toEnd == '\0' && epsilon > 0 ) {
 					is_error_bound_present = true;
 					i++;
-                    if(epsilon > 1){
-                        printf(COLOR_YELLOW "WARNING: The specified error bound is >1, you may obtain unexpected results!" COLOR_END);
+                    if(epsilon > 0.1){
+                        printf(COLOR_YELLOW "WARNING: The specified error bound is >0.1, you may obtain unexpected results!" COLOR_END);
                     }
 				}
 				else {
