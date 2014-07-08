@@ -33,11 +33,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-#define Color_Red "\33[0:31m\\]" // Color Start
-#define Color_end "\33[0m\\]" // To flush out prev settings
-#define Color_Yellow "\33[0:33m\\]" // Color Start
-#define Color_end "\33[0m\\]" // To flush out prev settings
-
 void PrintMsg( const char*, ... );
 
 #define dbg_printf      PrintMsg

@@ -627,12 +627,12 @@ Real compute_stochastic_shortest_path_problem_lrr(SparseMatrix *ma, SparseMatrix
 	dbg_printf("solve model\n");
 	stat = lp_model.solve();
 	
-	/* find the max or min prob. for an initial state */
+	/* find the max or min LRR for an initial state */
 	Real obj;
 	if(max)
 		obj=0;
 	else
-		obj=1;
+		obj=infinity;
 			
 	/* show if optimal solution */
 	if( stat == SPxSolver::OPTIMAL ) {
@@ -643,8 +643,7 @@ Real compute_stochastic_shortest_path_problem_lrr(SparseMatrix *ma, SparseMatrix
 		lp_model.getPrimal(probs);
 		
 		for (state_nr = 0; state_nr < ma->n; state_nr++) {
-			if(initials[state_nr] && !mec[state_nr]){
-				//cout << ssp_nr.find(state_nr)->second << endl;
+            if(initials[state_nr] && !mec[state_nr]){
 				Real tmp = probs[ssp_nr.find(state_nr)->second];
 				//cout << tmp << endl;
 				if(max && tmp > obj)
@@ -667,7 +666,7 @@ Real compute_stochastic_shortest_path_problem_lrr(SparseMatrix *ma, SparseMatrix
 	}
 
 	free(locks);
-        free(bad);
+    free(bad);
 	free(tmpname);	
 		
 	return obj;
