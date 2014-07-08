@@ -35,6 +35,11 @@
 
 #include "debug.h"
 
+// Coloured output
+#define COLOR_RED "\x1b[31m" // Color Start
+#define COLOR_YELLOW "\x1b[33m" // Color Start
+#define COLOR_END "\x1b[0m" // To flush out prev settings
+
 using namespace std;
 
 /**
