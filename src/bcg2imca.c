@@ -217,7 +217,7 @@ int main(int argc, char* argv[]) {
 	BCG_OT_ITERATE_PLN (bcg_graph, bcg_s1, bcg_label_number, bcg_s2) {
 		bcg_gate = BCG_OT_LABEL_GATE (bcg_graph, bcg_label_number);
 		if(strcmp(bcg_gate,argv[3]) == 0)
-			fprintf(ma, "s%lu\n",bcg_s2);
+			fprintf(ma, "s%lu\n",bcg_s1);
 	} BCG_OT_END_ITERATE;
 	BCG_OT_READ_BCG_END (&bcg_graph);
 	
