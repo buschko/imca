@@ -19,7 +19,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *
 *
-* Source description: 
+* Source description:
 *	Reads an compatible MA File
 */
 
@@ -50,9 +50,9 @@ using namespace std;
 * @param p MA file
 * @param filename filename of MA file
 * @param num_states will store number of states here
-* @param states will map the state names to state numbers 
+* @param states will map the state names to state numbers
 */
-static void read_states(unsigned long *line_no, bool *error, FILE *p, const char *filename, unsigned long *num_states, map<string,unsigned long> *states, map<unsigned long,string> *states_nr) 
+static void read_states(unsigned long *line_no, bool *error, FILE *p, const char *filename, unsigned long *num_states, map<string,unsigned long> *states, map<unsigned long,string> *states_nr)
 {
 	char s[MAX_LINE_LENGTH];
 	unsigned long state_nr = 0;
@@ -81,8 +81,8 @@ static void read_states(unsigned long *line_no, bool *error, FILE *p, const char
 			++(*line_no);
 		}
 	}
-	
-	
+
+
 	/* TODO: also check lines */
 	while (fgets(s, MAX_LINE_LENGTH, p) != NULL && !*error) {
 		if (s[0] == '*') {
@@ -93,12 +93,12 @@ static void read_states(unsigned long *line_no, bool *error, FILE *p, const char
 			if(ret.second == true){
 				tmp_nr.insert(pair<unsigned long,string>(state_nr,state));
 				state_nr++;
-			} 
+			}
 			++(*line_no);
 		}
 	}
-	
-	(*num_states) = state_nr;	
+
+	(*num_states) = state_nr;
 	(*states)=tmp;
 	(*states_nr)=tmp_nr;
 }
@@ -111,9 +111,9 @@ static void read_states(unsigned long *line_no, bool *error, FILE *p, const char
 * @param p MA file
 * @param filename filename of MA file
 * @param num_states will store number of states here
-* @param states will map the state names to state numbers 
+* @param states will map the state names to state numbers
 */
-static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const char *filename, unsigned long *num_states, map<string,unsigned long> *states, map<unsigned long,string> *states_nr, vector<unsigned long> *deadlocks) 
+static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const char *filename, unsigned long *num_states, map<string,unsigned long> *states, map<unsigned long,string> *states_nr, vector<unsigned long> *deadlocks)
 {
 	char s[MAX_LINE_LENGTH];
 	unsigned long state_nr = (*num_states);
@@ -123,7 +123,7 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 	map<string ,unsigned long> tmp=*states;
 	map<unsigned long, string> tmp_nr=*states_nr;
 	bool deadlock=false;
-	
+
 	/* go to Transitions */
 	if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 		{
@@ -152,7 +152,7 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 					tmp_nr.insert(pair<unsigned long,string>(state_nr,state));
 					(*deadlocks).push_back(state_nr);
 					state_nr++;
-				} 
+				}
 				if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 				{
 					fprintf(stderr, COLOR_RED "Reading line %ld of file \"%s\" failed.\n" COLOR_END,*line_no, filename);
@@ -175,7 +175,7 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 					tmp_nr.insert(pair<unsigned long,string>(state_nr,state));
 					(*deadlocks).push_back(state_nr);
 					state_nr++;
-				} 
+				}
 				if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 				{
 					fprintf(stderr, COLOR_RED "Reading line %ld of file \"%s\" failed.\n" COLOR_END,*line_no, filename);
@@ -185,9 +185,9 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 				++(*line_no);
 			}
 		}
-	
+
 	// cout << "hey" << endl;
-	
+
 	/* TODO: also check lines */
 	while (fgets(s, MAX_LINE_LENGTH, p) != NULL && !*error) {
 		if (s[0] == '*') {
@@ -207,7 +207,7 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 			++(*line_no);
 		}
 	}
-	
+
 	if(deadlock) {
 		(*num_states) = state_nr;
 		(*states)=tmp;
@@ -224,7 +224,7 @@ static void init_states(unsigned long *line_no, bool *error, FILE *p, const char
 	unsigned long ms_states=0;
 	bool *isPS;
 	bool first=true;
-	
+
 	if (!*error) {
 		bool *initials = (bool *) ma->initials;
 		bool *goals = (bool *)ma->goals;
@@ -236,7 +236,7 @@ static void init_states(unsigned long *line_no, bool *error, FILE *p, const char
 			goals[from]=false;
 			isPS[from]=false;
 		}
-		
+
 		/* store initials and goals */
 		if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 		{
@@ -287,7 +287,7 @@ static void init_states(unsigned long *line_no, bool *error, FILE *p, const char
 			}
 		}
 	}
-	
+
 	while (!*error && (fgets(s, MAX_LINE_LENGTH, p) != NULL)) {
 		if (s[0] != '*') {
 			if (sscanf(s, "%s%s", src, act) != 2) { /* check if both values are returned */
@@ -304,7 +304,7 @@ static void init_states(unsigned long *line_no, bool *error, FILE *p, const char
 						fprintf(stderr, COLOR_RED "Line %ld: Markovian state transitions of one state should not be divided.\n" COLOR_END, (*line_no));
 					} else {
 						isPS[from]=true;
-					}				
+					}
 				} else {
 					if(strcmp(act,MARKOV_ACTION) != 0)
 						isPS[from]=true;
@@ -315,19 +315,19 @@ static void init_states(unsigned long *line_no, bool *error, FILE *p, const char
 		}
 		++(*line_no);
 	}
-	
+
 	vector<unsigned long>::iterator it;
 	for(it=deadlocks.begin(); it<deadlocks.end(); it++) {
 		isPS[(*it)]=true;
 	}
-	
+
 	if(!*error) {
 		for(from=0; from<ma->n; from++) {
 			if(!isPS[from])
 				ms_states++;
 		}
 	}
-	
+
 	if(!*error) {
 		(*num_ms_states) = ms_states;
 		ma->ms_n = ms_states;
@@ -394,7 +394,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 		states = model->states;
 		isPS = model->isPS;
 	}
-	
+
 
 	while (!*error && (fgets(s, MAX_LINE_LENGTH, p) != NULL)) {
 		if (s[0] != '*') {
@@ -407,9 +407,9 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 				if (from < last_from) {
 					fprintf(stderr, COLOR_RED "Line %ld: State transitions must be given in continuous order for one state.\n" COLOR_END, *line_no);
 					*error = true;
-				} else {	
+				} else {
 					/* if Markovian state, store exit rate */
-                    if(is_ms & !isPS[last_from]) {
+					if(is_ms & !isPS[last_from]) {
 						if(max_exit_rate<exit_rate)
 							max_exit_rate=exit_rate;
 						exit_rates[exit_index] = exit_rate;
@@ -423,22 +423,22 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 							rate_starts[last_from + 1] = rate_starts[last_from + 0];
 						}
 					}
-					
-						
+
+
 					is_ms=false;
 					exit_rate=0;
 					if(strcmp(act,MARKOV_ACTION) == 0)
 					{
 						is_ms=true;
-					}	
-					
+					}
+
 					/* probabilistic transitions are chosen before Markovian transitions */
 					if((isPS[from] && !is_ms) || (!isPS[from] && is_ms)){
 						num_choice++;
 					}
-					
+
 					last_from = from;
-				}	
+				}
 			}
 			//++(*line_no);
 		} else {
@@ -448,7 +448,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 				fprintf(stderr, COLOR_RED "ERROR at line %d, expected something like '* <dst_state> <rate/prob>'.\n" COLOR_END, *line_no);
 				*error = true;
 			}
-            dbg_printf("%s %s\n",src,act);
+			dbg_printf("%s %s\n",src,act);
 			to = states.find(dst)->second;
 			if(((isPS[from] && !is_ms) || (!isPS[from] && is_ms)) && to != last_to) {
 				num_non_zeros++;
@@ -463,9 +463,9 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 		}
 		++(*line_no);
 	}
-	
+
 	//dbg_printf("nz %ld  nc %ld\n",num_non_zeros,num_choice);
-	
+
 	if(deadlocks.size() == 0) {
 		/* probabilistic transitions are choosen before markovian transitions */
 		if((is_ms)) {
@@ -556,7 +556,7 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 	bool bad=false;
 	unsigned long last_to = -1;
 	//Real r=0;
-	
+
 	Real tmp = 0;
 	unsigned int old_index;
 
@@ -568,7 +568,7 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 		unsigned long *row_starts = (unsigned long *) ma->row_counts;
 		map<string ,unsigned long> states = ma->states;
 		bool *isPS = ma->isPS;
-		
+
 		/* go to Transitions */
 		if (!*error) {
 			if(fgets(s, MAX_LINE_LENGTH, p) == 0)
@@ -810,7 +810,7 @@ void print_lp_info(SoPlex lp_model) {
 	printf("\n");
 	printf("SoPlex parameters:\n");
 	printf("Delta          = %g\n",lp_model.delta());
-	printf("Epsilon Zero   = %g\n", Param::epsilon());  
+	printf("Epsilon Zero   = %g\n", Param::epsilon());
 	printf("Epsilon Factor = %g\n", Param::epsilonFactorization());
 	printf("Epsilon Update = %g\n", Param::epsilonUpdate());
 	printf("\n");

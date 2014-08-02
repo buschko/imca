@@ -457,7 +457,7 @@ static void parseParams(int argc, char *argv[]) {
 			}
 		}
 	}
-	
+
 	checkComputation();
 }
 
@@ -481,10 +481,10 @@ int main(int argc, char* argv[]) {
 	// helpers to calculate allocated memory
 	unsigned long int sp1=0,sp2=0;
 	#endif
-	
+
 	//REAL test(0);
 	Real test;
-	
+
 	#ifndef __APPLE__
 	// get memory info before model is loaded
 	sp1 = mallinfo().uordblks;
@@ -492,13 +492,13 @@ int main(int argc, char* argv[]) {
 
 	/// print the MAA intro
 	print_intro();
-	
+
 	/// Parse and validate the input parameters
 	parseParams(argc, argv);
-	
+
 	/// load the MA from file
 	loadMA(ma_file);
-	
+
 	#ifndef __APPLE__
 	// get memory info after model is loaded
 	sp2 = mallinfo().uordblks;
@@ -517,7 +517,7 @@ int main(int argc, char* argv[]) {
 	#else
 	printf("The occupied space is ??? Bytes.\n\n");
 	#endif
-	
+
 	Real tmp;
 
 	if(is_unbound_present){
@@ -528,7 +528,7 @@ int main(int argc, char* argv[]) {
 			#endif
 			printf("\nCompute maximal unbounded reachability, please wait.\n");
 			if(!is_val){
-				tmp = compute_unbounded_reachability(ma,true);	
+				tmp = compute_unbounded_reachability(ma,true);
 				printf("Maximal unbounded reachability: %.10g\n", tmp);
 			}else {
 				tmp=unbounded_value_iteration(ma,true);
@@ -547,7 +547,7 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
-			printf("\nCompute minimal unbounded reachability, please wait.\n");	
+			printf("\nCompute minimal unbounded reachability, please wait.\n");
 			if(!is_val){
 				tmp = compute_unbounded_reachability(ma,false);
 				printf("Minimal unbounded reachability: %.10g\n", tmp);
@@ -677,24 +677,24 @@ int main(int argc, char* argv[]) {
 		}
 	}
 	if(is_lrr_present && is_mrm_present){
-        
+
         vector<bool> goals(ma->n,false);
-        
+
         int n_goal=0;
-        
+
         for (unsigned long state_nr = 0; state_nr < ma->n; state_nr++) {
             if(ma->goals[state_nr]){
                 n_goal++;
                 goals[state_nr]=true;
             }
         }
-        
+
         if(n_goal==0){
             for (unsigned long state_nr = 0; state_nr < ma->n; state_nr++) {
                 ma->goals[state_nr]=true;
             }
         }
-        
+
 		if(is_max_present){
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
@@ -727,7 +727,7 @@ int main(int argc, char* argv[]) {
 			printf("Computation Time: ??? seconds\n");
 			#endif
 		}
-        
+
         if(n_goal==0){
             for (unsigned long state_nr = 0; state_nr < ma->n; state_nr++) {
                 if(!goals[state_nr]){
@@ -735,7 +735,7 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
-        
+
 	}
 	if(is_time_bounded_present){
 		if(interval == 0){
@@ -849,7 +849,7 @@ int main(int argc, char* argv[]) {
 		delete(mecs);
 	}
 
-	SparseMatrix_free(ma);
+	//SparseMatrix_free(ma);
 
 	delete(ma);
 
