@@ -516,8 +516,8 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 	/* now allocate the memory needed */
 	if (!*error) {
 		unsigned long * choice_starts = (unsigned long *) calloc((size_t) (num_choice + 1), sizeof(unsigned long));
-		Real * non_zeros = (Real *) malloc((num_non_zeros+1) * sizeof(Real));
-		unsigned long * cols = (unsigned long *) malloc((num_non_zeros+1) * sizeof(unsigned long));
+		Real * non_zeros = (Real *) malloc((num_non_zeros) * sizeof(Real));
+		unsigned long * cols = (unsigned long *) malloc((num_non_zeros) * sizeof(unsigned long));
 		model->choice_counts = (unsigned char *) choice_starts;
 		model->non_zeros = non_zeros;
 		model->cols = cols;
@@ -525,7 +525,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 		model->non_zero_n = num_non_zeros;
 		model->max_exit_rate=max_exit_rate;
 		if(mrm){
-			Real * rewards = (Real *) malloc((num_choice+1) * sizeof(Real));
+			Real * rewards = (Real *) malloc((num_choice) * sizeof(Real));
 			model->rewards=rewards;
 		}
 	}
@@ -578,6 +578,7 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 			}
 			++(*line_no);
 			sscanf(s, "%s", src);
+			dbg_printf("%s\n", src);
 			while(strcmp(src,TRANSITIONS) != 0 && !*error) {
 				if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 				{
@@ -589,7 +590,6 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 			}
 		}
 
-
 		while (fgets(s, MAX_LINE_LENGTH, p) != NULL) {
 			if (s[0] == '*') {
 				if(!bad)
@@ -598,6 +598,7 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 					Real denominator=1;
 					char star[MAX_LINE_LENGTH];
 					sscanf(s, "%s%s%lf/%lf", star, dst, &rate, &denominator);
+					dbg_printf("* %s %lf/%lf\n", dst, rate, denominator);
 					to=states.find(dst)->second;
 					if(to != last_to) {
 						non_zeros[nz_index] = rate/denominator;
@@ -618,23 +619,26 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 					Real reward=0;
 					Real denominator=1;
 					sscanf(s, "%s%s%lf/%lf", src, act, &reward, &denominator);
+					dbg_printf("reward index: %ld\n",reward_index);
 					rewards[reward_index] = reward/denominator;
-					//r += reward;
-					reward_index++;
 				}else {
 					sscanf(s, "%s%s", src, act);
 				}
+				dbg_printf("%s %s\n",src,act);
 				from=states.find(src)->second;
 				/* probabilistic transitions are choosen before markovian transitions */
 				if(strcmp(act,MARKOV_ACTION) == 0 && isPS[from])
 					bad=true;
-				else
+				else{
 					bad=false;
+					reward_index++;
+				}
 				if(!bad) {
+					if(mrm){
 					// Set maximum Markovian reward
-					if( strncmp(act,MARKOV_ACTION, 2) == 0 && max_markovian_reward < rewards[reward_index - 1] )
-						max_markovian_reward = rewards[reward_index - 1];
-
+						if( strncmp(act,MARKOV_ACTION, 2) == 0 && max_markovian_reward < rewards[reward_index - 1] )
+							max_markovian_reward = rewards[reward_index - 1];
+					}
 					if (from == last_from) {
 						row_starts[from + 1]++;
 					} else {
@@ -654,12 +658,14 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 				}
 			}
 		}
+
 		if(deadlocks.size() == 0) {
 			choice_starts[choice_index] = choice_starts[choice_index - 1] + choice_size;
 			for (; from+1 < ma->n; from++) {
 				row_starts[from+2] = row_starts[from+1];
 			}
 		}else {
+
 			if (choice_index > 0) {
 				choice_starts[choice_index] =
 				choice_starts[choice_index - 1] + choice_size;

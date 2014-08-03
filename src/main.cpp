@@ -19,7 +19,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *
 *
-* Source description: 
+* Source description:
 * 	Interactive Markov Chain Analyzer
 *
 * Created by Dennis Guck
@@ -175,7 +175,7 @@ static void print_intro(void) {
 	printf("|          Copyright (C) University of Twente, 2013-2014.           |\n");
 	printf("|                         Author: Dennis Guck                       |\n");
 	printf("|           IMCA is distributed under the GPL conditions            |\n");
-	printf("|            (GPL stands for GNU General Public License)            |\n");    
+	printf("|            (GPL stands for GNU General Public License)            |\n");
 	printf("|          This program comes with ABSOLUTELY NO WARRANTY.          |\n");
 	printf("|   This is free software, and you are welcome to redistribute it   |\n");
 	printf(" ------------------------------------------------------------------- \n");
@@ -220,7 +220,7 @@ static bool isValidExtension(const char * filename, char * extension, int * ext_
 		strncpy(extension, p,  max(MIN_FILE_EXT_LENGTH, min(MAX_FILE_EXT_LENGTH, length)));
 		result = true;
 	}
-	
+
 
 	return result;
 }
@@ -233,7 +233,7 @@ static void checkComputation(){
 		printf(COLOR_RED "ERROR: No model type was set.\n" COLOR_END);
 		print_usage();
 		exit(EXIT_FAILURE);
-      
+
 	}
 	if(!is_expected_time_present && !is_unbound_present && !is_lra_present && !is_time_bounded_present && !is_expected_reward_present && !is_time_reward_present && !is_mec && !is_lrr_present){
 		printf(COLOR_RED "ERROR: No computation type was set.\n" COLOR_END);
@@ -272,7 +272,7 @@ static void parseParams(int argc, char *argv[]) {
 			if( strcmp(extension, MA_FILE_EXT) == 0 ){
 				if( !is_ma_present && !is_mrm_present ){
 					is_ma_present = true;
-                    is_mrm_present = true;
+					is_mrm_present = true;
 					ma_file = argv[i];
 				}else{
 					printf(COLOR_YELLOW "WARNING: A model has already noticed before, skipping the '%s' file.\n" COLOR_END, argv[i]);
@@ -284,7 +284,7 @@ static void parseParams(int argc, char *argv[]) {
 				}else{
 					printf(COLOR_YELLOW "WARNING: A model has already noticed before, skipping the '%s' file.\n" COLOR_END, argv[i]);
 				}
-			} 
+			}
 		}  else if( strcmp(argv[i], UNBOUND_STR) == 0 ){
 			if( !is_unbound_present ){
 				is_unbound_present = true;
@@ -849,7 +849,7 @@ int main(int argc, char* argv[]) {
 		delete(mecs);
 	}
 
-	//SparseMatrix_free(ma);
+	SparseMatrix_free(ma);
 
 	delete(ma);
 
