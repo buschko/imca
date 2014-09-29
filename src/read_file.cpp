@@ -833,6 +833,106 @@ void print_lp_info(SoPlex lp_model) {
 }
 #endif
 
+void witeToDot(SparseMatrix* ma, std::ostream& outStream)
+{
+    
+    unsigned long i;
+    unsigned long tau=1;
+    unsigned long state_nr;
+    unsigned long choice_nr;
+    map<unsigned long,string> states_nr = ma->states_nr;
+    unsigned long *row_starts = (unsigned long *) ma->row_counts;
+    unsigned long *rate_starts = (unsigned long *) ma->rate_counts;
+    unsigned long *choice_starts = (unsigned long *) ma->choice_counts;
+    Real *non_zeros = ma->non_zeros;
+    Real *rewards = ma->rewards;
+    Real *exit_rates = ma->exit_rates;
+    unsigned long *cols = ma->cols;
+    Real prob;
+    bool *initials = ma->initials;
+    bool *goals = ma->goals;
+
+    outStream << "digraph model {" << std::endl;
+    
+    // Write all states to the stream.
+    for (state_nr = 0; state_nr < ma->n; state_nr++) {
+        outStream << "\t" << state_nr;
+        outStream << " [ ";
+        outStream << "label = \"" << (states_nr.find(state_nr)->second).c_str() << ": ";
+        
+        outStream << "{";
+        // Now print the state labeling to the stream if requested.
+        if (initials[state_nr] || goals[state_nr]) {
+            bool includeComma = false;
+            if(initials[state_nr]){
+                outStream << "init";
+                includeComma = true;
+            }
+            if(goals[state_nr]){
+                if (includeComma) {
+                    outStream << ", ";
+                }
+                outStream << "goal";
+            }
+        }
+        outStream << "}";
+    
+        outStream << "\"";
+    
+        outStream << " ]";
+        outStream << ";" << std::endl;
+    }
+
+    
+    // Write the probability distributions for all the states.
+    for (state_nr = 0; state_nr < ma->n; state_nr++) {
+        unsigned long state_start = row_starts[state_nr];
+        unsigned long state_end = row_starts[state_nr + 1];
+        
+        // For this, we need to iterate over all available nondeterministic choices in the current state.
+        for (choice_nr = state_start; choice_nr < state_end; choice_nr++) {
+            unsigned long i_start = choice_starts[choice_nr];
+            unsigned long i_end = choice_starts[choice_nr + 1];
+            
+            // If it's not a Markovian state or the current row is the first choice for this state, then we
+            // are dealing with a probabilitic choice.
+            if (ma->isPS[state_nr]) {
+                // For each nondeterministic choice, we draw an arrow to an intermediate node to better display
+                // the grouping of transitions.
+                outStream << "\t\"" << state_nr << "c" << choice_nr << "\" [shape = \"point\"";
+                
+                outStream << "];" << std::endl;
+                
+                outStream << "\t" << state_nr << " -> \"" << state_nr << "c" << choice_nr << "\"";
+
+                outStream << ";" << std::endl;
+                
+                // Now draw all probabilitic arcs that belong to this nondeterminstic choice.
+                for (i = i_start; i < i_end; i++) {
+                    outStream << "\t\"" << state_nr << "c" << choice_nr << "\" -> " << cols[i] << " [ label= \"" << non_zeros[i] << "\" ]";
+
+                    outStream << ";" << std::endl;
+                }
+            } else {
+                // In this case we are emitting a Markovian choice, so draw the arrows directly to the target states.
+                for (i = i_start; i < i_end; i++) {
+                    prob=non_zeros[i];
+                    unsigned long r_start = rate_starts[state_nr];
+                    unsigned long r_end = rate_starts[state_nr + 1];
+                    Real exitRate=0;
+                    for (unsigned long j = r_start; j < r_end; j++) {
+                        exitRate = exit_rates[j];
+                        prob /= exitRate;
+                    }
+                    outStream << "\t\"" << state_nr << "\" -> " << cols[i] << " [ label= \"" << prob << " (" << exitRate << ")\" ]";
+                }
+            }
+        }
+    }
+    
+    outStream << "}" << std::endl;
+}
+
 /**
 * Reads MA file @a filename.
 *
