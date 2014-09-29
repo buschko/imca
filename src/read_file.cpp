@@ -873,6 +873,23 @@ void witeToDot(SparseMatrix* ma, std::ostream& outStream)
                     outStream << ", ";
                 }
                 outStream << "goal";
+                includeComma = true;
+            }
+            if(!ma->isPS[state_nr]){
+                unsigned long state_start = row_starts[state_nr];
+                unsigned long state_end = row_starts[state_nr + 1];
+                
+                // For this, we need to iterate over all available nondeterministic choices in the current state.
+                for (choice_nr = state_start; choice_nr < state_end; choice_nr++) {
+                    unsigned long i_start = choice_starts[choice_nr];
+                    unsigned long i_end = choice_starts[choice_nr + 1];
+                    if(rewards[choice_nr]>0){
+                        if (includeComma) {
+                            outStream << ", ";
+                        }
+                        outStream << "rew:" << rewards[choice_nr];
+                    }
+                }
             }
         }
         outStream << "}";
@@ -903,7 +920,12 @@ void witeToDot(SparseMatrix* ma, std::ostream& outStream)
                 
                 outStream << "];" << std::endl;
                 
-                outStream << "\t" << state_nr << " -> \"" << state_nr << "c" << choice_nr << "\"";
+                if(rewards[choice_nr]>0){
+                    outStream << "\t" << state_nr << " -> \"" << state_nr << "c" << choice_nr << "\" [ label= \"rew:" << rewards[choice_nr] << "\" ]";
+                }else{
+                    outStream << "\t" << state_nr << " -> \"" << state_nr << "c" << choice_nr << "\"";
+                }
+                
 
                 outStream << ";" << std::endl;
                 
