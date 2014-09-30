@@ -96,6 +96,7 @@ double begin, end;
 #define INTERVAL_START_STR "-b"
 #define TIME_POINTS_STR "-Tp"
 #define MEC_STR "-mec"
+#define DOT_STR "-dot"
 
 // Coloured output
 #define COLOR_RED "\x1b[31m" // Color Start
@@ -143,6 +144,8 @@ static bool is_mec = false;
 static bool is_lower_bound_present = false;
 static bool is_upper_bound_present = false;
 static bool is_error_bound_present = false;
+
+static bool is_dot_present = false;
 
 /**
 * Global variables
@@ -195,6 +198,8 @@ static void print_usage(void) {
 	printf("                          '-e' for error bound '-i' for interval output\n");
 	printf("                          '-i' only available for [0,T]\n");
 	printf("                          '-val for expected-time value iteration\n");
+    printf("                          '-mec for maximal end component computation + output\n");
+    printf("                          '-dot for .dot export\n");
 	//printf("                          '-Tp {a,b,c}' for several time points (i XOR Tp)\n");
 	//printf("	<model type>	- define if .ma input is an IMC {-imc} \n");
 }
@@ -235,12 +240,12 @@ static void checkComputation(){
 		exit(EXIT_FAILURE);
 
 	}
-	if(!is_expected_time_present && !is_unbound_present && !is_lra_present && !is_time_bounded_present && !is_expected_reward_present && !is_time_reward_present && !is_mec && !is_lrr_present){
+	if(!is_expected_time_present && !is_unbound_present && !is_lra_present && !is_time_bounded_present && !is_expected_reward_present && !is_time_reward_present && !is_mec && !is_lrr_present && !is_dot_present){
 		printf(COLOR_RED "ERROR: No computation type was set.\n" COLOR_END);
 		print_usage();
 		exit(EXIT_FAILURE);
 	}
-	if( !is_max_present && !is_min_present ){
+	if((is_expected_time_present || is_unbound_present || is_lra_present || is_time_bounded_present || is_expected_reward_present || is_time_reward_present || is_lrr_present) && (!is_max_present && !is_min_present) ){
 		printf(COLOR_RED "ERROR: No settings for maximum\\minimum computation.\n" COLOR_END);
 		print_usage();
 		exit(EXIT_FAILURE);
@@ -455,7 +460,13 @@ static void parseParams(int argc, char *argv[]) {
 			}else{
 				printf(COLOR_YELLOW "WARNING: The option has been noticed before, skipping '%s'.\n" COLOR_END, argv[i]);
 			}
-		}
+        }else if( strcmp(argv[i], DOT_STR) == 0 ){
+            if( !is_dot_present ){
+                is_dot_present = true;
+            }else{
+                printf(COLOR_YELLOW "WARNING: The option has been noticed before, skipping '%s'.\n" COLOR_END, argv[i]);
+            }
+        }
 	}
 
 	checkComputation();
@@ -467,6 +478,7 @@ static void parseParams(int argc, char *argv[]) {
 static void loadMA(const char *filename) {
 	if(is_ma_present || is_mrm_present) {
 		printf("Loading the '%s' file, please wait.\n", filename);
+		if(is_mrm_present)
 		ma = read_MA_SparseMatrix_file(filename,is_mrm_present);
 		if(ma == NULL){
 			printf(COLOR_RED "ERROR: The '%s' file '%s' was not found or is incorrect!\n" COLOR_END,MA_FILE_EXT, filename);
@@ -837,18 +849,30 @@ int main(int argc, char* argv[]) {
 			unsigned long mec_start = row_starts[mec_nr];
 			unsigned long mec_end = row_starts[mec_nr + 1];
 			printf("MEC #%d: %d States\n",mec_nr+1,mec_end-mec_start);
-			if(is_max_present){
-				printf("{");
-				for (int state_nr = mec_start; state_nr < mec_end-1; state_nr++) {
-					printf("%s,",(states_nr.find(cols[state_nr])->second).c_str());
-				}
-				printf("%s}\n",(states_nr.find(cols[mec_end-1])->second).c_str());
-			}
+            printf("{");
+            for (int state_nr = mec_start; state_nr < mec_end-1; state_nr++) {
+                printf("%s,",(states_nr.find(cols[state_nr])->second).c_str());
+            }
+            printf("%s}\n\n",(states_nr.find(cols[mec_end-1])->second).c_str());
 		}
 		SparseMatrixMEC_free(mecs);
 		delete(mecs);
 	}
-
+    
+    if(is_dot_present){
+        /*********************************************************************
+         *               DOT output
+         ********************************************************************/
+        std::ofstream out;
+        string file = ma_file;
+        file += ".dot";
+        out.open(file);
+        witeToDot(ma,out);
+        out.close();
+        
+        printf("Dot file \"%s\" created.\n",file.c_str());
+    }
+    
 	SparseMatrix_free(ma);
 
 	delete(ma);
