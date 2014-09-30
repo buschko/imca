@@ -887,7 +887,7 @@ void witeToDot(SparseMatrix* ma, std::ostream& outStream)
                         if (includeComma) {
                             outStream << ", ";
                         }
-                        outStream << "rew:" << rewards[choice_nr];
+                        outStream << "[" << rewards[choice_nr] << "]";
                     }
                 }
             }
@@ -921,7 +921,7 @@ void witeToDot(SparseMatrix* ma, std::ostream& outStream)
                 outStream << "];" << std::endl;
                 
                 if(rewards[choice_nr]>0){
-                    outStream << "\t" << state_nr << " -> \"" << state_nr << "c" << choice_nr << "\" [ label= \"rew:" << rewards[choice_nr] << "\" ]";
+                    outStream << "\t" << state_nr << " -> \"" << state_nr << "c" << choice_nr << "\" [ label= \"[" << rewards[choice_nr] << "]\" ]";
                 }else{
                     outStream << "\t" << state_nr << " -> \"" << state_nr << "c" << choice_nr << "\"";
                 }
@@ -939,6 +939,7 @@ void witeToDot(SparseMatrix* ma, std::ostream& outStream)
                 // In this case we are emitting a Markovian choice, so draw the arrows directly to the target states.
                 for (i = i_start; i < i_end; i++) {
                     prob=non_zeros[i];
+                    /*
                     unsigned long r_start = rate_starts[state_nr];
                     unsigned long r_end = rate_starts[state_nr + 1];
                     Real exitRate=0;
@@ -946,7 +947,11 @@ void witeToDot(SparseMatrix* ma, std::ostream& outStream)
                         exitRate = exit_rates[j];
                         prob /= exitRate;
                     }
-                    outStream << "\t\"" << state_nr << "\" -> " << cols[i] << " [ label= \"" << prob << " (" << exitRate << ")\" ]";
+                    outStream << "\t\"" << state_nr << "\" -> " << cols[i] << " [ label= \"" << prob << " (" << exitRate << ")\", style=\"dashed\" ]";
+                     */
+                    outStream << "\t\"" << state_nr << "\" -> " << cols[i] << " [ label= \"" << prob << "\", style=\"dashed\" ]";
+                    
+                    outStream << ";" << std::endl;
                 }
             }
         }
