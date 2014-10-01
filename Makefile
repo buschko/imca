@@ -118,6 +118,9 @@ LIBFILE		=	$(LIBDIR)/lib$(LIBNAME).$(LIBEXT)
 LIBSHORTLINK	=	$(LIBDIR)/lib$(NAME).$(LIBEXT)
 LIBLINK		=	$(LIBDIR)/lib$(NAME).$(BASE).$(LIBEXT)
 
+BCG2IMCA    = bcg2imca
+BCG2IMCAFILE= $(BINDIR)/$(BCG2IMCA)
+
 OBJDIR		=	obj/O.$(BASE)
 BINOBJDIR	=	$(OBJDIR)/bin
 LIBOBJDIR	=	$(OBJDIR)/lib
@@ -166,10 +169,19 @@ endif
 
 
 ifeq ($(VERBOSE),false)
-.SILENT:	$(LIBLINK) $(LIBSHORTLINK) $(BINLINK) $(BINSHORTLINK) $(BINFILE) $(LIBFILE) $(BINOBJFILES) $(LIBOBJFILES)
+.SILENT:	$(LIBLINK) $(LIBSHORTLINK) $(BINLINK) $(BINSHORTLINK) $(BINFILE) $(LIBFILE) $(BINOBJFILES) $(LIBOBJFILES) $(BCG2IMCA)
 endif
 
-all: $(TMPDIR) $(LIBFILE) $(BINFILE) $(LIBLINK) $(LIBSHORTLINK) $(BINLINK) $(BINSHORTLINK) $(SOPLEXLINK) 
+all: $(TMPDIR) $(LIBFILE) $(BINFILE) $(LIBLINK) $(LIBSHORTLINK) $(BINLINK) $(BINSHORTLINK) $(SOPLEXLINK) $(BCG2IMCA)
+
+#-----------------------------------------------------------------------------
+# bcg2imca 
+#-----------------------------------------------------------------------------
+$(BCG2IMCA):
+ifneq ($(CADP),)
+		@echo "-> compiling $(BCG2IMCAFILE)"
+		$(CADP)/src/com/cadp_cc src/bcg2imca.c -I include/ -o $(BCG2IMCAFILE) -I$(CADP)/incl \-L$(CADP)/bin.`$(CADP)/com/arch` -lBCG_IO -lBCG -lm
+endif
 
 #-----------------------------------------------------------------------------
 # SHARED Libaries
@@ -253,7 +265,7 @@ $(LIBOBJDIR)/%.o:	$(SRCDIR)/%.cpp $(INCLUDEDIR)/%.h
 .PHONY: cleanbin
 cleanbin:       $(BINDIR)
 		@echo "remove binary $(BINFILE)"
-		@-rm -f $(BINFILE) $(BINLINK) $(BINSHORTLINK)
+		@-rm -f $(BINFILE) $(BINLINK) $(BCG2IMCAFILE) $(BINSHORTLINK)
 
 .PHONY: cleanlib
 cleanlib:       $(LIBDIR)

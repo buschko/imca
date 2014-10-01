@@ -19,7 +19,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *
 *
-* Source description: 
+* Source description:
 * 	Interactive Markov Chain Analyzer
 *
 * Created by Dennis Guck
@@ -96,6 +96,7 @@ double begin, end;
 #define INTERVAL_START_STR "-b"
 #define TIME_POINTS_STR "-Tp"
 #define MEC_STR "-mec"
+#define DOT_STR "-dot"
 
 // Coloured output
 #define COLOR_RED "\x1b[31m" // Color Start
@@ -144,6 +145,8 @@ static bool is_lower_bound_present = false;
 static bool is_upper_bound_present = false;
 static bool is_error_bound_present = false;
 
+static bool is_dot_present = false;
+
 /**
 * Global variables
 */
@@ -175,7 +178,7 @@ static void print_intro(void) {
 	printf("|          Copyright (C) University of Twente, 2013-2014.           |\n");
 	printf("|                         Author: Dennis Guck                       |\n");
 	printf("|           IMCA is distributed under the GPL conditions            |\n");
-	printf("|            (GPL stands for GNU General Public License)            |\n");    
+	printf("|            (GPL stands for GNU General Public License)            |\n");
 	printf("|          This program comes with ABSOLUTELY NO WARRANTY.          |\n");
 	printf("|   This is free software, and you are welcome to redistribute it   |\n");
 	printf(" ------------------------------------------------------------------- \n");
@@ -195,6 +198,8 @@ static void print_usage(void) {
 	printf("                          '-e' for error bound '-i' for interval output\n");
 	printf("                          '-i' only available for [0,T]\n");
 	printf("                          '-val for expected-time value iteration\n");
+    printf("                          '-mec for maximal end component computation + output\n");
+    printf("                          '-dot for .dot export\n");
 	//printf("                          '-Tp {a,b,c}' for several time points (i XOR Tp)\n");
 	//printf("	<model type>	- define if .ma input is an IMC {-imc} \n");
 }
@@ -220,7 +225,7 @@ static bool isValidExtension(const char * filename, char * extension, int * ext_
 		strncpy(extension, p,  max(MIN_FILE_EXT_LENGTH, min(MAX_FILE_EXT_LENGTH, length)));
 		result = true;
 	}
-	
+
 
 	return result;
 }
@@ -233,14 +238,14 @@ static void checkComputation(){
 		printf(COLOR_RED "ERROR: No model type was set.\n" COLOR_END);
 		print_usage();
 		exit(EXIT_FAILURE);
-      
+
 	}
-	if(!is_expected_time_present && !is_unbound_present && !is_lra_present && !is_time_bounded_present && !is_expected_reward_present && !is_time_reward_present && !is_mec && !is_lrr_present){
+	if(!is_expected_time_present && !is_unbound_present && !is_lra_present && !is_time_bounded_present && !is_expected_reward_present && !is_time_reward_present && !is_mec && !is_lrr_present && !is_dot_present){
 		printf(COLOR_RED "ERROR: No computation type was set.\n" COLOR_END);
 		print_usage();
 		exit(EXIT_FAILURE);
 	}
-	if( !is_max_present && !is_min_present ){
+	if((is_expected_time_present || is_unbound_present || is_lra_present || is_time_bounded_present || is_expected_reward_present || is_time_reward_present || is_lrr_present) && (!is_max_present && !is_min_present) ){
 		printf(COLOR_RED "ERROR: No settings for maximum\\minimum computation.\n" COLOR_END);
 		print_usage();
 		exit(EXIT_FAILURE);
@@ -272,7 +277,7 @@ static void parseParams(int argc, char *argv[]) {
 			if( strcmp(extension, MA_FILE_EXT) == 0 ){
 				if( !is_ma_present && !is_mrm_present ){
 					is_ma_present = true;
-                    is_mrm_present = true;
+					is_mrm_present = true;
 					ma_file = argv[i];
 				}else{
 					printf(COLOR_YELLOW "WARNING: A model has already noticed before, skipping the '%s' file.\n" COLOR_END, argv[i]);
@@ -284,7 +289,7 @@ static void parseParams(int argc, char *argv[]) {
 				}else{
 					printf(COLOR_YELLOW "WARNING: A model has already noticed before, skipping the '%s' file.\n" COLOR_END, argv[i]);
 				}
-			} 
+			}
 		}  else if( strcmp(argv[i], UNBOUND_STR) == 0 ){
 			if( !is_unbound_present ){
 				is_unbound_present = true;
@@ -455,9 +460,15 @@ static void parseParams(int argc, char *argv[]) {
 			}else{
 				printf(COLOR_YELLOW "WARNING: The option has been noticed before, skipping '%s'.\n" COLOR_END, argv[i]);
 			}
-		}
+        }else if( strcmp(argv[i], DOT_STR) == 0 ){
+            if( !is_dot_present ){
+                is_dot_present = true;
+            }else{
+                printf(COLOR_YELLOW "WARNING: The option has been noticed before, skipping '%s'.\n" COLOR_END, argv[i]);
+            }
+        }
 	}
-	
+
 	checkComputation();
 }
 
@@ -467,6 +478,7 @@ static void parseParams(int argc, char *argv[]) {
 static void loadMA(const char *filename) {
 	if(is_ma_present || is_mrm_present) {
 		printf("Loading the '%s' file, please wait.\n", filename);
+		if(is_mrm_present)
 		ma = read_MA_SparseMatrix_file(filename,is_mrm_present);
 		if(ma == NULL){
 			printf(COLOR_RED "ERROR: The '%s' file '%s' was not found or is incorrect!\n" COLOR_END,MA_FILE_EXT, filename);
@@ -481,10 +493,10 @@ int main(int argc, char* argv[]) {
 	// helpers to calculate allocated memory
 	unsigned long int sp1=0,sp2=0;
 	#endif
-	
+
 	//REAL test(0);
 	Real test;
-	
+
 	#ifndef __APPLE__
 	// get memory info before model is loaded
 	sp1 = mallinfo().uordblks;
@@ -492,13 +504,13 @@ int main(int argc, char* argv[]) {
 
 	/// print the MAA intro
 	print_intro();
-	
+
 	/// Parse and validate the input parameters
 	parseParams(argc, argv);
-	
+
 	/// load the MA from file
 	loadMA(ma_file);
-	
+
 	#ifndef __APPLE__
 	// get memory info after model is loaded
 	sp2 = mallinfo().uordblks;
@@ -517,7 +529,7 @@ int main(int argc, char* argv[]) {
 	#else
 	printf("The occupied space is ??? Bytes.\n\n");
 	#endif
-	
+
 	Real tmp;
 
 	if(is_unbound_present){
@@ -528,7 +540,7 @@ int main(int argc, char* argv[]) {
 			#endif
 			printf("\nCompute maximal unbounded reachability, please wait.\n");
 			if(!is_val){
-				tmp = compute_unbounded_reachability(ma,true);	
+				tmp = compute_unbounded_reachability(ma,true);
 				printf("Maximal unbounded reachability: %.10g\n", tmp);
 			}else {
 				tmp=unbounded_value_iteration(ma,true);
@@ -547,7 +559,7 @@ int main(int argc, char* argv[]) {
 			clock_gettime(CLOCK_REALTIME, &tp);
 			begin = 1e9*tp.tv_sec + tp.tv_nsec;
 			#endif
-			printf("\nCompute minimal unbounded reachability, please wait.\n");	
+			printf("\nCompute minimal unbounded reachability, please wait.\n");
 			if(!is_val){
 				tmp = compute_unbounded_reachability(ma,false);
 				printf("Minimal unbounded reachability: %.10g\n", tmp);
@@ -677,24 +689,24 @@ int main(int argc, char* argv[]) {
 		}
 	}
 	if(is_lrr_present && is_mrm_present){
-        
+
         vector<bool> goals(ma->n,false);
-        
+
         int n_goal=0;
-        
+
         for (unsigned long state_nr = 0; state_nr < ma->n; state_nr++) {
             if(ma->goals[state_nr]){
                 n_goal++;
                 goals[state_nr]=true;
             }
         }
-        
+
         if(n_goal==0){
             for (unsigned long state_nr = 0; state_nr < ma->n; state_nr++) {
                 ma->goals[state_nr]=true;
             }
         }
-        
+
 		if(is_max_present){
 			#ifndef __APPLE__
 			clock_gettime(CLOCK_REALTIME, &tp);
@@ -727,7 +739,7 @@ int main(int argc, char* argv[]) {
 			printf("Computation Time: ??? seconds\n");
 			#endif
 		}
-        
+
         if(n_goal==0){
             for (unsigned long state_nr = 0; state_nr < ma->n; state_nr++) {
                 if(!goals[state_nr]){
@@ -735,7 +747,7 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
-        
+
 	}
 	if(is_time_bounded_present){
 		if(interval == 0){
@@ -837,21 +849,33 @@ int main(int argc, char* argv[]) {
 			unsigned long mec_start = row_starts[mec_nr];
 			unsigned long mec_end = row_starts[mec_nr + 1];
 			printf("MEC #%d: %d States\n",mec_nr+1,mec_end-mec_start);
-			if(is_max_present){
-				printf("{");
-				for (int state_nr = mec_start; state_nr < mec_end-1; state_nr++) {
-					printf("%s,",(states_nr.find(cols[state_nr])->second).c_str());
-				}
-				printf("%s}\n",(states_nr.find(cols[mec_end-1])->second).c_str());
-			}
+            printf("{");
+            for (int state_nr = mec_start; state_nr < mec_end-1; state_nr++) {
+                printf("%s,",(states_nr.find(cols[state_nr])->second).c_str());
+            }
+            printf("%s}\n\n",(states_nr.find(cols[mec_end-1])->second).c_str());
 		}
 		SparseMatrixMEC_free(mecs);
-        delete(mecs);
+		delete(mecs);
 	}
-	
-	SparseMatrix_free(ma);
-	
-	delete(ma);
     
+    if(is_dot_present){
+        /*********************************************************************
+         *               DOT output
+         ********************************************************************/
+        std::ofstream out;
+        string file = ma_file;
+        file += ".dot";
+        out.open(file);
+        witeToDot(ma,out);
+        out.close();
+        
+        printf("Dot file \"%s\" created.\n",file.c_str());
+    }
+    
+	SparseMatrix_free(ma);
+
+	delete(ma);
+
 	return 0;
 }

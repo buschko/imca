@@ -42,7 +42,7 @@ using namespace soplex;
 *
 * @param ma file to read MA from
 * @param max identifier for min or max
-* @return expected reward 
+* @return expected reward
 */
 extern Real expected_reward_value_iteration(SparseMatrix*, bool);
 

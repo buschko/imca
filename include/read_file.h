@@ -63,6 +63,7 @@ extern void print_lp_info(SoPlex);
 * @return MA read from file
 */
 extern SparseMatrix *read_MA_SparseMatrix_file(const char*,bool mrm);
+extern void witeToDot(SparseMatrix* ma, std::ostream& outStream);
 
 
 #endif

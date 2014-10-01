@@ -48,7 +48,7 @@ The default solver is "SoPlex" which licence can be found here:
 http://soplex.zib.de/licence.shtml
 
 Note: Soplex is free for academic use. How to compile with SoPlex is described
-in Section 3.
+in Section 3. IMCA currently requieres Soplex version <= 1.7.2
 
 The second solver is "LP_SOLVE" which is distributwet under LGPL:
 

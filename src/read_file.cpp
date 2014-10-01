@@ -19,7 +19,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *
 *
-* Source description: 
+* Source description:
 *	Reads an compatible MA File
 */
 
@@ -50,9 +50,9 @@ using namespace std;
 * @param p MA file
 * @param filename filename of MA file
 * @param num_states will store number of states here
-* @param states will map the state names to state numbers 
+* @param states will map the state names to state numbers
 */
-static void read_states(unsigned long *line_no, bool *error, FILE *p, const char *filename, unsigned long *num_states, map<string,unsigned long> *states, map<unsigned long,string> *states_nr) 
+static void read_states(unsigned long *line_no, bool *error, FILE *p, const char *filename, unsigned long *num_states, map<string,unsigned long> *states, map<unsigned long,string> *states_nr)
 {
 	char s[MAX_LINE_LENGTH];
 	unsigned long state_nr = 0;
@@ -81,8 +81,8 @@ static void read_states(unsigned long *line_no, bool *error, FILE *p, const char
 			++(*line_no);
 		}
 	}
-	
-	
+
+
 	/* TODO: also check lines */
 	while (fgets(s, MAX_LINE_LENGTH, p) != NULL && !*error) {
 		if (s[0] == '*') {
@@ -93,12 +93,12 @@ static void read_states(unsigned long *line_no, bool *error, FILE *p, const char
 			if(ret.second == true){
 				tmp_nr.insert(pair<unsigned long,string>(state_nr,state));
 				state_nr++;
-			} 
+			}
 			++(*line_no);
 		}
 	}
-	
-	(*num_states) = state_nr;	
+
+	(*num_states) = state_nr;
 	(*states)=tmp;
 	(*states_nr)=tmp_nr;
 }
@@ -111,9 +111,9 @@ static void read_states(unsigned long *line_no, bool *error, FILE *p, const char
 * @param p MA file
 * @param filename filename of MA file
 * @param num_states will store number of states here
-* @param states will map the state names to state numbers 
+* @param states will map the state names to state numbers
 */
-static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const char *filename, unsigned long *num_states, map<string,unsigned long> *states, map<unsigned long,string> *states_nr, vector<unsigned long> *deadlocks) 
+static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const char *filename, unsigned long *num_states, map<string,unsigned long> *states, map<unsigned long,string> *states_nr, vector<unsigned long> *deadlocks)
 {
 	char s[MAX_LINE_LENGTH];
 	unsigned long state_nr = (*num_states);
@@ -123,7 +123,7 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 	map<string ,unsigned long> tmp=*states;
 	map<unsigned long, string> tmp_nr=*states_nr;
 	bool deadlock=false;
-	
+
 	/* go to Transitions */
 	if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 		{
@@ -152,7 +152,7 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 					tmp_nr.insert(pair<unsigned long,string>(state_nr,state));
 					(*deadlocks).push_back(state_nr);
 					state_nr++;
-				} 
+				}
 				if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 				{
 					fprintf(stderr, COLOR_RED "Reading line %ld of file \"%s\" failed.\n" COLOR_END,*line_no, filename);
@@ -175,7 +175,7 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 					tmp_nr.insert(pair<unsigned long,string>(state_nr,state));
 					(*deadlocks).push_back(state_nr);
 					state_nr++;
-				} 
+				}
 				if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 				{
 					fprintf(stderr, COLOR_RED "Reading line %ld of file \"%s\" failed.\n" COLOR_END,*line_no, filename);
@@ -185,9 +185,9 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 				++(*line_no);
 			}
 		}
-	
+
 	// cout << "hey" << endl;
-	
+
 	/* TODO: also check lines */
 	while (fgets(s, MAX_LINE_LENGTH, p) != NULL && !*error) {
 		if (s[0] == '*') {
@@ -207,7 +207,7 @@ static void check_dedlocks(unsigned long *line_no, bool *error, FILE *p, const c
 			++(*line_no);
 		}
 	}
-	
+
 	if(deadlock) {
 		(*num_states) = state_nr;
 		(*states)=tmp;
@@ -224,7 +224,7 @@ static void init_states(unsigned long *line_no, bool *error, FILE *p, const char
 	unsigned long ms_states=0;
 	bool *isPS;
 	bool first=true;
-	
+
 	if (!*error) {
 		bool *initials = (bool *) ma->initials;
 		bool *goals = (bool *)ma->goals;
@@ -236,7 +236,7 @@ static void init_states(unsigned long *line_no, bool *error, FILE *p, const char
 			goals[from]=false;
 			isPS[from]=false;
 		}
-		
+
 		/* store initials and goals */
 		if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 		{
@@ -287,7 +287,7 @@ static void init_states(unsigned long *line_no, bool *error, FILE *p, const char
 			}
 		}
 	}
-	
+
 	while (!*error && (fgets(s, MAX_LINE_LENGTH, p) != NULL)) {
 		if (s[0] != '*') {
 			if (sscanf(s, "%s%s", src, act) != 2) { /* check if both values are returned */
@@ -304,7 +304,7 @@ static void init_states(unsigned long *line_no, bool *error, FILE *p, const char
 						fprintf(stderr, COLOR_RED "Line %ld: Markovian state transitions of one state should not be divided.\n" COLOR_END, (*line_no));
 					} else {
 						isPS[from]=true;
-					}				
+					}
 				} else {
 					if(strcmp(act,MARKOV_ACTION) != 0)
 						isPS[from]=true;
@@ -315,19 +315,19 @@ static void init_states(unsigned long *line_no, bool *error, FILE *p, const char
 		}
 		++(*line_no);
 	}
-	
+
 	vector<unsigned long>::iterator it;
 	for(it=deadlocks.begin(); it<deadlocks.end(); it++) {
 		isPS[(*it)]=true;
 	}
-	
+
 	if(!*error) {
 		for(from=0; from<ma->n; from++) {
 			if(!isPS[from])
 				ms_states++;
 		}
 	}
-	
+
 	if(!*error) {
 		(*num_ms_states) = ms_states;
 		ma->ms_n = ms_states;
@@ -394,7 +394,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 		states = model->states;
 		isPS = model->isPS;
 	}
-	
+
 
 	while (!*error && (fgets(s, MAX_LINE_LENGTH, p) != NULL)) {
 		if (s[0] != '*') {
@@ -407,9 +407,9 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 				if (from < last_from) {
 					fprintf(stderr, COLOR_RED "Line %ld: State transitions must be given in continuous order for one state.\n" COLOR_END, *line_no);
 					*error = true;
-				} else {	
+				} else {
 					/* if Markovian state, store exit rate */
-                    if(is_ms & !isPS[last_from]) {
+					if(is_ms & !isPS[last_from]) {
 						if(max_exit_rate<exit_rate)
 							max_exit_rate=exit_rate;
 						exit_rates[exit_index] = exit_rate;
@@ -423,22 +423,22 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 							rate_starts[last_from + 1] = rate_starts[last_from + 0];
 						}
 					}
-					
-						
+
+
 					is_ms=false;
 					exit_rate=0;
 					if(strcmp(act,MARKOV_ACTION) == 0)
 					{
 						is_ms=true;
-					}	
-					
+					}
+
 					/* probabilistic transitions are chosen before Markovian transitions */
 					if((isPS[from] && !is_ms) || (!isPS[from] && is_ms)){
 						num_choice++;
 					}
-					
+
 					last_from = from;
-				}	
+				}
 			}
 			//++(*line_no);
 		} else {
@@ -448,7 +448,7 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 				fprintf(stderr, COLOR_RED "ERROR at line %d, expected something like '* <dst_state> <rate/prob>'.\n" COLOR_END, *line_no);
 				*error = true;
 			}
-            dbg_printf("%s %s\n",src,act);
+			dbg_printf("%s %s\n",src,act);
 			to = states.find(dst)->second;
 			if(((isPS[from] && !is_ms) || (!isPS[from] && is_ms)) && to != last_to) {
 				num_non_zeros++;
@@ -463,9 +463,9 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 		}
 		++(*line_no);
 	}
-	
+
 	//dbg_printf("nz %ld  nc %ld\n",num_non_zeros,num_choice);
-	
+
 	if(deadlocks.size() == 0) {
 		/* probabilistic transitions are choosen before markovian transitions */
 		if((is_ms)) {
@@ -510,14 +510,14 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 			rate_starts[last_from + 1] = rate_starts[last_from + 0];
 		}
 	}
-	
+
 	dbg_printf("nz %ld  nc %ld\n",num_non_zeros,num_choice);
-	
+
 	/* now allocate the memory needed */
 	if (!*error) {
 		unsigned long * choice_starts = (unsigned long *) calloc((size_t) (num_choice + 1), sizeof(unsigned long));
-		Real * non_zeros = (Real *) malloc(num_non_zeros * sizeof(Real));
-		unsigned long * cols = (unsigned long *) malloc(num_non_zeros * sizeof(unsigned long));
+		Real * non_zeros = (Real *) malloc((num_non_zeros) * sizeof(Real));
+		unsigned long * cols = (unsigned long *) malloc((num_non_zeros) * sizeof(unsigned long));
 		model->choice_counts = (unsigned char *) choice_starts;
 		model->non_zeros = non_zeros;
 		model->cols = cols;
@@ -525,9 +525,9 @@ static void reserve_transition_memory(unsigned long *line_no, bool *error, FILE 
 		model->non_zero_n = num_non_zeros;
 		model->max_exit_rate=max_exit_rate;
 		if(mrm){
-            Real * rewards = (Real *) malloc(num_choice * sizeof(Real));
+			Real * rewards = (Real *) malloc((num_choice) * sizeof(Real));
 			model->rewards=rewards;
-        }
+		}
 	}
 }
 
@@ -556,7 +556,7 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 	bool bad=false;
 	unsigned long last_to = -1;
 	//Real r=0;
-	
+
 	Real tmp = 0;
 	unsigned int old_index;
 
@@ -568,7 +568,7 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 		unsigned long *row_starts = (unsigned long *) ma->row_counts;
 		map<string ,unsigned long> states = ma->states;
 		bool *isPS = ma->isPS;
-		
+
 		/* go to Transitions */
 		if (!*error) {
 			if(fgets(s, MAX_LINE_LENGTH, p) == 0)
@@ -578,6 +578,7 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 			}
 			++(*line_no);
 			sscanf(s, "%s", src);
+			dbg_printf("%s\n", src);
 			while(strcmp(src,TRANSITIONS) != 0 && !*error) {
 				if(fgets(s, MAX_LINE_LENGTH, p) == 0)
 				{
@@ -588,16 +589,16 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 				++(*line_no);
 			}
 		}
-		
 
 		while (fgets(s, MAX_LINE_LENGTH, p) != NULL) {
 			if (s[0] == '*') {
 				if(!bad)
 				{
 					Real rate;
-                    Real denominator=1;
+					Real denominator=1;
 					char star[MAX_LINE_LENGTH];
 					sscanf(s, "%s%s%lf/%lf", star, dst, &rate, &denominator);
+					dbg_printf("* %s %lf/%lf\n", dst, rate, denominator);
 					to=states.find(dst)->second;
 					if(to != last_to) {
 						non_zeros[nz_index] = rate/denominator;
@@ -616,25 +617,28 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 				// if mrm we also read in the reward
 				if(mrm){
 					Real reward=0;
-                    Real denominator=1;
+					Real denominator=1;
 					sscanf(s, "%s%s%lf/%lf", src, act, &reward, &denominator);
+					dbg_printf("reward index: %ld\n",reward_index);
 					rewards[reward_index] = reward/denominator;
-                    //r += reward;
-					reward_index++;
 				}else {
 					sscanf(s, "%s%s", src, act);
 				}
+				dbg_printf("%s %s\n",src,act);
 				from=states.find(src)->second;
 				/* probabilistic transitions are choosen before markovian transitions */
 				if(strcmp(act,MARKOV_ACTION) == 0 && isPS[from])
 					bad=true;
-				else
+				else{
 					bad=false;
+					reward_index++;
+				}
 				if(!bad) {
+					if(mrm){
 					// Set maximum Markovian reward
-					if( strncmp(act,MARKOV_ACTION, 2) == 0 && max_markovian_reward < rewards[reward_index - 1] )
-						max_markovian_reward = rewards[reward_index - 1];
-
+						if( strncmp(act,MARKOV_ACTION, 2) == 0 && max_markovian_reward < rewards[reward_index - 1] )
+							max_markovian_reward = rewards[reward_index - 1];
+					}
 					if (from == last_from) {
 						row_starts[from + 1]++;
 					} else {
@@ -654,12 +658,14 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 				}
 			}
 		}
+
 		if(deadlocks.size() == 0) {
 			choice_starts[choice_index] = choice_starts[choice_index - 1] + choice_size;
 			for (; from+1 < ma->n; from++) {
 				row_starts[from+2] = row_starts[from+1];
 			}
 		}else {
+
 			if (choice_index > 0) {
 				choice_starts[choice_index] =
 				choice_starts[choice_index - 1] + choice_size;
@@ -689,7 +695,7 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 				}
 				choice_index++;
 			}
-			
+
 			//choice_starts[choice_index] = choice_starts[choice_index - 1] + choice_size;
 			for (; from+1 < ma->n; from++) {
 				row_starts[from+2] = row_starts[from+1];
@@ -697,10 +703,10 @@ static void read_transitions(unsigned long *line_no, bool *error, FILE *p, const
 		}
 	}
     if(mrm){
-        ma -> max_markovian_reward=max_markovian_reward;  // Set maximum Markovian reward (reward of Markovian states)
-        std::cout<<"Maximum State Reward: "<<max_markovian_reward<<std::endl;
-    }
-	
+			ma -> max_markovian_reward=max_markovian_reward;  // Set maximum Markovian reward (reward of Markovian states)
+			std::cout<<"Maximum State Reward: "<<max_markovian_reward<<std::endl;
+		}
+
 }
 
 void print_model(SparseMatrix *ma, bool mrm)
@@ -720,8 +726,8 @@ void print_model(SparseMatrix *ma, bool mrm)
 	Real prob;
 	bool *initials = ma->initials;
 	bool *goals = ma->goals;
-	
-	
+
+
 	for (state_nr = 0; state_nr < ma->n; state_nr++) {
 		unsigned long state_start = row_starts[state_nr];
 		unsigned long state_end = row_starts[state_nr + 1];
@@ -735,10 +741,10 @@ void print_model(SparseMatrix *ma, bool mrm)
 			if(mrm){
 				printf("reward: %lg\n",rewards[choice_nr]);
 			}
-            if(ma->isPS[state_nr])
-            {
-                printf("Action: tau_%d\n",tau);
-            }
+			if(ma->isPS[state_nr])
+				{
+					printf("Action: tau_%d\n",tau);
+				}
 			tau++;
 			for (i = i_start; i < i_end; i++) {
 				prob=non_zeros[i];
@@ -765,18 +771,18 @@ void print_model(SparseMatrix *ma, bool mrm)
 }
 
 void print_model_info(SparseMatrix *ma)
-{	
+{
 	unsigned long state_nr;
 	bool *initials = ma->initials;
 	bool *goals = ma->goals;
 	unsigned long n_init=0;
 	unsigned long n_goal=0;
 	unsigned long n_trans=0;
-	
+
 	unsigned long *row_starts = (unsigned long *) ma->row_counts;
 	//unsigned long *rate_starts = (unsigned long *) ma->rate_counts;
 	unsigned long *choice_starts = (unsigned long *) ma->choice_counts;
-	
+
 	unsigned long nd_states=0;
 	for (state_nr = 0; state_nr < ma->n; state_nr++) {
 		if(initials[state_nr])
@@ -795,7 +801,7 @@ void print_model_info(SparseMatrix *ma)
 		if(((state_end)-state_start)>1)
 			nd_states++;
 	}
-	
+
 	printf("#States: %ld    #MS: %ld    #PS: %ld    #ND: %ld\n",ma->n, ma->ms_n, (ma->n - ma->ms_n),nd_states);
 	printf("#Initials: %ld    #Goals: %ld    #Transitions: %ld\n", n_init, n_goal, n_trans);
 }
@@ -810,7 +816,7 @@ void print_lp_info(SoPlex lp_model) {
 	printf("\n");
 	printf("SoPlex parameters:\n");
 	printf("Delta          = %g\n",lp_model.delta());
-	printf("Epsilon Zero   = %g\n", Param::epsilon());  
+	printf("Epsilon Zero   = %g\n", Param::epsilon());
 	printf("Epsilon Factor = %g\n", Param::epsilonFactorization());
 	printf("Epsilon Update = %g\n", Param::epsilonUpdate());
 	printf("\n");
@@ -826,6 +832,133 @@ void print_lp_info(SoPlex lp_model) {
 	printf("Iterations     : %d\n",lp_model.iteration());
 }
 #endif
+
+void witeToDot(SparseMatrix* ma, std::ostream& outStream)
+{
+    
+    unsigned long i;
+    unsigned long tau=1;
+    unsigned long state_nr;
+    unsigned long choice_nr;
+    map<unsigned long,string> states_nr = ma->states_nr;
+    unsigned long *row_starts = (unsigned long *) ma->row_counts;
+    unsigned long *rate_starts = (unsigned long *) ma->rate_counts;
+    unsigned long *choice_starts = (unsigned long *) ma->choice_counts;
+    Real *non_zeros = ma->non_zeros;
+    Real *rewards = ma->rewards;
+    Real *exit_rates = ma->exit_rates;
+    unsigned long *cols = ma->cols;
+    Real prob;
+    bool *initials = ma->initials;
+    bool *goals = ma->goals;
+
+    outStream << "digraph model {" << std::endl;
+    
+    // Write all states to the stream.
+    for (state_nr = 0; state_nr < ma->n; state_nr++) {
+        outStream << "\t" << state_nr;
+        outStream << " [ ";
+        outStream << "label = \"" << (states_nr.find(state_nr)->second).c_str() << ": ";
+        
+        outStream << "{";
+        // Now print the state labeling to the stream if requested.
+        if (initials[state_nr] || goals[state_nr]) {
+            bool includeComma = false;
+            if(initials[state_nr]){
+                outStream << "init";
+                includeComma = true;
+            }
+            if(goals[state_nr]){
+                if (includeComma) {
+                    outStream << ", ";
+                }
+                outStream << "goal";
+                includeComma = true;
+            }
+            if(!ma->isPS[state_nr]){
+                unsigned long state_start = row_starts[state_nr];
+                unsigned long state_end = row_starts[state_nr + 1];
+                
+                // For this, we need to iterate over all available nondeterministic choices in the current state.
+                for (choice_nr = state_start; choice_nr < state_end; choice_nr++) {
+                    unsigned long i_start = choice_starts[choice_nr];
+                    unsigned long i_end = choice_starts[choice_nr + 1];
+                    if(rewards[choice_nr]>0){
+                        if (includeComma) {
+                            outStream << ", ";
+                        }
+                        outStream << "[" << rewards[choice_nr] << "]";
+                    }
+                }
+            }
+        }
+        outStream << "}";
+    
+        outStream << "\"";
+    
+        outStream << " ]";
+        outStream << ";" << std::endl;
+    }
+
+    
+    // Write the probability distributions for all the states.
+    for (state_nr = 0; state_nr < ma->n; state_nr++) {
+        unsigned long state_start = row_starts[state_nr];
+        unsigned long state_end = row_starts[state_nr + 1];
+        
+        // For this, we need to iterate over all available nondeterministic choices in the current state.
+        for (choice_nr = state_start; choice_nr < state_end; choice_nr++) {
+            unsigned long i_start = choice_starts[choice_nr];
+            unsigned long i_end = choice_starts[choice_nr + 1];
+            
+            // If it's not a Markovian state or the current row is the first choice for this state, then we
+            // are dealing with a probabilitic choice.
+            if (ma->isPS[state_nr]) {
+                // For each nondeterministic choice, we draw an arrow to an intermediate node to better display
+                // the grouping of transitions.
+                outStream << "\t\"" << state_nr << "c" << choice_nr << "\" [shape = \"point\"";
+                
+                outStream << "];" << std::endl;
+                
+                if(rewards[choice_nr]>0){
+                    outStream << "\t" << state_nr << " -> \"" << state_nr << "c" << choice_nr << "\" [ label= \"[" << rewards[choice_nr] << "]\" ]";
+                }else{
+                    outStream << "\t" << state_nr << " -> \"" << state_nr << "c" << choice_nr << "\"";
+                }
+                
+
+                outStream << ";" << std::endl;
+                
+                // Now draw all probabilitic arcs that belong to this nondeterminstic choice.
+                for (i = i_start; i < i_end; i++) {
+                    outStream << "\t\"" << state_nr << "c" << choice_nr << "\" -> " << cols[i] << " [ label= \"" << non_zeros[i] << "\" ]";
+
+                    outStream << ";" << std::endl;
+                }
+            } else {
+                // In this case we are emitting a Markovian choice, so draw the arrows directly to the target states.
+                for (i = i_start; i < i_end; i++) {
+                    prob=non_zeros[i];
+                    /*
+                    unsigned long r_start = rate_starts[state_nr];
+                    unsigned long r_end = rate_starts[state_nr + 1];
+                    Real exitRate=0;
+                    for (unsigned long j = r_start; j < r_end; j++) {
+                        exitRate = exit_rates[j];
+                        prob /= exitRate;
+                    }
+                    outStream << "\t\"" << state_nr << "\" -> " << cols[i] << " [ label= \"" << prob << " (" << exitRate << ")\", style=\"dashed\" ]";
+                     */
+                    outStream << "\t\"" << state_nr << "\" -> " << cols[i] << " [ label= \"" << prob << "\", style=\"dashed\" ]";
+                    
+                    outStream << ";" << std::endl;
+                }
+            }
+        }
+    }
+    
+    outStream << "}" << std::endl;
+}
 
 /**
 * Reads MA file @a filename.
@@ -843,9 +976,9 @@ SparseMatrix *read_MA_SparseMatrix_file(const char *filename, bool mrm)
 	unsigned long num_ms_states = 0;
 	map<string,unsigned long> states;
 	map<unsigned long,string> states_nr;
-    states.clear();
-    states_nr.clear();
-	
+	states.clear();
+	states_nr.clear();
+
 	if (filename == NULL) {
 		fprintf(stderr, COLOR_RED "Called with filename == NULL\n" COLOR_END);
 		error = true;
@@ -859,16 +992,16 @@ SparseMatrix *read_MA_SparseMatrix_file(const char *filename, bool mrm)
 			error = true;
 		}
 	}
-	
+
 	line_no = 1;
-	
+
 	if(!error)
 		read_states(&line_no, &error, p, filename, &num_states, &states, &states_nr);
-	
+
 	if (p != NULL) {
 		rewind(p);
 	}
-	
+
 	line_no = 1;
 	//cout << "deadlock pass" << endl;
 	vector<unsigned long> deadlocks;
@@ -876,13 +1009,13 @@ SparseMatrix *read_MA_SparseMatrix_file(const char *filename, bool mrm)
 	// check for deadlock states and add a selfloop
 	if(!error)
 		check_dedlocks(&line_no, &error, p, filename, &num_states, &states, &states_nr, &deadlocks);
-	
+
 	if (p != NULL) {
 		rewind(p);
 	}
-	
+
 	line_no = 1;
-	
+
     //cout << "reserve memory" << endl;
 	if (!error) {
 		model = SparseMatrix_new(num_states, states, states_nr); /* create MA model and reserve state memory */
@@ -891,30 +1024,30 @@ SparseMatrix *read_MA_SparseMatrix_file(const char *filename, bool mrm)
 	/* second pass: count probabilistic states and store initial and goal states */
 	line_no = 1;
 	if(!error)
-		init_states(&line_no, &error, p, filename, &num_ms_states, states, model, deadlocks); 
-	
+		init_states(&line_no, &error, p, filename, &num_ms_states, states, model, deadlocks);
+
 	if (!error) {
 		rewind(p);
 	}
 	//cout << "third pass" << endl;
 	/* third pass on file: than reserve transition memory and store exit rates */
 	line_no = 1;
-	
+
 	if (!error) {
 		reserve_transition_memory(&line_no, &error, p, filename, model, deadlocks, mrm);
 	}
-	
+
 	if (!error) {
 		rewind(p);
 	}
 	//cout << "fourth pass" << endl;
 	/* fourth pass on file: save transitions */
 	read_transitions(&line_no, &error, p, filename, model, deadlocks,mrm);
-    
+
 	if (p != NULL) {
 		fclose(p);
 	}
-    
+
 	if (error) {
 		/* free the halfly-complete MA structure if an error has occured */
 		SparseMatrix_free(model);
@@ -923,8 +1056,8 @@ SparseMatrix *read_MA_SparseMatrix_file(const char *filename, bool mrm)
 		//print_model(model,mrm);
 		print_model_info(model);
 	}
-	
+
 	//print_model(model,mrm);
-	
+
 	return model;
 }
