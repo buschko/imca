@@ -866,7 +866,7 @@ int main(int argc, char* argv[]) {
         std::ofstream out;
         string file = ma_file;
         file += ".dot";
-        out.open(file);
+        out.open(file.c_str());
         witeToDot(ma,out);
         out.close();
         
