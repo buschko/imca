@@ -135,7 +135,7 @@ static void set_constraints_ext(SoPlex& lp_model, SparseMatrix *ma, bool max, bo
 				if(!loop)
 					row.add(state_nr,-1.0);
 				lp_model.addRow(LPRow(row,LPRow::Type(m), rate));
-				row.~DSVector();
+				//row.~DSVector();
 			}
 		}
 	}
