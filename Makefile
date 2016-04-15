@@ -57,7 +57,7 @@ UNAME := $(shell uname)
 # Soplex Libaries -- path to Soplex library has to be adjusted (only if option 
 #                    SOPLEX=true is active ) --
 #-----------------------------------------------------------------------------
-SOPLEXSRC	= ~/lib/soplex-1.7.2#/Users/guckd/lib/soplex-1.7.2
+SOPLEXSRC      = ~/lib/soplex-2.2.1#/Users/guckd/lib/soplex-2.2.1
 SOPLEXLIB	= $(SOPLEXSRC)/lib/libsoplex.a
 SOPLEXINCLUDE	= $(SOPLEXSRC)/src
 SOPLEXLINK	= $(SOPLEXSRC)/lib/libsoplex.a

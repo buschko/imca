@@ -34,7 +34,7 @@
 #include <vector>
 
 #ifdef __SOPLEX__
-#include "soplex.h"
+#include "soplexlegacy.h"
 #endif
 
 #include "sccs.h"
@@ -51,7 +51,7 @@ using namespace soplex;
 * @param ma the MA
 * @param max identifier for maximum/minimum
 */
-static void set_obj_function_unb(SoPlex& lp_model, SparseMatrix *ma, bool max, bool *locks) {
+static void set_obj_function_unb(SoPlexLegacy& lp_model, SparseMatrix *ma, bool max, bool *locks) {
 	unsigned long state_nr;
 	bool *goals = ma->goals;
 	DSVector dummycol(0);
@@ -83,7 +83,7 @@ static void set_obj_function_unb(SoPlex& lp_model, SparseMatrix *ma, bool max, b
 * @param ma the MA
 * @param max identifier for maximum/minimum
 */
-static void set_constraints_unb(SoPlex& lp_model, SparseMatrix *ma, bool max, bool *locks) {
+static void set_constraints_unb(SoPlexLegacy& lp_model, SparseMatrix *ma, bool max, bool *locks) {
 	unsigned long i;
 	unsigned long state_nr;
 	unsigned long choice_nr;
@@ -354,7 +354,9 @@ Real unbounded_value_iteration(SparseMatrix* ma, bool max) {
 */
 Real compute_unbounded_reachability(SparseMatrix* ma, bool max) {
 	dbg_printf("before soplex\n");
-	SoPlex lp_model;
+	SPxOut out;
+	SoPlexLegacy lp_model(out);
+	lp_model.setOutstream(out);
 	dbg_printf("after soplex\n");
 	
 	bool *locks=(bool *)malloc(ma->n * sizeof(bool));

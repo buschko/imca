@@ -32,7 +32,7 @@
 #include "sparse.h"
 
 #ifdef __SOPLEX__
-#include "soplex.h"
+#include "soplexlegacy.h"
 using namespace soplex;
 #endif
 

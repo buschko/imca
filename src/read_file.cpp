@@ -812,7 +812,7 @@ void print_model_info(SparseMatrix *ma)
 *
 * @param lp_model the LP
 */
-void print_lp_info(SoPlex lp_model) {
+void print_lp_info(SoPlexLegacy lp_model) {
 	printf("\n");
 	printf("SoPlex parameters:\n");
 	printf("Delta          = %g\n",lp_model.delta());

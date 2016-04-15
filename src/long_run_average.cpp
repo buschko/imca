@@ -34,7 +34,7 @@
 #include <vector>
 
 #ifdef __SOPLEX__
-#include "soplex.h"
+#include "soplexlegacy.h"
 #endif
 
 #include "sccs.h"
@@ -52,7 +52,7 @@ using namespace soplex;
 * @param ma the MA
 * @param max identifier for maximum/minimum
 */
-static void set_obj_function_lra(SoPlex& lp_model, SparseMatrix *ma, bool max, vector<bool> mec, bool *locks) {
+static void set_obj_function_lra(SoPlexLegacy& lp_model, SparseMatrix *ma, bool max, vector<bool> mec, bool *locks) {
 	unsigned long state_nr;
 	//bool *goals = ma->goals;
 	DSVector dummycol(0);
@@ -83,7 +83,7 @@ static void set_obj_function_lra(SoPlex& lp_model, SparseMatrix *ma, bool max, v
 * @param ma the MA
 * @param max identifier for maximum/minimum
 */
-static void set_obj_function_ssp(SoPlex& lp_model, SparseMatrix *ma, SparseMatrixMEC *mecs, bool max, 
+static void set_obj_function_ssp(SoPlexLegacy& lp_model, SparseMatrix *ma, SparseMatrixMEC *mecs, bool max,
 				 vector<bool> mec, vector<Real> lra, bool *locks, map<unsigned long,unsigned long>& ssp_nr) {
 	unsigned long state_nr;
 	//bool *goals = ma->goals;
@@ -149,7 +149,7 @@ static void set_obj_function_ssp(SoPlex& lp_model, SparseMatrix *ma, SparseMatri
 * @param ma the MA
 * @param max identifier for maximum/minimum
 */
-static void set_constraints_lra(SoPlex& lp_model, SparseMatrix *ma, bool max, vector<bool> mec, bool *locks) {
+static void set_constraints_lra(SoPlexLegacy& lp_model, SparseMatrix *ma, bool max, vector<bool> mec, bool *locks) {
 	unsigned long i;
 	unsigned long state_nr;
 	unsigned long choice_nr;
@@ -236,7 +236,7 @@ static void set_constraints_lra(SoPlex& lp_model, SparseMatrix *ma, bool max, ve
 * @param ma the MA
 * @param max identifier for maximum/minimum
 */
-static void set_constraints_ssp(SoPlex& lp_model, SparseMatrix *ma,SparseMatrixMEC *mecs, bool max, vector<bool> mec, bool *locks, vector<Real> lra, map<unsigned long,unsigned long> ssp_nr, vector<Real> mecNr,vector<Real> lra_mec) {
+static void set_constraints_ssp(SoPlexLegacy& lp_model, SparseMatrix *ma,SparseMatrixMEC *mecs, bool max, vector<bool> mec, bool *locks, vector<Real> lra, map<unsigned long,unsigned long> ssp_nr, vector<Real> mecNr,vector<Real> lra_mec) {
 	unsigned long i;
 	unsigned long state_nr;
 	unsigned long choice_nr;
@@ -437,7 +437,9 @@ string getEnvVar( std::string const & key )
 }
 
 Real compute_stochastic_shortest_path_problem(SparseMatrix *ma, SparseMatrixMEC *mecs, vector<Real> lra_mec, bool max) {
-	SoPlex lp_model;
+	SPxOut out;
+	SoPlexLegacy lp_model(out);
+	lp_model.setOutstream(out);
 	vector<bool> mec(ma->n,false);
 	vector<Real> lra(ma->n,0);
 	vector<Real> mecNr(ma->n,0);
@@ -920,7 +922,9 @@ Real compute_long_run_average(SparseMatrix *ma, bool max) {
 			mec[cols[state_nr]]=true;
 			//printf("%s\n",(ma->states_nr.find(cols[state_nr])->second).c_str());
 		}
-		SoPlex lp_model;
+		SPxOut out;
+		SoPlexLegacy lp_model(out);
+		lp_model.setOutstream(out);
 		/* first step: build the lp model */
 		dbg_printf("set obj\n");
 		set_obj_function_lra(lp_model,ma,max,mec,locks);
